@@ -1,3 +1,5 @@
+import { LayoutDashboard } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import groupList from "../config/group_list";
 
 function Sidebar() {
@@ -12,6 +14,22 @@ function Sidebar() {
         + New Group
       </button>
 
+      <NavLink
+        to="/dashboard"
+        className={({ isActive }) =>
+          `flex items-center gap-3 p-2 rounded-xl transition group mb-4
+          ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
+        }
+      >
+        <div className="w-9 h-9 flex items-center justify-center rounded-lg shrink-0 bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition">
+          <LayoutDashboard className="w-5 h-5 stroke-2" />
+        </div>
+
+        <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+          Dashboard
+        </span>
+      </NavLink>
+
       <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
         Groups
       </p>
@@ -21,9 +39,14 @@ function Sidebar() {
           const Icon = group.icon;
 
           return (
-            <div
+            <NavLink
               key={group.id}
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-blue-50 cursor-pointer transition group"
+              to={`/groups/${group.id}`}
+              title={group.name}
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-2 rounded-xl transition group
+                ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
+              }
             >
               <div
                 className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
@@ -34,7 +57,7 @@ function Sidebar() {
               <span className="truncate text-sm font-medium text-gray-700 group-hover:text-gray-900">
                 {group.name}
               </span>
-            </div>
+            </NavLink>
           );
         })}
       </div>
