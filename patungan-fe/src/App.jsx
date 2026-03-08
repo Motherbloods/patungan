@@ -16,7 +16,7 @@ function App() {
               ></Route>
             ) : (
               <Route
-                index={index}
+                key={index}
                 path={route.path}
                 element={route.element}
               ></Route>
