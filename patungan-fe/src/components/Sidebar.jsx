@@ -23,11 +23,11 @@ function Sidebar() {
 
       <div
         className={`
-        fixed md:static top-0 left-0 h-screen bg-white p-4 flex flex-col
-        w-full transition-transform duration-300 z-50
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
-        `}
+  fixed md:static top-0 left-0 h-screen bg-white p-4 flex flex-col
+  w-full md:w-64 transition-transform duration-300 z-50
+  ${open ? "translate-x-0" : "-translate-x-full"}
+  md:translate-x-0
+  `}
       >
         <div className="flex items-center justify-between mb-6">
           <div>
