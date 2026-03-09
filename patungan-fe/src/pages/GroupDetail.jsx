@@ -7,6 +7,7 @@ import { useState } from "react";
 import TabRingkasan from "../components/tabs/TabRingkasan";
 import TabTransaksi from "../components/tabs/TabTransaksi";
 import TabTransfer from "../components/tabs/TabTransfer";
+import TabRiwayat from "../components/tabs/TabRiwayat";
 
 function GroupDetail() {
   const { id } = useParams();
@@ -70,6 +71,13 @@ function GroupDetail() {
           <TabTransfer
             members={group.members}
             settlements={group.settlements}
+          />
+        )}
+        {activeTab === "riwayat" && (
+          <TabRiwayat
+            members={group.members}
+            balances={group.balances}
+            history={group.history}
           />
         )}
       </div>
