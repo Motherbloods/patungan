@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import groupList from "../config/group_list";
 import { TABS } from "../config/tabs";
 import { GroupHeader } from "../components/GroupHeader";
 import AddExpenseForm from "../components/AddExpenseForm";
@@ -8,11 +7,12 @@ import TabRingkasan from "../components/tabs/TabRingkasan";
 import TabTransaksi from "../components/tabs/TabTransaksi";
 import TabTransfer from "../components/tabs/TabTransfer";
 import TabRiwayat from "../components/tabs/TabRiwayat";
+import useGroupDetail from "../hooks/useGroupDetail";
 
 function GroupDetail() {
   const { id } = useParams();
 
-  const group = groupList.find((g) => g.id === Number(id));
+  const { loading, error, group } = useGroupDetail(id);
 
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState("ringkasan");
@@ -25,6 +25,31 @@ function GroupDetail() {
     console.log("Expense addition cancelled");
     setShowForm(false);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-full bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-400">Loading group details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-full bg-gray-50 flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (!group) {
+    return (
+      <div className="min-h-full bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-400">Group not found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full bg-gray-50 flex flex-col">
       <GroupHeader groupConfig={group} />
