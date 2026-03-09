@@ -4,6 +4,7 @@ import { TABS } from "../config/tabs";
 import { GroupHeader } from "../components/GroupHeader";
 import AddExpenseForm from "../components/AddExpenseForm";
 import { useState } from "react";
+import TabRingkasan from "../components/tabs/TabRingkasan";
 
 function GroupDetail() {
   const { id } = useParams();
@@ -57,6 +58,9 @@ function GroupDetail() {
             </button>
           ))}
         </div>
+        {activeTab === "ringkasan" && (
+          <TabRingkasan members={group.members} balances={group.balances} />
+        )}
       </div>
     </div>
   );
