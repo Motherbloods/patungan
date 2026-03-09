@@ -8,6 +8,9 @@ import TabTransaksi from "../components/tabs/TabTransaksi";
 import TabTransfer from "../components/tabs/TabTransfer";
 import TabRiwayat from "../components/tabs/TabRiwayat";
 import useGroupDetail from "../hooks/useGroupDetail";
+import LoadingFallback from "../components/fallback/LoadingFallback";
+import ErrorFallback from "../components/fallback/ErrorFallback";
+import NotFoundFallback from "../components/fallback/NotFoundFallback";
 
 function GroupDetail() {
   const { id } = useParams();
@@ -26,29 +29,9 @@ function GroupDetail() {
     setShowForm(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-full bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400">Loading group details...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-full bg-gray-50 flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (!group) {
-    return (
-      <div className="min-h-full bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400">Group not found.</p>
-      </div>
-    );
-  }
+  if (loading) return <LoadingFallback message="Loading group details..." />;
+  if (error) return <ErrorFallback message={error} />;
+  if (!group) return <NotFoundFallback message="Group not found." />;
 
   return (
     <div className="min-h-full bg-gray-50 flex flex-col">
