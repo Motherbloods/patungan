@@ -16,6 +16,98 @@ import {
   TreePalm,
 } from "lucide-react";
 
+const mockFinance = {
+  members: [
+    {
+      _id: "u1",
+      name: "Alice",
+      emoji: "🧑",
+      color: "#7C3AED",
+      light: "#EDE9FE",
+    },
+    { _id: "u2", name: "Bob", emoji: "👦", color: "#0EA5E9", light: "#E0F2FE" },
+    {
+      _id: "u3",
+      name: "Charlie",
+      emoji: "🧔",
+      color: "#F59E0B",
+      light: "#FEF3C7",
+    },
+  ],
+
+  expenses: [
+    {
+      _id: "e1",
+      name: "Makan Malam",
+      paid_by: "u1",
+      total_amount: 150000,
+      participants: [
+        { user_id: "u1", share_amount: 50000 },
+        { user_id: "u2", share_amount: 50000 },
+        { user_id: "u3", share_amount: 50000 },
+      ],
+    },
+    {
+      _id: "e2",
+      name: "Transport",
+      paid_by: "u2",
+      total_amount: 90000,
+      participants: [
+        { user_id: "u1", share_amount: 30000 },
+        { user_id: "u2", share_amount: 30000 },
+        { user_id: "u3", share_amount: 30000 },
+      ],
+    },
+    {
+      _id: "e3",
+      name: "Kopi & Snack",
+      paid_by: "u3",
+      total_amount: 60000,
+      participants: [
+        { user_id: "u1", share_amount: 20000 },
+        { user_id: "u2", share_amount: 20000 },
+        { user_id: "u3", share_amount: 20000 },
+      ],
+    },
+  ],
+
+  balances: [
+    { user_id: "u1", amount: 70000 },
+    { user_id: "u2", amount: 10000 },
+    { user_id: "u3", amount: -80000 },
+  ],
+
+  settlements: [
+    { from: "u3", to: "u1", amount: 70000 },
+    { from: "u3", to: "u2", amount: 10000 },
+  ],
+
+  history: {
+    u1: [
+      { type: "received", from: "u2", amount: 50000, expense: "Makan Malam" },
+      { type: "received", from: "u3", amount: 50000, expense: "Makan Malam" },
+      { type: "paid", to: "u2", amount: 30000, expense: "Transport" },
+      { type: "paid", to: "u3", amount: 20000, expense: "Kopi & Snack" },
+      { type: "settlement_received", from: "u3", amount: 70000 },
+    ],
+    u2: [
+      { type: "paid", to: "u1", amount: 50000, expense: "Makan Malam" },
+      { type: "received", from: "u1", amount: 30000, expense: "Transport" },
+      { type: "received", from: "u3", amount: 30000, expense: "Transport" },
+      { type: "paid", to: "u3", amount: 20000, expense: "Kopi & Snack" },
+      { type: "settlement_received", from: "u3", amount: 10000 },
+    ],
+    u3: [
+      { type: "paid", to: "u1", amount: 50000, expense: "Makan Malam" },
+      { type: "paid", to: "u2", amount: 30000, expense: "Transport" },
+      { type: "received", from: "u1", amount: 20000, expense: "Kopi & Snack" },
+      { type: "received", from: "u2", amount: 20000, expense: "Kopi & Snack" },
+      { type: "settlement_paid", to: "u1", amount: 70000 },
+      { type: "settlement_paid", to: "u2", amount: 10000 },
+    ],
+  },
+};
+
 const groupList = [
   {
     id: 1,
@@ -25,6 +117,7 @@ const groupList = [
     total_expenses: 300000,
     expense_count: 3,
     member_count: 3,
+    ...mockFinance,
   },
   {
     id: 2,
@@ -34,6 +127,7 @@ const groupList = [
     total_expenses: 450000,
     expense_count: 5,
     member_count: 6,
+    ...mockFinance,
   },
   {
     id: 3,
@@ -43,6 +137,7 @@ const groupList = [
     total_expenses: 220000,
     expense_count: 4,
     member_count: 4,
+    ...mockFinance,
   },
   {
     id: 4,
@@ -52,6 +147,7 @@ const groupList = [
     total_expenses: 180000,
     expense_count: 2,
     member_count: 3,
+    ...mockFinance,
   },
   {
     id: 5,
@@ -61,6 +157,7 @@ const groupList = [
     total_expenses: 1250000,
     expense_count: 8,
     member_count: 5,
+    ...mockFinance,
   },
   {
     id: 6,
@@ -70,6 +167,7 @@ const groupList = [
     total_expenses: 90000,
     expense_count: 2,
     member_count: 4,
+    ...mockFinance,
   },
   {
     id: 7,
@@ -79,6 +177,7 @@ const groupList = [
     total_expenses: 150000,
     expense_count: 3,
     member_count: 3,
+    ...mockFinance,
   },
   {
     id: 8,
@@ -88,6 +187,7 @@ const groupList = [
     total_expenses: 320000,
     expense_count: 4,
     member_count: 5,
+    ...mockFinance,
   },
   {
     id: 9,
@@ -97,6 +197,7 @@ const groupList = [
     total_expenses: 200000,
     expense_count: 3,
     member_count: 4,
+    ...mockFinance,
   },
   {
     id: 10,
@@ -106,6 +207,7 @@ const groupList = [
     total_expenses: 75000,
     expense_count: 1,
     member_count: 3,
+    ...mockFinance,
   },
   {
     id: 11,
@@ -115,6 +217,7 @@ const groupList = [
     total_expenses: 680000,
     expense_count: 6,
     member_count: 5,
+    ...mockFinance,
   },
   {
     id: 12,
@@ -124,6 +227,7 @@ const groupList = [
     total_expenses: 260000,
     expense_count: 4,
     member_count: 4,
+    ...mockFinance,
   },
   {
     id: 13,
@@ -133,6 +237,7 @@ const groupList = [
     total_expenses: 350000,
     expense_count: 2,
     member_count: 7,
+    ...mockFinance,
   },
   {
     id: 14,
@@ -142,6 +247,7 @@ const groupList = [
     total_expenses: 120000,
     expense_count: 2,
     member_count: 6,
+    ...mockFinance,
   },
   {
     id: 15,
@@ -151,6 +257,7 @@ const groupList = [
     total_expenses: 500000,
     expense_count: 7,
     member_count: 8,
+    ...mockFinance,
   },
 ];
 
