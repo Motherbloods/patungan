@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import groupList from "../config/group_list";
+import { TABS } from "../config/tabs";
 import { GroupHeader } from "../components/GroupHeader";
 import AddExpenseForm from "../components/AddExpenseForm";
 import { useState } from "react";
@@ -10,6 +11,7 @@ function GroupDetail() {
   const group = groupList.find((g) => g.id === Number(id));
 
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("ringkasan");
 
   const handleAddExpense = (expenseData) => {
     console.log("Adding expense:", expenseData);
@@ -38,6 +40,23 @@ function GroupDetail() {
             Tambah Pengeluaran
           </button>
         )}
+
+        <div className="bg-white rounded-2xl shadow-sm p-1 flex gap-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-[11px] font-bold transition-all duration-150"
+              style={{
+                background: activeTab === tab.id ? "#EEF2FF" : "transparent",
+                color: activeTab === tab.id ? "#4F46E5" : "#9CA3AF",
+              }}
+            >
+              <span className="text-base">{tab.emoji}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
