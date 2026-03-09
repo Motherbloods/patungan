@@ -6,6 +6,7 @@ import AddExpenseForm from "../components/AddExpenseForm";
 import { useState } from "react";
 import TabRingkasan from "../components/tabs/TabRingkasan";
 import TabTransaksi from "../components/tabs/TabTransaksi";
+import TabTransfer from "../components/tabs/TabTransfer";
 
 function GroupDetail() {
   const { id } = useParams();
@@ -64,6 +65,12 @@ function GroupDetail() {
         )}
         {activeTab === "transaksi" && (
           <TabTransaksi members={group.members} expenses={group.expenses} />
+        )}
+        {activeTab === "transfer" && (
+          <TabTransfer
+            members={group.members}
+            settlements={group.settlements}
+          />
         )}
       </div>
     </div>
