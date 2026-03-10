@@ -30,6 +30,9 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     setSelectedColor(COLOR_OPTIONS[0]);
     setMembers([]);
     setError("");
+    setInputName("");
+    setInputEmoji(MEMBER_EMOJIS[0]);
+    setShowEmoji(false);
     onClose?.();
   };
 
@@ -152,9 +155,10 @@ function NewGroupModal({ open, onClose, onSubmit }) {
               </button>
               <button
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-sm"
               >
-                Buat Grup 🎉
+                {isSubmitting ? "Membuat..." : "Buat Grup 🎉"}
               </button>
             </>
           )}
