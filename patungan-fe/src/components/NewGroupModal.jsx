@@ -52,6 +52,10 @@ function NewGroupModal({ open, onClose, onSubmit }) {
       setError("Nama grup tidak boleh kosong");
       return;
     }
+    if (members.length === 0) {
+      setError("Minimal tambahkan 1 anggota");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await onSubmit({
