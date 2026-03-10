@@ -14,32 +14,8 @@ import {
   Bike,
   Tent,
 } from "lucide-react";
-
-const ICON_OPTIONS = [
-  { id: "utensils", icon: UtensilsCrossed, label: "Makan" },
-  { id: "car", icon: Car, label: "Transport" },
-  { id: "plane", icon: Plane, label: "Liburan" },
-  { id: "home", icon: Home, label: "Rumah" },
-  { id: "music", icon: Music, label: "Hiburan" },
-  { id: "shopping", icon: ShoppingBag, label: "Belanja" },
-  { id: "game", icon: Gamepad2, label: "Game" },
-  { id: "heart", icon: Heart, label: "Kesehatan" },
-  { id: "coffee", icon: Coffee, label: "Ngopi" },
-  { id: "work", icon: Briefcase, label: "Kerja" },
-  { id: "bike", icon: Bike, label: "Olahraga" },
-  { id: "camp", icon: Tent, label: "Camping" },
-];
-
-const COLOR_OPTIONS = [
-  { id: "blue", bg: "bg-blue-100", text: "text-blue-600" },
-  { id: "violet", bg: "bg-violet-100", text: "text-violet-600" },
-  { id: "rose", bg: "bg-rose-100", text: "text-rose-600" },
-  { id: "amber", bg: "bg-amber-100", text: "text-amber-600" },
-  { id: "emerald", bg: "bg-emerald-100", text: "text-emerald-600" },
-  { id: "sky", bg: "bg-sky-100", text: "text-sky-600" },
-  { id: "pink", bg: "bg-pink-100", text: "text-pink-600" },
-  { id: "orange", bg: "bg-orange-100", text: "text-orange-600" },
-];
+import ICON_OPTIONS from "../config/colors";
+import COLOR_OPTIONS from "../config/icons";
 
 function NewGroupModal({ open, onClose, onSubmit }) {
   const [groupName, setGroupName] = useState("");
