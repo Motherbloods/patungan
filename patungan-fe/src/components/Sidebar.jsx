@@ -51,7 +51,10 @@ function Sidebar() {
         </div>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true);
+            setOpen(false);
+          }}
           className="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-xl mb-6 text-sm font-medium transition shadow-sm"
         >
           + New Group
