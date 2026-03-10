@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import ICON_OPTIONS from "../config/colors";
-import COLOR_OPTIONS from "../config/icons";
+import ICON_OPTIONS from "../config/icons";
+import COLOR_OPTIONS from "../config/colors";
 import MEMBER_EMOJIS from "../config/emoji";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
 import MemberStep from "./NewGroupModal/MemberStep";

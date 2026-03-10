@@ -1,5 +1,5 @@
-import ICON_OPTIONS from "../../config/colors";
-import COLOR_OPTIONS from "../../config/icons";
+import ICON_OPTIONS from "../../config/icons";
+import COLOR_OPTIONS from "../../config/colors";
 
 function GroupInfoStep({
   GroupIcon,
