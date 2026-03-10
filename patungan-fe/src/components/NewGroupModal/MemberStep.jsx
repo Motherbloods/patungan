@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
+import { useEffect, useRef } from "react";
 
 function MemberStep({
   inputName,
@@ -13,6 +14,18 @@ function MemberStep({
   error,
   setError,
 }) {
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowEmoji(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const addMember = () => {
     const trimmed = inputName.trim();
     if (!trimmed) return;
@@ -33,7 +46,7 @@ function MemberStep({
         untuk menambah.
       </p>
       <div className="flex gap-2 items-center">
-        <div className="relative shrink-0">
+        <div className="relative shrink-0" ref={pickerRef}>
           <button
             onClick={() => setShowEmoji((v) => !v)}
             className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-xl hover:border-gray-300 hover:bg-gray-50 transition"
