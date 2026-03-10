@@ -16,21 +16,7 @@ import {
 } from "lucide-react";
 import ICON_OPTIONS from "../config/colors";
 import COLOR_OPTIONS from "../config/icons";
-
-const MEMBER_EMOJIS = [
-  "🧑",
-  "👦",
-  "👧",
-  "🧔",
-  "👩",
-  "🧒",
-  "👨",
-  "🙋",
-  "🙆",
-  "🤷",
-  "👱",
-  "🧕",
-];
+import MEMBER_EMOJIS from "../config/emoji";
 
 function NewGroupModal({ open, onClose, onSubmit }) {
   const [step, setStep] = useState(1);
