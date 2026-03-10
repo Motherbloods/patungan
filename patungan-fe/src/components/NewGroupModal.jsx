@@ -5,6 +5,7 @@ import COLOR_OPTIONS from "../config/colors";
 import MEMBER_EMOJIS from "../config/emoji";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
 import MemberStep from "./NewGroupModal/MemberStep";
+import STEP_META from "../config/step_meta";
 
 function NewGroupModal({ open, onClose, onSubmit }) {
   const [step, setStep] = useState(1);
@@ -75,9 +76,11 @@ function NewGroupModal({ open, onClose, onSubmit }) {
         <div className="px-6 pt-5 pb-4 border-b border-gray-100">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h2 className="text-base font-bold text-gray-900">Info Group</h2>
+              <h2 className="text-base font-bold text-gray-900">
+                {STEP_META[step]?.title}
+              </h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                Atur nama, ikon, dan warna grupmu
+                {STEP_META[step]?.sub}
               </p>
             </div>
             <button
