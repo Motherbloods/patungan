@@ -11,11 +11,10 @@ const groupSchema = new mongoose.Schema(
 
     members: [
       {
-        user_id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         name: { type: String, required: true },
         emoji: { type: String },
         color: { type: String },
-        light: { type: Boolean, default: false },
+        light: { type: String },
       },
     ],
   },
