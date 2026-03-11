@@ -9,6 +9,8 @@ const errorHandler = require("./src/middleware/errorHandler");
 const requestLogger = require("./src/middleware/requestLogger");
 const AppError = require("./src/errors/AppError");
 
+const groupRoutes = require("./src/routes/group.route");
+
 const app = express();
 app.set("trust proxy", 1);
 
@@ -42,7 +44,7 @@ app.get("/health", (req, res) => {
 });
 
 // routes utama
-// app.use("/api/v1", require("./src/routes"));
+app.use("/api/v1", groupRoutes);
 
 app.use((req, res, next) => {
   next(new AppError("Route not found", 404));
