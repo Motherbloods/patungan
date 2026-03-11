@@ -2,12 +2,23 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 const errorHandler = require("./src/middleware/errorHandler");
 const requestLogger = require("./src/middleware/requestLogger");
 const AppError = require("./src/errors/AppError");
 
 const app = express();
+app.set("trust proxy", 1);
+
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 100, // max 100 request per IP
+});
+app.use(limiter);
 
 app.use(
   cors({
