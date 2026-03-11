@@ -1,5 +1,9 @@
 import { useSearchParams } from "react-router-dom";
-import { summaryData, generateGroupSummaries } from "../data/dashboardData";
+import {
+  summaryData,
+  recentActivity,
+  generateGroupSummaries,
+} from "../data/dashboardData";
 import groupList from "../config/group_list";
 import { fmt } from "../utils/format";
 import {
@@ -7,6 +11,7 @@ import {
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Receipt,
   Users,
 } from "lucide-react";
@@ -258,6 +263,68 @@ function Dashboard() {
               {start + 1}–{Math.min(start + PAGE_SIZE, groupList.length)} dari{" "}
               {groupList.length} grup
             </p>
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Clock className="w-3.5 h-3.5 text-gray-400" />
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Aktivitas Terbaru
+            </h2>
+          </div>
+          <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
+            {recentActivity.map((ra) => {
+              const isSettlement = ra.type === "settlement";
+              const isIncome = isSettlement && ra.desc.startsWith("Terima");
+              return (
+                <div key={ra._id}>
+                  <div className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0"
+                      style={{
+                        background: isSettlement
+                          ? isIncome
+                            ? "#DCFCE7"
+                            : "#EDE9FE"
+                          : "#EFF6FF",
+                      }}
+                    >
+                      {isSettlement ? (isIncome ? "⬇️" : "⬆️") : "🧾"}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">
+                        {ra.desc}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        <span
+                          className="font-semibold"
+                          style={{ color: "#6366F1" }}
+                        >
+                          {ra.groupName}
+                        </span>{" "}
+                        · {ra.paidBy} · {ra.time}
+                      </p>
+                    </div>
+
+                    <span
+                      className="text-sm font-bold shrink-0"
+                      style={{
+                        color: isSettlement
+                          ? isIncome
+                            ? "#16A34A"
+                            : "#7C3AED"
+                          : "#374151",
+                      }}
+                    >
+                      {isSettlement && (isIncome ? "+" : "-")}
+                      {fmt(ra.amount)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
