@@ -33,7 +33,7 @@ function Dashboard() {
     totalPages,
   );
   const start = (page - 1) * PAGE_SIZE;
-  const visible = groupSummaries.slice(0, PAGE_SIZE);
+  const visible = groupSummaries.slice(start, start + PAGE_SIZE);
 
   function goTo(n) {
     setSearchParams((prev) => {
