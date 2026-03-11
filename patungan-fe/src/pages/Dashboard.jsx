@@ -1,12 +1,9 @@
-import { NavLink } from "react-router-dom";
 import { summaryData, recentActivity } from "../data/dashboardData";
 import groupList from "../config/group_list";
 import { fmt } from "../utils/format";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   Receipt,
   Users,
