@@ -2,9 +2,15 @@ import { LayoutDashboard, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import groupList from "../config/group_list";
+import NewGroupModal from "./NewGroupModal";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const onSubmitModal = (groupData) => {
+    console.log("Grup baru:", groupData);
+  };
   return (
     <>
       <button
@@ -37,13 +43,20 @@ function Sidebar() {
 
           <button
             onClick={() => setOpen(false)}
+            aria-label="Close"
             className="md:hidden p-2 hover:bg-gray-100 rounded"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-xl mb-6 text-sm font-medium transition shadow-sm">
+        <button
+          onClick={() => {
+            setShowModal(true);
+            setOpen(false);
+          }}
+          className="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-xl mb-6 text-sm font-medium transition shadow-sm"
+        >
           + New Group
         </button>
 
@@ -94,6 +107,14 @@ function Sidebar() {
           })}
         </div>
       </div>
+
+      {showModal && (
+        <NewGroupModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          onSubmit={onSubmitModal}
+        />
+      )}
     </>
   );
 }
