@@ -15,6 +15,7 @@ import {
   Receipt,
   Users,
 } from "lucide-react";
+import SummaryCard from "../components/Dashboard/SummaryCard";
 
 const PAGE_SIZE = 4;
 
@@ -62,76 +63,37 @@ function Dashboard() {
 
       <div className="px-4 py-5 sm:px-6 max-w-2xl mx-auto space-y-5">
         <div className="grid grid-cols-2 gap-3">
-          <div className={`rounded-2xl p-4 flex flex-col gap-3 bg-rose-50`}>
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-rose-500 bg-white/60`}
-            >
-              <ArrowUpRight style={{ width: 18, height: 18 }} />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-gray-900 leading-none">
-                {fmt(summary.totalOwe)}
-              </p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                Harus Kamu Bayar
-              </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">
-                dari semua grup
-              </p>
-            </div>
-          </div>
-
-          <div className={`rounded-2xl p-4 flex flex-col gap-3 bg-emerald-50`}>
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-emerald-500 bg-white/60`}
-            >
-              <ArrowDownLeft style={{ width: 18, height: 18 }} />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-gray-900 leading-none">
-                {fmt(summary.totalOwed)}
-              </p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                Akan Kamu Terima
-              </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">
-                dari semua grup
-              </p>
-            </div>
-          </div>
-
-          <div className={`rounded-2xl p-4 flex flex-col gap-3 bg-blue-50`}>
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-blue-500 bg-white/60`}
-            >
-              <Users style={{ width: 18, height: 18 }} />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-gray-900 leading-none">
-                {String(summary.activeGroups)}
-              </p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                Grup Aktif
-              </p>
-            </div>
-          </div>
-
-          <div className={`rounded-2xl p-4 flex flex-col gap-3 bg-violet-50`}>
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-violet-500 bg-white/60`}
-            >
-              <Receipt style={{ width: 18, height: 18 }} />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-gray-900 leading-none">
-                {fmt(summary.totalExpenses)}
-              </p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                Total Pengeluaran
-              </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">semua grup</p>
-            </div>
-          </div>
+          <SummaryCard
+            icon={ArrowUpRight}
+            label="Harus Kamu Bayar"
+            value={fmt(summary.totalOwe)}
+            sub="dari semua grup"
+            color="text-rose-500"
+            bg="bg-rose-50"
+          />
+          <SummaryCard
+            icon={ArrowDownLeft}
+            label="Akan Kamu Terima"
+            value={fmt(summary.totalOwed)}
+            sub="dari semua grup"
+            color="text-emerald-500"
+            bg="bg-emerald-50"
+          />
+          <SummaryCard
+            icon={Users}
+            label="Grup Aktif"
+            value={String(summary.activeGroups)}
+            color="text-blue-500"
+            bg="bg-blue-50"
+          />
+          <SummaryCard
+            icon={Receipt}
+            label="Total Pengeluaran"
+            value={String(summary.totalExpenses)}
+            sub="semua grup"
+            color="text-violet-500"
+            bg="bg-violet-50"
+          />
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
