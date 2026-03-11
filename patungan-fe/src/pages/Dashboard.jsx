@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import {
   summaryData,
   recentActivity,
@@ -146,7 +146,8 @@ function Dashboard() {
                 const isPos = g.myBalance > 0;
                 const isZero = g.myBalance === 0;
                 return (
-                  <div
+                  <NavLink
+                    to={`/groups/${g.id}`}
                     key={g._id}
                     className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3"
                   >
@@ -201,7 +202,7 @@ function Dashboard() {
                         {fmt(g.totalSpent)}
                       </span>
                     </div>
-                  </div>
+                  </NavLink>
                 );
               })}
             </div>
