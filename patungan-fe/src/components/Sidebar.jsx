@@ -1,16 +1,32 @@
 import { LayoutDashboard, Menu, X } from "lucide-react";
-import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import groupList from "../config/group_list";
 import NewGroupModal from "./NewGroupModal";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const groupRefs = useRef({});
+  const listRef = useRef(null);
+  const location = useLocation();
 
   const onSubmitModal = (groupData) => {
     console.log("Grup baru:", groupData);
   };
+
+  useEffect(() => {
+    if (!location.state?.autoScrollSidebar) return;
+
+    const match = location.pathname.match(/\/groups\/(\w+)/);
+    if (match) {
+      const groupId = match[1];
+      const groupElement = groupRefs.current[groupId];
+      if (groupElement) {
+        groupElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [location]);
   return (
     <>
       <button
@@ -62,7 +78,10 @@ function Sidebar() {
 
         <NavLink
           to="/dashboard"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            setOpen(false);
+            listRef.current.scrollTo({ behavior: "smooth", top: 0 });
+          }}
           className={({ isActive }) =>
             `flex items-center gap-3 p-2 rounded-xl transition group mb-4
             ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
@@ -79,12 +98,13 @@ function Sidebar() {
           Groups
         </p>
 
-        <div className="flex flex-col gap-1 overflow-y-auto">
+        <div ref={listRef} className="flex flex-col gap-1 overflow-y-auto">
           {groupList.map((group) => {
             const Icon = group.icon;
 
             return (
               <NavLink
+                ref={(el) => (groupRefs.current[group.id] = el)}
                 key={group.id}
                 to={`/groups/${group.id}`}
                 onClick={() => setOpen(false)}

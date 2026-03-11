@@ -9,6 +9,7 @@ function GroupCard({ group }) {
   return (
     <NavLink
       to={`/groups/${group.id}`}
+      state={{ autoScrollSidebar: true }}
       className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3"
     >
       <div className="flex items-start justify-between">
