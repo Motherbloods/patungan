@@ -14,6 +14,7 @@ import {
 import SummaryCard from "../components/Dashboard/SummaryCard";
 import BalanceBar from "../components/Dashboard/BalanceBar";
 import GroupPagination from "../components/Dashboard/GroupPagination";
+import ActivityItem from "../components/Dashboard/ActivityItem";
 
 function Dashboard() {
   const summary = {
@@ -94,57 +95,9 @@ function Dashboard() {
             </h2>
           </div>
           <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
-            {recentActivity.map((ra) => {
-              const isSettlement = ra.type === "settlement";
-              const isIncome = isSettlement && ra.desc.startsWith("Terima");
-              return (
-                <div key={ra.id}>
-                  <div className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0"
-                      style={{
-                        background: isSettlement
-                          ? isIncome
-                            ? "#DCFCE7"
-                            : "#EDE9FE"
-                          : "#EFF6FF",
-                      }}
-                    >
-                      {isSettlement ? (isIncome ? "⬇️" : "⬆️") : "🧾"}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {ra.desc}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        <span
-                          className="font-semibold"
-                          style={{ color: "#6366F1" }}
-                        >
-                          {ra.groupName}
-                        </span>{" "}
-                        · {ra.paidBy} · {ra.time}
-                      </p>
-                    </div>
-
-                    <span
-                      className="text-sm font-bold shrink-0"
-                      style={{
-                        color: isSettlement
-                          ? isIncome
-                            ? "#16A34A"
-                            : "#7C3AED"
-                          : "#374151",
-                      }}
-                    >
-                      {isSettlement && (isIncome ? "+" : "-")}
-                      {fmt(ra.amount)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+            {recentActivity.map((ra) => (
+              <ActivityItem key={ra.id} activity={ra} />
+            ))}
           </div>
         </section>
       </div>
