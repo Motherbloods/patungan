@@ -180,52 +180,36 @@ const createExpenseService = async (data) => {
   return expense;
 };
 
-const getSummaryGroupService = async (group_id) => {
-  const group = await Group.findById(group_id);
+const getGroupOrThrow = async (group_id) => {
+  const group = await Group.findById(group_id).lean();
   if (!group) throw new Error("Group not found");
-
-  const balances = await Balance.find({ group_id });
-
-  return {
-    members: group.members,
-    balances,
-  };
+  return group;
 };
 
-const getGroupTransactionsService = async (group_id) => {
-  const group = await Group.findById(group_id);
-  if (!group) throw new Error("Group not found");
+const getGroupDataService = async (group_id, options = {}) => {
+  const group = await getGroupOrThrow(group_id);
+  const result = { members: group.members };
 
-  const expenses = await Expense.find({ group_id });
+  if (options.balances) {
+    result.balances = await Balance.find({ group_id }).lean();
+  }
 
-  return { members, expenses };
+  if (options.expenses) {
+    result.expenses = await Expense.find({ group_id }).lean();
+  }
+
+  if (options.settlements) {
+    result.settlements = await Settlement.find({ group_id }).lean();
+  }
+
+  if (options.history) {
+    result.history = await History.find({ group_id }).lean();
+  }
+
+  return result;
 };
-
-const getGroupSettlementsService = async (group_id) => {
-  const group = await Group.findById(group_id);
-  if (!group) throw new Error("Group not found");
-
-  const settlements = await Settlement.find({ group_id });
-
-  return { members, settlements };
-};
-
-const getGroupHistoryService = async (group_id) => {
-  const group = await Group.findById(group_id);
-  if (!group) throw new Error("Group not found");
-
-  const balances = await Balance.find({ group_id });
-
-  const history = await History.find({ group_id });
-
-  return { members, balances, history };
-};
-
 module.exports = {
   createGroupService,
   createExpenseService,
-  getSummaryGroupService,
-  getGroupTransactionsService,
-  getGroupSettlementsService,
-  getGroupHistoryService,
+  getGroupDataService,
 };

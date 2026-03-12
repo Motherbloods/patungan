@@ -2,10 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const {
   createGroupService,
   createExpenseService,
-  getSummaryGroupService,
-  getGroupTransactionsService,
-  getGroupSettlementsService,
-  getGroupHistoryService,
+  getGroupDataService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -21,25 +18,25 @@ const createExpense = asyncHandler(async (req, res) => {
 
 const getSummaryGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const summary = await getSummaryGroupService(id);
+  const summary = await getGroupDataService(id, { balances: true });
   res.json(summary);
 });
 
 const getGroupTransactions = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const transaksi = await getGroupTransactionsService(id);
+  const transaksi = await getGroupDataService(id, { expenses: true });
   res.json(transaksi);
 });
 
 const getGroupSettlements = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const settlement = getGroupSettlementsService(id);
+  const settlement = await getGroupDataService(id, { settlements: true });
   res.json(settlement);
 });
 
 const getGroupHistory = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const history = getGroupHistoryService(id);
+  const history = await getGroupDataService(id, { history: true });
   res.json(history);
 });
 
