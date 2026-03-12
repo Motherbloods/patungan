@@ -5,6 +5,7 @@ const {
   getSummaryGroupService,
   getGroupTransactionsService,
   getGroupSettlementsService,
+  getGroupHistoryService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -36,10 +37,17 @@ const getGroupSettlements = asyncHandler(async (req, res) => {
   res.json(settlement);
 });
 
+const getGroupHistory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const history = getGroupHistoryService(id);
+  res.json(history);
+});
+
 module.exports = {
   createGroup,
   createExpense,
   getSummaryGroup,
   getGroupTransactions,
   getGroupSettlements,
+  getGroupHistory,
 };

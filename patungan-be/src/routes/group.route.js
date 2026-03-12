@@ -5,6 +5,7 @@ const {
   getSummaryGroup,
   getGroupTransactions,
   getGroupSettlements,
+  getGroupHistory,
 } = require("../controllers/group.controller");
 const router = express.Router();
 
@@ -13,5 +14,6 @@ router.post("/group/expense", createExpense);
 router.get("/group/:id", getSummaryGroup);
 router.get("/group/:id/transactions", getGroupTransactions);
 router.get("/group/:id/settlements", getGroupSettlements);
+router.get("/group/:id/history", getGroupHistory);
 
 module.exports = router;

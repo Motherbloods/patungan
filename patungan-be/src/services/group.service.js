@@ -210,10 +210,22 @@ const getGroupSettlementsService = async (group_id) => {
   return { members, settlements };
 };
 
+const getGroupHistoryService = async (group_id) => {
+  const group = await Group.findById(group_id);
+  if (!group) throw new Error("Group not found");
+
+  const balances = await Balance.find({ group_id });
+
+  const history = await History.find({ group_id });
+
+  return { members, balances, history };
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
   getSummaryGroupService,
   getGroupTransactionsService,
   getGroupSettlementsService,
+  getGroupHistoryService,
 };
