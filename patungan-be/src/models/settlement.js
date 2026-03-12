@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const settlementSchema = new mongoose.Schema({
   group_id: {
     type: mongoose.Schema.Types.ObjectId,
