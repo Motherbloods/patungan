@@ -191,8 +191,18 @@ const getSummaryGroupService = async (group_id) => {
   };
 };
 
+const getGroupTransactionsService = async (group_id) => {
+  const group = await Group.findById(group_id);
+  if (!group) throw new Error("Group not found");
+
+  const expenses = await Expense.find({ group_id });
+
+  return { members, expenses };
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
   getSummaryGroupService,
+  getGroupTransactionsService,
 };
