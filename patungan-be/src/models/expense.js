@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const expenseSchema = new mongoose.Schema({
   group_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -6,6 +8,11 @@ const expenseSchema = new mongoose.Schema({
   },
   name: { type: String, required: true },
   paid_by: { type: mongoose.Schema.Types.ObjectId, required: true },
+  split_method: {
+    type: String,
+    enum: ["bagi-rata", "custom"],
+    default: "bagi-rata",
+  },
   total_amount: { type: Number, required: true },
   participants: [
     {
