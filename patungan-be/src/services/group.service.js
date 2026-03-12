@@ -3,6 +3,7 @@ const Group = require("../models/group");
 const Expense = require("../models/expense");
 const Balance = require("../models/balance");
 const History = require("../models/history");
+const Settlement = require("../models/settlement");
 
 const createGroupService = async (data) => {
   const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
@@ -200,9 +201,19 @@ const getGroupTransactionsService = async (group_id) => {
   return { members, expenses };
 };
 
+const getGroupSettlementsService = async (group_id) => {
+  const group = await Group.findById(group_id);
+  if (!group) throw new Error("Group not found");
+
+  const settlements = await Settlement.find({ group_id });
+
+  return { members, settlements };
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
   getSummaryGroupService,
   getGroupTransactionsService,
+  getGroupSettlementsService,
 };
