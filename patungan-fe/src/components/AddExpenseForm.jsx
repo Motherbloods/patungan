@@ -1,7 +1,9 @@
 import { PlusCircle, SplitSquareVertical, X } from "lucide-react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { fmt } from "../utils/format";
 function AddExpenseForm({ members = [], onCancel, onSubmit }) {
+  const { id } = useParams();
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState("");
@@ -68,12 +70,12 @@ function AddExpenseForm({ members = [], onCancel, onSubmit }) {
     }));
 
     const expenseData = {
+      group_id: id,
       name: name.trim(),
       total_amount: totalAmount,
       paid_by: paidBy,
       participants: participantList,
       split_method: splitMethod,
-      custom_shares: splitMethod === "custom" ? customShares : null,
     };
 
     onSubmit(expenseData);
