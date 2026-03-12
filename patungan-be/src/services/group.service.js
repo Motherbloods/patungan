@@ -21,12 +21,15 @@ const createGroupService = async (data) => {
     );
   }
 
-  const formattedMembers = members.map((member) => ({
-    name: member.name,
-    emoji: member.emoji || "",
-    color: member.color || "#ffffff",
-    light: member.light || "#ffffff",
-  }));
+  const formattedMembers = members.map((member) => {
+    const palette = MEMBER_COLORS[index % MEMBER_COLORS.length];
+    return {
+      name: member.name,
+      emoji: member.emoji || "",
+      color: palette.color,
+      light: palette.light,
+    };
+  });
 
   const group = new Group({
     name: groupName,
