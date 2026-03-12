@@ -176,4 +176,20 @@ const createExpenseService = async (data) => {
   return expense;
 };
 
-module.exports = { createGroupService, createExpenseService };
+const getSummaryGroupService = async (group_id) => {
+  const group = await Group.findById(group_id);
+  if (!group) throw new Error("Group not found");
+
+  const balances = await Balance.find({ group_id });
+
+  return {
+    members: group.members,
+    balances,
+  };
+};
+
+module.exports = {
+  createGroupService,
+  createExpenseService,
+  getSummaryGroupService,
+};

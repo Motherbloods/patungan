@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const {
   createGroupService,
   createExpenseService,
+  getSummaryGroupService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -15,4 +16,10 @@ const createExpense = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
-module.exports = { createGroup, createExpense };
+const getSummaryGroup = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const summary = await getSummaryGroupService(id);
+  res.json(summary);
+});
+
+module.exports = { createGroup, createExpense, getSummaryGroup };
