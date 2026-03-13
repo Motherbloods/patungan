@@ -5,6 +5,7 @@ const {
   getGroupDataService,
   editGroupService,
   editExpenseService,
+  deleteGroupService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -54,6 +55,12 @@ const editExpense = asyncHandler(async (req, res) => {
   req.json(result);
 });
 
+const deleteGroup = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await deleteGroupService(id);
+  req.json(result);
+});
+
 module.exports = {
   createGroup,
   createExpense,
@@ -63,4 +70,5 @@ module.exports = {
   getGroupHistory,
   editGroup,
   editExpense,
+  deleteGroup,
 };

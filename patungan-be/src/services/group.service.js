@@ -417,6 +417,28 @@ const editExpenseService = async (group_id, expense_id, data) => {
   }
 };
 
+const deleteGroupService = async (group_id) => {
+  const session = await mongoose.startSession();
+
+  await session.withTransaction(async () => {
+    const group = await Group.findById(group_id).session(session);
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    await Expense.deleteMany({ group_id }).session(session);
+    await Balance.deleteMany({ group_id }).session(session);
+    await History.deleteMany({ group_id }).session(session);
+    await Settlement.deleteMany({ group_id }).session(session);
+
+    await Group.findByIdAndDelete(group_id).session(session);
+  });
+
+  session.endSession();
+
+  return { message: "Group and related data deleted successfully" };
+};
+
 const deleteExpenseService = async (data) => {};
 
 module.exports = {
@@ -425,4 +447,5 @@ module.exports = {
   getGroupDataService,
   editGroupService,
   editExpenseService,
+  deleteGroupService,
 };
