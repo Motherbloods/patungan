@@ -16,6 +16,9 @@ const {
   validateExpenseInput,
   normalizeParticipants,
 } = require("../helpers/expense.validator");
+const MEMBER_COLORS = require("../utils/colors");
+const logger = require("../utils/logger");
+const { isValidObjectId, validateObjectIds } = require("../utils/objectId");
 
 const createGroupService = async (data) => {
   const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
@@ -54,6 +57,7 @@ const createGroupService = async (data) => {
   });
 
   await group.save();
+  logger.info(`Group created: ${group._id}`);
   return group;
 };
 
@@ -62,6 +66,7 @@ const createExpenseService = async (data) => {
     data;
 
   if (!group_id) throw new Error("group_id is required");
+  validateObjectIds(group_id);
   validateExpenseInput({
     name,
     total_amount,
@@ -76,34 +81,54 @@ const createExpenseService = async (data) => {
     total_amount,
   );
 
-  const expense = await Expense.create({
-    group_id,
-    name,
-    total_amount,
-    paid_by,
-    participants: updatedParticipants,
-    split_method,
-    createdAt: new Date(),
-  });
+  const session = await mongoose.startSession();
+  let expense;
 
-  await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
+  try {
+    await session.withTransaction(async () => {
+      [expense] = await Expense.create(
+        [
+          {
+            group_id,
+            name,
+            total_amount,
+            paid_by,
+            participants: updatedParticipants,
+            split_method,
+          },
+        ],
+        { session },
+      );
 
-  const groupHistory = await getOrCreateGroupHistory(group_id);
-  pushExpenseHistory(
-    groupHistory,
-    updatedParticipants,
-    paid_by,
-    name,
-    expense._id,
-  );
-  await groupHistory.save();
+      await applyBalances(
+        group_id,
+        updatedParticipants,
+        paid_by,
+        total_amount,
+        session,
+      );
 
-  await Group.findByIdAndUpdate(
-    new mongoose.Types.ObjectId(group_id),
-    { $inc: { total_expenses: total_amount, expense_count: 1 } },
-    { new: true },
-  );
+      const groupHistory = await getOrCreateGroupHistory(group_id, session);
+      pushExpenseHistory(
+        groupHistory,
+        updatedParticipants,
+        paid_by,
+        name,
+        expense._id,
+      );
+      await groupHistory.save({ session });
 
+      await Group.findByIdAndUpdate(
+        new mongoose.Types.ObjectId(group_id),
+        { $inc: { total_expenses: total_amount, expense_count: 1 } },
+        { new: true, session },
+      );
+    });
+  } finally {
+    session.endSession();
+  }
+
+  logger.info(`Expense created: ${expense._id} in group: ${group_id}`);
   return expense;
 };
 
@@ -114,6 +139,7 @@ const getGroupOrThrow = async (group_id) => {
 };
 
 const getGroupDataService = async (group_id, options = {}) => {
+  validateObjectIds(group_id);
   const group = await getGroupOrThrow(group_id);
   const result = { members: group.members };
 
@@ -137,6 +163,7 @@ const getGroupDataService = async (group_id, options = {}) => {
 };
 
 const editGroupService = async (group_id, data) => {
+  validateObjectIds(group_id);
   const { groupName, groupIcon, groupColor, members } = data;
 
   const group = await Group.findByIdAndUpdate(
@@ -153,6 +180,9 @@ const editGroupService = async (group_id, data) => {
     },
   );
 
+  if (!group) throw new Error("Group not found");
+  logger.info(`Group updated: ${group_id}`);
+
   return group;
 };
 
@@ -161,6 +191,7 @@ const editExpenseService = async (group_id, expense_id, data) => {
 
   if (!group_id || !expense_id)
     throw new Error("group_id and expense_id are required");
+  validateObjectIds(group_id, expense_id);
   validateExpenseInput({
     name,
     total_amount,
@@ -171,6 +202,10 @@ const editExpenseService = async (group_id, expense_id, data) => {
 
   const oldExpense = await Expense.findById(expense_id);
   if (!oldExpense) throw new Error("Expense Not Found");
+
+  if (oldExpense.group_id.toString() !== group_id.toString()) {
+    throw new Error("Expense does not belong to this group");
+  }
 
   const isCalculationChanged =
     oldExpense.total_amount !== total_amount ||
@@ -188,71 +223,86 @@ const editExpenseService = async (group_id, expense_id, data) => {
           share: p.share_amount,
         })),
       );
+  const session = await mongoose.startSession();
+  let updatedExpense;
 
-  if (isCalculationChanged) {
-    await reverseBalances(
-      group_id,
-      oldExpense.participants,
-      oldExpense.paid_by,
-      oldExpense.total_amount,
-    );
+  try {
+    await session.withTransaction(async () => {
+      if (isCalculationChanged) {
+        await reverseBalances(
+          group_id,
+          oldExpense.participants,
+          oldExpense.paid_by,
+          oldExpense.total_amount,
+          session,
+        );
 
-    const groupHistory = await getOrCreateGroupHistory(group_id);
-    removeExpenseHistory(groupHistory, oldExpense._id);
+        const groupHistory = await getOrCreateGroupHistory(group_id, session);
+        removeExpenseHistory(groupHistory, oldExpense._id);
 
-    const updatedParticipants = normalizeParticipants(
-      participants,
-      paid_by,
-      total_amount,
-    );
+        const updatedParticipants = normalizeParticipants(
+          participants,
+          paid_by,
+          total_amount,
+        );
 
-    const updatedExpense = await Expense.findByIdAndUpdate(
-      expense_id,
-      {
-        name,
-        total_amount,
-        paid_by,
-        participants: updatedParticipants,
-        split_method,
-      },
-      { new: true },
-    );
+        updatedExpense = await Expense.findByIdAndUpdate(
+          expense_id,
+          {
+            name,
+            total_amount,
+            paid_by,
+            participants: updatedParticipants,
+            split_method,
+          },
+          { new: true, session },
+        );
 
-    await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
+        await applyBalances(
+          group_id,
+          updatedParticipants,
+          paid_by,
+          total_amount,
+          session,
+        );
 
-    pushExpenseHistory(
-      groupHistory,
-      updatedParticipants,
-      paid_by,
-      name,
-      updatedExpense._id,
-    );
-    await groupHistory.save();
+        pushExpenseHistory(
+          groupHistory,
+          updatedParticipants,
+          paid_by,
+          name,
+          updatedExpense._id,
+        );
+        await groupHistory.save({ session });
 
-    const diff = total_amount - oldExpense.total_amount;
-    await Group.findByIdAndUpdate(
-      new mongoose.Types.ObjectId(group_id),
-      { $inc: { total_expenses: diff } },
-      { new: true },
-    );
+        const diff = total_amount - oldExpense.total_amount;
+        await Group.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(group_id),
+          { $inc: { total_expenses: diff } },
+          { new: true, session },
+        );
+      } else {
+        updatedExpense = await Expense.findByIdAndUpdate(
+          expense_id,
+          { name },
+          { new: true, session },
+        );
 
-    return updatedExpense;
-  } else {
-    const updatedExpense = await Expense.findByIdAndUpdate(
-      expense_id,
-      { name },
-      { new: true },
-    );
-
-    const groupHistory = await getOrCreateGroupHistory(group_id);
-    updateExpenseNameInHistory(groupHistory, expense_id, name);
-    await groupHistory.save();
-
-    return updatedExpense;
+        const groupHistory = await getOrCreateGroupHistory(group_id, session);
+        updateExpenseNameInHistory(groupHistory, expense_id, name);
+        await groupHistory.save({ session });
+      }
+    });
+  } finally {
+    session.endSession();
   }
+
+  logger.info(`Expense updated: ${expense_id} in group: ${group_id}`);
+  return updatedExpense;
 };
 
 const deleteGroupService = async (group_id) => {
+  validateObjectIds(group_id);
   const session = await mongoose.startSession();
 
   try {
@@ -273,6 +323,7 @@ const deleteGroupService = async (group_id) => {
     session.endSession();
   }
 
+  logger.info(`Group deleted: ${group_id}`);
   return { message: "Group and related data deleted successfully" };
 };
 
@@ -282,29 +333,43 @@ const deleteExpenseService = async (group_id, expense_id) => {
       "All required fields must be provided: group_id, expense_id",
     );
   }
+  validateObjectIds(group_id, expense_id);
 
   const expense = await Expense.findById(expense_id);
   if (!expense) throw new Error("Expense Not Found");
 
-  await reverseBalances(
-    group_id,
-    expense.participants,
-    expense.paid_by,
-    expense.total_amount,
-  );
+  if (expense.group_id.toString() !== group_id.toString()) {
+    throw new Error("Expense does not belong to this group");
+  }
+  const session = await mongoose.startSession();
 
-  const groupHistory = await History.findOne({ group_id });
-  removeExpenseHistory(groupHistory, expense._id);
-  await groupHistory.save();
+  try {
+    await session.withTransaction(async () => {
+      await reverseBalances(
+        group_id,
+        expense.participants,
+        expense.paid_by,
+        expense.total_amount,
+        session,
+      );
 
-  await Expense.findByIdAndDelete(expense_id);
+      const groupHistory = await getOrCreateGroupHistory(group_id, session);
+      removeExpenseHistory(groupHistory, expense._id);
+      await groupHistory.save({ session });
 
-  await Group.findByIdAndUpdate(
-    new mongoose.Types.ObjectId(group_id),
-    { $inc: { total_expenses: -expense.total_amount, expense_count: -1 } },
-    { new: true },
-  );
+      await Expense.findByIdAndDelete(expense_id).session(session);
 
+      await Group.findByIdAndUpdate(
+        new mongoose.Types.ObjectId(group_id),
+        { $inc: { total_expenses: -expense.total_amount, expense_count: -1 } },
+        { new: true, session },
+      );
+    });
+  } finally {
+    session.endSession();
+  }
+
+  logger.info(`Expense deleted: ${expense_id} from group: ${group_id}`);
   return { message: "Expense deleted successfully" };
 };
 

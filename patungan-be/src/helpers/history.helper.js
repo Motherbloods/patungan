@@ -64,8 +64,8 @@ const updateExpenseNameInHistory = (groupHistory, expense_id, newName) => {
   }
 };
 
-const getOrCreateGroupHistory = async (group_id) => {
-  let groupHistory = await History.findOne({ group_id });
+const getOrCreateGroupHistory = async (group_id, session) => {
+  let groupHistory = await History.findOne({ group_id }).session(session);
   if (!groupHistory) {
     groupHistory = new History({ group_id, histories: [] });
   }
