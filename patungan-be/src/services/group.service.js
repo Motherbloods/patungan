@@ -413,6 +413,23 @@ const editExpenseService = async (group_id, expense_id, data) => {
       { name },
       { new: true },
     );
+
+    // update nama expense di history
+    const groupHistory = await History.findOne({ group_id });
+    if (groupHistory) {
+      for (const userHistory of groupHistory.histories) {
+        for (const item of userHistory.history) {
+          if (
+            item.expense_id &&
+            item.expense_id.toString() === expense_id.toString()
+          ) {
+            item.expense = name;
+          }
+        }
+      }
+      await groupHistory.save();
+    }
+
     return updatedExpense;
   }
 };
@@ -420,26 +437,71 @@ const editExpenseService = async (group_id, expense_id, data) => {
 const deleteGroupService = async (group_id) => {
   const session = await mongoose.startSession();
 
-  await session.withTransaction(async () => {
-    const group = await Group.findById(group_id).session(session);
-    if (!group) {
-      throw new Error("Group not found");
-    }
+  try {
+    await session.withTransaction(async () => {
+      const group = await Group.findById(group_id).session(session);
+      if (!group) {
+        throw new Error("Group not found");
+      }
 
-    await Expense.deleteMany({ group_id }).session(session);
-    await Balance.deleteMany({ group_id }).session(session);
-    await History.deleteMany({ group_id }).session(session);
-    await Settlement.deleteMany({ group_id }).session(session);
+      await Expense.deleteMany({ group_id }).session(session);
+      await Balance.deleteMany({ group_id }).session(session);
+      await History.deleteMany({ group_id }).session(session);
+      await Settlement.deleteMany({ group_id }).session(session);
 
-    await Group.findByIdAndDelete(group_id).session(session);
-  });
-
-  session.endSession();
+      await Group.findByIdAndDelete(group_id).session(session);
+    });
+  } finally {
+    session.endSession();
+  }
 
   return { message: "Group and related data deleted successfully" };
 };
 
-const deleteExpenseService = async (data) => {};
+const deleteExpenseService = async (group_id, expense_id) => {
+  if (!group_id || !expense_id) {
+    throw new Error(
+      "All required fields must be provided: group_id, expense_id",
+    );
+  }
+
+  const expense = await Expense.findById(expense_id);
+  if (!expense) throw new Error("Expense Not Found");
+
+  for (const p of expense.participants) {
+    const isPayer = p.user_id.toString() === expense.paid_by.toString();
+    const reverseAmount = isPayer
+      ? -(expense.total_amount - p.share_amount)
+      : p.share_amount;
+
+    const balance = await Balance.findOne({ group_id, user_id: p.user_id });
+    if (balance) {
+      balance.amount += reverseAmount;
+      await balance.save();
+    }
+  }
+
+  const groupHistory = await History.findOne({ group_id });
+  if (groupHistory) {
+    for (const userHistory of groupHistory.histories) {
+      userHistory.history = userHistory.history.filter(
+        (h) =>
+          !h.expense_id || h.expense_id.toString() !== expense._id.toString(),
+      );
+    }
+    await groupHistory.save();
+  }
+
+  await Expense.findByIdAndDelete(expense_id);
+
+  await Group.findByIdAndUpdate(
+    new mongoose.Types.ObjectId(group_id),
+    { $inc: { total_expenses: -expense.total_amount, expense_count: -1 } },
+    { new: true },
+  );
+
+  return { message: "Expense deleted successfully" };
+};
 
 module.exports = {
   createGroupService,
@@ -448,4 +510,5 @@ module.exports = {
   editGroupService,
   editExpenseService,
   deleteGroupService,
+  deleteExpenseService,
 };
