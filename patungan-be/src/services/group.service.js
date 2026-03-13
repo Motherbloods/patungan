@@ -5,6 +5,12 @@ const Balance = require("../models/balance");
 const History = require("../models/history");
 const Settlement = require("../models/settlement");
 const { applyBalances, reverseBalances } = require("../helpers/balance.helper");
+const {
+  pushExpenseHistory,
+  getOrCreateGroupHistory,
+  updateExpenseNameInHistory,
+  removeExpenseHistory,
+} = require("../helpers/history.helper");
 
 const createGroupService = async (data) => {
   const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
@@ -112,56 +118,21 @@ const createExpenseService = async (data) => {
 
   await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
 
-  let groupHistory = await History.findOne({ group_id });
-  if (!groupHistory) {
-    groupHistory = new History({ group_id, histories: [] });
-  }
-
-  const getOrCreateUserHistory = (userId) => {
-    let userHistory = groupHistory.histories.find(
-      (h) => h.user_id.toString() === userId.toString(),
-    );
-    if (!userHistory) {
-      groupHistory.histories.push({ user_id: userId, history: [] });
-      userHistory = groupHistory.histories[groupHistory.histories.length - 1];
-    }
-    return userHistory;
-  };
-
-  for (const p of updatedParticipants) {
-    if (p.user_id.toString() === paid_by.toString()) continue;
-
-    const payerHistory = getOrCreateUserHistory(paid_by);
-    payerHistory.history.push({
-      type: "received",
-      from: p.user_id,
-      to: paid_by,
-      amount: p.share_amount,
-      expense: name,
-      expense_id: expense._id,
-    });
-
-    const participantHistory = getOrCreateUserHistory(p.user_id);
-    participantHistory.history.push({
-      type: "paid",
-      from: p.user_id,
-      to: paid_by,
-      amount: p.share_amount,
-      expense: name,
-      expense_id: expense._id,
-    });
-  }
-
+  const groupHistory = await getOrCreateGroupHistory(group_id);
+  pushExpenseHistory(
+    groupHistory,
+    updatedParticipants,
+    paid_by,
+    name,
+    expense._id,
+  );
   await groupHistory.save();
 
-  const groupupdete = await Group.findByIdAndUpdate(
+  await Group.findByIdAndUpdate(
     new mongoose.Types.ObjectId(group_id),
-    {
-      $inc: { total_expenses: total_amount, expense_count: 1 },
-    },
+    { $inc: { total_expenses: total_amount, expense_count: 1 } },
     { new: true },
   );
-  console.log(groupupdete);
 
   return expense;
 };
@@ -287,19 +258,8 @@ const editExpenseService = async (group_id, expense_id, data) => {
       oldExpense.total_amount,
     );
 
-    let groupHistory = await History.findOne({ group_id });
-    if (!groupHistory) {
-      groupHistory = new History({ group_id, histories: [] });
-    }
-
-    for (const userHistory of groupHistory.histories) {
-      userHistory.history = userHistory.history.filter(
-        (h) =>
-          !h.expense_id ||
-          h.expense_id.toString() !== oldExpense._id.toString(),
-      );
-    }
-
+    const groupHistory = await getOrCreateGroupHistory(group_id);
+    removeExpenseHistory(groupHistory, oldExpense._id);
     const totalShare = participants.reduce((sum, p) => sum + p.share_amount, 0);
     const roundingDiff = total_amount - totalShare;
 
@@ -323,41 +283,13 @@ const editExpenseService = async (group_id, expense_id, data) => {
 
     await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
 
-    const getOrCreateUserHistory = (userId) => {
-      let userHistory = groupHistory.histories.find(
-        (h) => h.user_id.toString() === userId.toString(),
-      );
-      if (!userHistory) {
-        groupHistory.histories.push({ user_id: userId, history: [] });
-        userHistory = groupHistory.histories[groupHistory.histories.length - 1];
-      }
-      return userHistory;
-    };
-
-    for (const p of updatedParticipants) {
-      if (p.user_id.toString() === paid_by.toString()) continue;
-
-      const payerHistory = getOrCreateUserHistory(paid_by);
-      payerHistory.history.push({
-        type: "received",
-        from: p.user_id,
-        to: paid_by,
-        amount: p.share_amount,
-        expense: name,
-        expense_id: updatedExpense._id,
-      });
-
-      const participantHistory = getOrCreateUserHistory(p.user_id);
-      participantHistory.history.push({
-        type: "paid",
-        from: p.user_id,
-        to: paid_by,
-        amount: p.share_amount,
-        expense: name,
-        expense_id: updatedExpense._id,
-      });
-    }
-
+    pushExpenseHistory(
+      groupHistory,
+      updatedParticipants,
+      paid_by,
+      name,
+      updatedExpense._id,
+    );
     await groupHistory.save();
 
     const diff = total_amount - oldExpense.total_amount;
@@ -375,21 +307,9 @@ const editExpenseService = async (group_id, expense_id, data) => {
       { new: true },
     );
 
-    // update nama expense di history
-    const groupHistory = await History.findOne({ group_id });
-    if (groupHistory) {
-      for (const userHistory of groupHistory.histories) {
-        for (const item of userHistory.history) {
-          if (
-            item.expense_id &&
-            item.expense_id.toString() === expense_id.toString()
-          ) {
-            item.expense = name;
-          }
-        }
-      }
-      await groupHistory.save();
-    }
+    const groupHistory = await getOrCreateGroupHistory(group_id);
+    updateExpenseNameInHistory(groupHistory, expense_id, name);
+    await groupHistory.save();
 
     return updatedExpense;
   }
@@ -438,12 +358,7 @@ const deleteExpenseService = async (group_id, expense_id) => {
 
   const groupHistory = await History.findOne({ group_id });
   if (groupHistory) {
-    for (const userHistory of groupHistory.histories) {
-      userHistory.history = userHistory.history.filter(
-        (h) =>
-          !h.expense_id || h.expense_id.toString() !== expense._id.toString(),
-      );
-    }
+    removeExpenseHistory(groupHistory, expense._id);
     await groupHistory.save();
   }
 
