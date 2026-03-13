@@ -10,3 +10,5 @@ const MEMBER_COLORS = [
   { color: "#EC4899", light: "#FCE7F3" },
   { color: "#84CC16", light: "#ECFCCB" },
 ];
+
+module.exports = MEMBER_COLORS;
