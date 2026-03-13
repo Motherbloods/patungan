@@ -208,8 +208,30 @@ const getGroupDataService = async (group_id, options = {}) => {
 
   return result;
 };
+
+const editGroupService = async (data) => {
+  const { group_id, groupName, groupIcon, groupColor, members } = data;
+
+  const group = await Group.findByIdAndUpdate(
+    group_id,
+    {
+      name: groupName,
+      icon: groupIcon,
+      color: groupColor,
+      members,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  return group;
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
   getGroupDataService,
+  editGroupService,
 };

@@ -3,6 +3,7 @@ const {
   createGroupService,
   createExpenseService,
   getGroupDataService,
+  editGroupService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -40,6 +41,11 @@ const getGroupHistory = asyncHandler(async (req, res) => {
   res.json(history);
 });
 
+const editGroup = asyncHandler(async (req, res) => {
+  const result = await editGroupService(req.body);
+  res.json(result);
+});
+
 module.exports = {
   createGroup,
   createExpense,
@@ -47,4 +53,5 @@ module.exports = {
   getGroupTransactions,
   getGroupSettlements,
   getGroupHistory,
+  editGroup,
 };
