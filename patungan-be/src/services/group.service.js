@@ -12,9 +12,13 @@ const {
   removeExpenseHistory,
 } = require("../helpers/history.helper");
 
+const {
+  validateExpenseInput,
+  normalizeParticipants,
+} = require("../helpers/expense.validator");
+
 const createGroupService = async (data) => {
   const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
-  console.log(data);
 
   if (
     !groupName ||
@@ -29,7 +33,7 @@ const createGroupService = async (data) => {
     );
   }
 
-  const formattedMembers = members.map((member) => {
+  const formattedMembers = members.map((member, index) => {
     const palette = MEMBER_COLORS[index % MEMBER_COLORS.length];
     return {
       name: member.name,
@@ -57,53 +61,19 @@ const createExpenseService = async (data) => {
   const { group_id, name, total_amount, paid_by, participants, split_method } =
     data;
 
-  if (
-    !group_id ||
-    !name ||
-    !total_amount ||
-    !paid_by ||
-    !participants ||
-    !split_method
-  ) {
-    throw new Error(
-      "All required fields must be provided: name, total_amount, paid_by, participants, split_method",
-    );
-  }
-
-  if (typeof total_amount !== "number" || total_amount <= 0) {
-    throw new Error("total_amount must be a number greater than 0");
-  }
-
-  if (!Array.isArray(participants) || participants.length === 0) {
-    throw new Error("participants must be a non-empty array");
-  }
-
-  participants.forEach((p, index) => {
-    if (!p.user_id) {
-      throw new Error(`Participant at index ${index} must have a user_id`);
-    }
-    if (typeof p.share_amount !== "number") {
-      throw new Error(
-        `Participant at index ${index} must have share_amount as number`,
-      );
-    }
+  if (!group_id) throw new Error("group_id is required");
+  validateExpenseInput({
+    name,
+    total_amount,
+    paid_by,
+    participants,
+    split_method,
   });
 
-  const allowedSplitMethods = ["bagi-rata", "custom"];
-  if (!allowedSplitMethods.includes(split_method)) {
-    throw new Error(
-      `split_method must be one of: ${allowedSplitMethods.join(", ")}`,
-    );
-  }
-
-  // normalisasi total amount
-  const totalShare = participants.reduce((sum, p) => sum + p.share_amount, 0);
-  const roundingDiff = total_amount - totalShare;
-
-  const updatedParticipants = participants.map((p) =>
-    p.user_id.toString() === paid_by.toString()
-      ? { ...p, share_amount: p.share_amount + roundingDiff }
-      : p,
+  const updatedParticipants = normalizeParticipants(
+    participants,
+    paid_by,
+    total_amount,
   );
 
   const expense = await Expense.create({
@@ -189,46 +159,15 @@ const editGroupService = async (group_id, data) => {
 const editExpenseService = async (group_id, expense_id, data) => {
   const { name, total_amount, paid_by, participants, split_method } = data;
 
-  // validasi input
-  if (
-    !group_id ||
-    !expense_id ||
-    !name ||
-    !total_amount ||
-    !paid_by ||
-    !participants ||
-    !split_method
-  ) {
-    throw new Error(
-      "All required fields must be provided: group_id, expense_id, name, total_amount, paid_by, participants, split_method",
-    );
-  }
-
-  if (typeof total_amount !== "number" || total_amount <= 0) {
-    throw new Error("total_amount must be a number greater than 0");
-  }
-
-  if (!Array.isArray(participants) || participants.length === 0) {
-    throw new Error("participants must be a non-empty array");
-  }
-
-  participants.forEach((p, index) => {
-    if (!p.user_id) {
-      throw new Error(`Participant at index ${index} must have a user_id`);
-    }
-    if (typeof p.share_amount !== "number") {
-      throw new Error(
-        `Participant at index ${index} must have share_amount as number`,
-      );
-    }
+  if (!group_id || !expense_id)
+    throw new Error("group_id and expense_id are required");
+  validateExpenseInput({
+    name,
+    total_amount,
+    paid_by,
+    participants,
+    split_method,
   });
-
-  const allowedSplitMethods = ["bagi-rata", "custom"];
-  if (!allowedSplitMethods.includes(split_method)) {
-    throw new Error(
-      `split_method must be one of: ${allowedSplitMethods.join(", ")}`,
-    );
-  }
 
   const oldExpense = await Expense.findById(expense_id);
   if (!oldExpense) throw new Error("Expense Not Found");
@@ -260,13 +199,11 @@ const editExpenseService = async (group_id, expense_id, data) => {
 
     const groupHistory = await getOrCreateGroupHistory(group_id);
     removeExpenseHistory(groupHistory, oldExpense._id);
-    const totalShare = participants.reduce((sum, p) => sum + p.share_amount, 0);
-    const roundingDiff = total_amount - totalShare;
 
-    const updatedParticipants = participants.map((p) =>
-      p.user_id.toString() === paid_by.toString()
-        ? { ...p, share_amount: p.share_amount + roundingDiff }
-        : p,
+    const updatedParticipants = normalizeParticipants(
+      participants,
+      paid_by,
+      total_amount,
     );
 
     const updatedExpense = await Expense.findByIdAndUpdate(
@@ -357,10 +294,8 @@ const deleteExpenseService = async (group_id, expense_id) => {
   );
 
   const groupHistory = await History.findOne({ group_id });
-  if (groupHistory) {
-    removeExpenseHistory(groupHistory, expense._id);
-    await groupHistory.save();
-  }
+  removeExpenseHistory(groupHistory, expense._id);
+  await groupHistory.save();
 
   await Expense.findByIdAndDelete(expense_id);
 
