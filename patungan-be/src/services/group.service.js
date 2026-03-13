@@ -4,6 +4,7 @@ const Expense = require("../models/expense");
 const Balance = require("../models/balance");
 const History = require("../models/history");
 const Settlement = require("../models/settlement");
+const { applyBalances, reverseBalances } = require("../helpers/balance.helper");
 
 const createGroupService = async (data) => {
   const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
@@ -109,24 +110,7 @@ const createExpenseService = async (data) => {
     createdAt: new Date(),
   });
 
-  for (const p of updatedParticipants) {
-    const isPayer = p.user_id.toString() === paid_by.toString();
-    const balanceAmount = isPayer
-      ? total_amount - p.share_amount
-      : -p.share_amount;
-
-    const balance = await Balance.findOne({ group_id, user_id: p.user_id });
-    if (balance) {
-      balance.amount += balanceAmount;
-      await balance.save();
-    } else {
-      await Balance.create({
-        group_id,
-        user_id: p.user_id,
-        amount: balanceAmount,
-      });
-    }
-  }
+  await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
 
   let groupHistory = await History.findOne({ group_id });
   if (!groupHistory) {
@@ -296,18 +280,12 @@ const editExpenseService = async (group_id, expense_id, data) => {
       );
 
   if (isCalculationChanged) {
-    for (const p of oldExpense.participants) {
-      const isPayer = p.user_id.toString() === oldExpense.paid_by.toString();
-      const reverseAmount = isPayer
-        ? -(oldExpense.total_amount - p.share_amount)
-        : p.share_amount;
-
-      const balance = await Balance.findOne({ group_id, user_id: p.user_id });
-      if (balance) {
-        balance.amount += reverseAmount;
-        await balance.save();
-      }
-    }
+    await reverseBalances(
+      group_id,
+      oldExpense.participants,
+      oldExpense.paid_by,
+      oldExpense.total_amount,
+    );
 
     let groupHistory = await History.findOne({ group_id });
     if (!groupHistory) {
@@ -343,24 +321,7 @@ const editExpenseService = async (group_id, expense_id, data) => {
       { new: true },
     );
 
-    for (const p of updatedParticipants) {
-      const isPayer = p.user_id.toString() === paid_by.toString();
-      const balanceAmount = isPayer
-        ? total_amount - p.share_amount
-        : -p.share_amount;
-
-      const balance = await Balance.findOne({ group_id, user_id: p.user_id });
-      if (balance) {
-        balance.amount += balanceAmount;
-        await balance.save();
-      } else {
-        await Balance.create({
-          group_id,
-          user_id: p.user_id,
-          amount: balanceAmount,
-        });
-      }
-    }
+    await applyBalances(group_id, updatedParticipants, paid_by, total_amount);
 
     const getOrCreateUserHistory = (userId) => {
       let userHistory = groupHistory.histories.find(
@@ -468,18 +429,12 @@ const deleteExpenseService = async (group_id, expense_id) => {
   const expense = await Expense.findById(expense_id);
   if (!expense) throw new Error("Expense Not Found");
 
-  for (const p of expense.participants) {
-    const isPayer = p.user_id.toString() === expense.paid_by.toString();
-    const reverseAmount = isPayer
-      ? -(expense.total_amount - p.share_amount)
-      : p.share_amount;
-
-    const balance = await Balance.findOne({ group_id, user_id: p.user_id });
-    if (balance) {
-      balance.amount += reverseAmount;
-      await balance.save();
-    }
-  }
+  await reverseBalances(
+    group_id,
+    expense.participants,
+    expense.paid_by,
+    expense.total_amount,
+  );
 
   const groupHistory = await History.findOne({ group_id });
   if (groupHistory) {
