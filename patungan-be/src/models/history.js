@@ -10,6 +10,7 @@ const historyItemSchema = new mongoose.Schema({
   to: { type: mongoose.Schema.Types.ObjectId, required: true },
   amount: { type: Number, required: true },
   expense: { type: String },
+  expense_id: { type: mongoose.Schema.Types.ObjectId },
   created_at: { type: Date, default: Date.now },
 });
 

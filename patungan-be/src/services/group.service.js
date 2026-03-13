@@ -154,6 +154,7 @@ const createExpenseService = async (data) => {
       to: paid_by,
       amount: p.share_amount,
       expense: name,
+      expense_id: expense._id,
     });
 
     const participantHistory = getOrCreateUserHistory(p.user_id);
@@ -163,6 +164,7 @@ const createExpenseService = async (data) => {
       to: paid_by,
       amount: p.share_amount,
       expense: name,
+      expense_id: expense._id,
     });
   }
 
