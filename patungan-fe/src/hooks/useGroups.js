@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import groupService from "../services/groupService";
+import { useNavigate } from "react-router-dom";
 
 export const useGroups = () => {
   return useQuery({
@@ -31,10 +32,12 @@ export const useEditGroup = () => {
 
 export const useDeleteGroup = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: (id) => groupService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      navigate("/dashboard");
     },
   });
 };
