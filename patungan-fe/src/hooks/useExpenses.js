@@ -1,27 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import expenseService from "../services/expenseService";
 
-export const useGetTransactions = (group_id) => {
+//enabled untuk agar hanya dipanggil ketika tab active
+export const useGetTransactions = (group_id, enabled = false) => {
   return useQuery({
     queryKey: ["expenses", group_id, "transactions"],
     queryFn: () => expenseService.getTransactions(group_id),
-    enabled: !!group_id,
+    enabled: !!group_id && enabled,
   });
 };
 
-export const useGetSettlements = (group_id) => {
+export const useGetSettlements = (group_id, enabled = false) => {
   return useQuery({
     queryKey: ["expenses", group_id, "settlements"],
     queryFn: () => expenseService.getSettlements(group_id),
-    enabled: !!group_id,
+    enabled: !!group_id && enabled,
   });
 };
 
-export const useGetHistory = (group_id) => {
+export const useGetHistory = (group_id, enabled = false) => {
   return useQuery({
     queryKey: ["expenses", group_id, "history"],
     queryFn: () => expenseService.getHistory(group_id),
-    enabled: !!group_id,
+    enabled: !!group_id && enabled,
   });
 };
 
