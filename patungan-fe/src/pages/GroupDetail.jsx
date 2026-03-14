@@ -9,6 +9,7 @@ import TabTransfer from "../components/tabs/TabTransfer";
 import TabRiwayat from "../components/tabs/TabRiwayat";
 import { useGroupDetail } from "../hooks/useGroups";
 import {
+  useCreateExpense,
   useGetHistory,
   useGetSettlements,
   useGetTransactions,
@@ -46,10 +47,9 @@ function GroupDetail() {
     isLoading: isHistoryLoading,
     error: historyError,
   } = useGetHistory(id, activeTab === "riwayat");
-  const handleAddExpense = (expenseData) => {
-    console.log("Adding expense:", expenseData);
-  };
 
+  const { mutate: useCreate } = useCreateExpense();
+  console.log(history);
   const handleCancelExpense = () => {
     console.log("Expense addition cancelled");
     setShowForm(false);
@@ -79,7 +79,7 @@ function GroupDetail() {
           <AddExpenseForm
             members={group.members}
             onCancel={handleCancelExpense}
-            onSubmit={handleAddExpense}
+            onSubmit={useCreate}
           />
         ) : (
           <button
@@ -137,7 +137,7 @@ function GroupDetail() {
             {activeTab === "riwayat" && (
               <TabRiwayat
                 members={group.members}
-                balances={history.balances}
+                balances={group.balances}
                 history={history.history}
               />
             )}
