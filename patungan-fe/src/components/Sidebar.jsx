@@ -1,8 +1,8 @@
 import { LayoutDashboard, Menu, X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import groupList from "../config/group_list";
 import NewGroupModal from "./NewGroupModal";
+import { useAddGroup, useGroups } from "../hooks/useGroups";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -11,8 +11,11 @@ function Sidebar() {
   const listRef = useRef(null);
   const location = useLocation();
 
+  const { data: groupList = [], isLoading } = useGroups();
+  const { mutate: addGroup } = useAddGroup();
+
   const onSubmitModal = (groupData) => {
-    console.log("Grup baru:", groupData);
+    addGroup(groupData);
   };
 
   useEffect(() => {
@@ -99,32 +102,42 @@ function Sidebar() {
         </p>
 
         <div ref={listRef} className="flex flex-col gap-1 overflow-y-auto">
-          {groupList.map((group) => {
-            const Icon = group.icon;
+          {isLoading && (
+            <p className="text-sm text-gray-400 px-2 py-1">Loading groups...</p>
+          )}
 
-            return (
-              <NavLink
-                ref={(el) => (groupRefs.current[group.id] = el)}
-                key={group.id}
-                to={`/groups/${group.id}`}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 p-2 rounded-xl transition group
+          {!isLoading && groupList.length === 0 && (
+            <p className="text-sm text-gray-400 px-2 py-1">
+              Belum ada group. Buat group baru.
+            </p>
+          )}
+          {!isLoading &&
+            groupList.map((group) => {
+              const Icon = group.icon;
+
+              return (
+                <NavLink
+                  ref={(el) => (groupRefs.current[group.id] = el)}
+                  key={group.id}
+                  to={`/groups/${group.id}`}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 p-2 rounded-xl transition group
                   ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
-                }
-              >
-                <div
-                  className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
+                  }
                 >
-                  <Icon className="w-5 h-5 stroke-2" />
-                </div>
+                  <div
+                    className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
+                  >
+                    <Icon className="w-5 h-5 stroke-2" />
+                  </div>
 
-                <span className="truncate text-sm font-medium text-gray-700">
-                  {group.name}
-                </span>
-              </NavLink>
-            );
-          })}
+                  <span className="truncate text-sm font-medium text-gray-700">
+                    {group.name}
+                  </span>
+                </NavLink>
+              );
+            })}
         </div>
       </div>
 
