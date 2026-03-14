@@ -382,6 +382,7 @@ const deleteExpenseService = async (group_id, expense_id) => {
 module.exports = {
   createGroupService,
   createExpenseService,
+  getAllGroupService,
   getGroupDataService,
   editGroupService,
   editExpenseService,
