@@ -132,6 +132,12 @@ const createExpenseService = async (data) => {
   return expense;
 };
 
+const getAllGroupService = async () => {
+  const groups = await Group.find();
+
+  return groups;
+};
+
 const getGroupOrThrow = async (group_id) => {
   const group = await Group.findById(group_id).lean();
   if (!group) throw new Error("Group not found");
