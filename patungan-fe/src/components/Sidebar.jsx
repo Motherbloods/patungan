@@ -4,16 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import NewGroupModal from "./NewGroupModal";
 import { useAddGroup, useGroups } from "../hooks/useGroups";
 import ICON_OPTIONS from "../config/icons";
+import GroupMenu from "./GroupMenu";
+import EditGroupModal from "./EditGroupModal";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const groupRefs = useRef({});
   const listRef = useRef(null);
   const location = useLocation();
 
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
+  const deleteGroup = (id) => {
+    console.log("hapus group ", id);
+  };
 
   const onSubmitModal = (groupData) => {
     addGroup(groupData);
@@ -114,35 +120,44 @@ function Sidebar() {
           )}
           {!isLoading &&
             groupList.map((group) => {
-              const iconItem = ICON_OPTIONS.find(
-                (item) => item.id === group.icon,
-              );
-              const Icon = iconItem?.icon;
-              return (
-                <NavLink
-                  ref={(el) => (groupRefs.current[group._id] = el)}
-                  key={group._id}
-                  to={`/groups/${group._id}`}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 p-2 rounded-xl transition group
-                  ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
-                  }
-                >
-                  <div
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
-                  >
-                    {Icon && <Icon className="w-5 h-5 stroke-2" />}
-                  </div>
+              const Icon = ICON_OPTIONS.find((i) => i.id === group.icon)?.icon;
 
-                  <span className="truncate text-sm font-medium text-gray-700">
-                    {group.name}
-                  </span>
-                </NavLink>
+              return (
+                <div key={group._id} className="relative group/item">
+                  <NavLink
+                    to={`/groups/${group._id}`}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 p-2 rounded-xl transition pr-8
+          ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
+                    }
+                  >
+                    <div
+                      className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
+                    >
+                      {Icon && <Icon className="w-5 h-5 stroke-2" />}
+                    </div>
+                    <span className="truncate text-sm font-medium text-gray-700">
+                      {group.name}
+                    </span>
+                  </NavLink>
+
+                  <GroupMenu
+                    onEdit={() => setEditTarget(group)}
+                    onDelete={() => deleteGroup(group._id)}
+                  />
+                </div>
               );
             })}
         </div>
       </div>
+
+      {editTarget && (
+        <EditGroupModal
+          open={!!editTarget}
+          group={editTarget}
+          onClose={() => setEditTarget(null)}
+        />
+      )}
 
       {showModal && (
         <NewGroupModal
