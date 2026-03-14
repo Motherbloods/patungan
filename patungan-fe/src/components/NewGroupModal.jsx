@@ -19,7 +19,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
   const [showEmojiPicker, setShowEmoji] = useState(false);
   const [error, setError] = useState("");
 
-  const GroupIcon = ICON_OPTIONS.find((o) => o.id === groupIconId)?.icon;
+  const GroupIcon = ICON_OPTIONS.find((o) => o.id === groupIconId)?.id;
 
   if (!open) return null;
 

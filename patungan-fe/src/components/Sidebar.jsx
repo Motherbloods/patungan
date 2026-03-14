@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import NewGroupModal from "./NewGroupModal";
 import { useAddGroup, useGroups } from "../hooks/useGroups";
+import ICON_OPTIONS from "../config/icons";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -113,13 +114,15 @@ function Sidebar() {
           )}
           {!isLoading &&
             groupList.map((group) => {
-              const Icon = group.icon;
-
+              const iconItem = ICON_OPTIONS.find(
+                (item) => item.id === group.icon,
+              );
+              const Icon = iconItem?.icon;
               return (
                 <NavLink
-                  ref={(el) => (groupRefs.current[group.id] = el)}
-                  key={group.id}
-                  to={`/groups/${group.id}`}
+                  ref={(el) => (groupRefs.current[group._id] = el)}
+                  key={group._id}
+                  to={`/groups/${group._id}`}
                   onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     `flex items-center gap-3 p-2 rounded-xl transition group
@@ -129,7 +132,7 @@ function Sidebar() {
                   <div
                     className={`w-9 h-9 flex items-center justify-center rounded-lg shrink-0 ${group.color}`}
                   >
-                    <Icon className="w-5 h-5 stroke-2" />
+                    {Icon && <Icon className="w-5 h-5 stroke-2" />}
                   </div>
 
                   <span className="truncate text-sm font-medium text-gray-700">
