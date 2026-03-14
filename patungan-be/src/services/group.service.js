@@ -153,8 +153,8 @@ const getGroupDataService = async (group_id, options = {}) => {
     name: group.name,
     icon: group.icon,
     color: group.color,
-    expense_count: group.expenses?.length ?? 0,
-    member_count: group.members?.length ?? 0,
+    expense_count: group.expense_count ?? 0,
+    member_count: group.member_count ?? 0,
     total_expenses: group.total_expenses ?? 0,
     members: group.members,
   };
