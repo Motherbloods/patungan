@@ -43,6 +43,7 @@ const createGroupService = async (data) => {
       emoji: member.emoji || "",
       color: palette.color,
       light: palette.light,
+      isActive: true,
     };
   });
 
@@ -179,7 +180,7 @@ const getGroupDataService = async (group_id, options = {}) => {
 
 const editGroupService = async (group_id, data) => {
   validateObjectIds(group_id);
-  const { groupName, groupIcon, groupColor, members } = data;
+  const { groupName, groupIcon, groupColor } = data;
 
   const group = await Group.findByIdAndUpdate(
     group_id,
@@ -187,7 +188,6 @@ const editGroupService = async (group_id, data) => {
       name: groupName,
       icon: groupIcon,
       color: groupColor,
-      members,
     },
     {
       new: true,
@@ -199,6 +199,93 @@ const editGroupService = async (group_id, data) => {
   logger.info(`Group updated: ${group_id}`);
 
   return group;
+};
+
+const editMemberService = async (group_id, member_id, data) => {
+  validateObjectIds(group_id, member_id);
+
+  const { name, emoji } = data;
+  if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
+
+  const group = await Group.findOneAndUpdate(
+    {
+      _id: group_id,
+      "members._id": member_id,
+    },
+    {
+      $set: {
+        "members.$.name": name.trim(),
+        ...(emoji !== undefined && { "members.$.emoji": emoji }),
+      },
+    },
+    { new: true, runValidators: true },
+  );
+
+  if (!group) throw new Error("Group atau member tidak ditemukan");
+
+  logger.info(`Member updated: ${member_id} in group: ${group_id}`);
+  return group.members.id(member_id);
+};
+
+const deactivateMemberService = async (group_id, member_id) => {
+  validateObjectIds(group_id, member_id);
+
+  const expenseCount = await Expense.countDocuments({
+    group_id,
+    $or: [{ paid_by: member_id }, { "participants.user_id": member_id }],
+  });
+
+  const group = await Group.findOneAndUpdate(
+    {
+      _id: group_id,
+      "members._id": member_id,
+    },
+    {
+      $set: { "members.$.isActive": false },
+      $inc: { member_count: -1 },
+    },
+    { new: true },
+  );
+
+  if (!group) throw new Error("Group atau member tidak ditemukan");
+
+  logger.info(`Member deactivated: ${member_id} in group: ${group_id}`);
+  return {
+    member: group.members.id(member_id),
+    hadExpenses: expenseCount > 0,
+  };
+};
+
+const addMemberService = async (group_id, data) => {
+  validateObjectIds(group_id);
+
+  const { name, emoji } = data;
+  if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
+
+  const group = await Group.findById(group_id);
+  if (!group) throw new Error("Group tidak ditemukan");
+
+  const isDuplicate = group.members.some(
+    (m) => m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
+  );
+  if (isDuplicate) throw new Error("Nama member sudah ada di grup ini");
+
+  const activeCount = group.members.filter((m) => m.isActive).length;
+  const palette = MEMBER_COLORS[activeCount % MEMBER_COLORS.length];
+
+  group.members.push({
+    name: name.trim(),
+    emoji: emoji || "",
+    color: palette.color,
+    light: palette.light,
+    isActive: true,
+  });
+  group.member_count += 1;
+
+  await group.save();
+
+  logger.info(`Member added to group: ${group_id}`);
+  return group.members[group.members.length - 1];
 };
 
 const editExpenseService = async (group_id, expense_id, data) => {
@@ -394,6 +481,9 @@ module.exports = {
   getAllGroupService,
   getGroupDataService,
   editGroupService,
+  editMemberService,
+  deactivateMemberService,
+  addMemberService,
   editExpenseService,
   deleteGroupService,
   deleteExpenseService,
