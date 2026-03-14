@@ -4,6 +4,24 @@ import { fmt } from "../../utils/format";
 import { getNameUtil } from "../../utils/member";
 
 function TabTransfer({ members, settlements }) {
+  if (!settlements || settlements.length === 0) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          0 transfer
+        </p>
+
+        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">
+            Tidak ada transfer yang diperlukan.
+          </p>
+        </div>
+
+        <InfoBox />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
