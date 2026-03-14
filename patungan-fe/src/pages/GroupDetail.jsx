@@ -7,7 +7,7 @@ import TabRingkasan from "../components/tabs/TabRingkasan";
 import TabTransaksi from "../components/tabs/TabTransaksi";
 import TabTransfer from "../components/tabs/TabTransfer";
 import TabRiwayat from "../components/tabs/TabRiwayat";
-import useGroupDetail from "../hooks/useGroupDetail";
+import { useGroupDetail } from "../hooks/useGroupDetail";
 import LoadingFallback from "../components/fallback/LoadingFallback";
 import ErrorFallback from "../components/fallback/ErrorFallback";
 import NotFoundFallback from "../components/fallback/NotFoundFallback";
@@ -15,8 +15,7 @@ import NotFoundFallback from "../components/fallback/NotFoundFallback";
 function GroupDetail() {
   const { id } = useParams();
 
-  const { loading, error, group } = useGroupDetail(id);
-
+  const { data: group = [], isLoading, error } = useGroupDetail(id);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState("ringkasan");
 
@@ -29,7 +28,7 @@ function GroupDetail() {
     setShowForm(false);
   };
 
-  if (loading) return <LoadingFallback message="Loading group details..." />;
+  if (isLoading) return <LoadingFallback message="Loading group details..." />;
   if (error) return <ErrorFallback message={error} />;
   if (!group) return <NotFoundFallback message="Group not found." />;
 
