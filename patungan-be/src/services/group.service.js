@@ -309,18 +309,23 @@ const editExpenseService = async (group_id, expense_id, data) => {
     throw new Error("Expense does not belong to this group");
   }
 
+  const sortParticipants = (arr) =>
+    [...arr].sort((a, b) =>
+      a.user_id.toString().localeCompare(b.user_id.toString()),
+    );
+
   const isCalculationChanged =
     oldExpense.total_amount !== total_amount ||
     oldExpense.paid_by.toString() !== paid_by.toString() ||
     oldExpense.split_method !== split_method ||
     JSON.stringify(
-      oldExpense.participants.map((p) => ({
+      sortParticipants(oldExpense.participants).map((p) => ({
         id: p.user_id.toString(),
         share: p.share_amount,
       })),
     ) !==
       JSON.stringify(
-        participants.map((p) => ({
+        sortParticipants(participants).map((p) => ({
           id: p.user_id.toString(),
           share: p.share_amount,
         })),
