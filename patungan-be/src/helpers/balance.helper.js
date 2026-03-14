@@ -46,10 +46,13 @@ const reverseBalances = async (
       group_id,
       user_id: p.user_id,
     }).session(session);
-    if (balance) {
-      balance.amount += reverseAmount;
-      await balance.save({ session });
+    if (!balance) {
+      throw new Error(
+        `Balance not found for user ${p.user_id} in group ${group_id}. Data may be corrupted.`,
+      );
     }
+    balance.amount += reverseAmount;
+    await balance.save({ session });
   }
 };
 
