@@ -11,6 +11,9 @@ const {
   deleteGroup,
   deleteExpense,
   getAllGroup,
+  addMember,
+  editMember,
+  deactivateMember,
 } = require("../controllers/group.controller");
 const router = express.Router();
 
@@ -25,5 +28,8 @@ router.put("/group/:id", editGroup);
 router.put("/group/:group_id/expense/:expense_id", editExpense);
 router.delete("/group/:id", deleteGroup);
 router.delete("/group/:group_id/expense/:expense_id", deleteExpense);
+router.post("/group/:id/members", addMember);
+router.patch("/group/:id/members/:member_id", editMember);
+router.patch("/group/:id/members/:member_id/deactivate", deactivateMember);
 
 module.exports = router;
