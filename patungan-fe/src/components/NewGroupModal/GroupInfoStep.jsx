@@ -12,13 +12,15 @@ function GroupInfoStep({
   error,
   setError,
 }) {
+  const iconItem = ICON_OPTIONS.find((item) => item.id === GroupIcon);
+  const Icon = iconItem.icon;
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-center">
         <div
           className={`${selectedColor.bg} ${selectedColor.text} w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-200`}
         >
-          {GroupIcon && <GroupIcon className="w-8 h-8 stroke-2 text-current" />}
+          {Icon && <Icon className="w-8 h-8 stroke-2 text-current" />}
         </div>
       </div>
 
