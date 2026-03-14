@@ -5,6 +5,19 @@ import { getMemberUtil } from "../../utils/member";
 import { fmt } from "../../utils/format";
 
 function TabRingkasan({ members, balances }) {
+  if (!balances || balances.length === 0) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">
+            Belum ada data ringkasan pembagian.
+          </p>
+        </div>
+        <InfoBox />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
       {balances.map((b) => {
