@@ -3,18 +3,37 @@ import { X } from "lucide-react";
 import ICON_OPTIONS from "../config/icons";
 import COLOR_OPTIONS from "../config/colors";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
+import EditMemberStep from "./EditGroupModal/EditMemberStep";
+import {
+  useEditGroup,
+  useEditMember,
+  useDeactivateMember,
+  useAddMember,
+} from "../hooks/useGroups";
 
-function EditGroupModal({ open, onClose, onSubmit, group }) {
+const TABS = [
+  { id: "info", label: "Info Grup" },
+  { id: "members", label: "Members" },
+];
+
+function EditGroupModal({ open, onClose, group }) {
   const initialColor =
     COLOR_OPTIONS.find((c) => c.bg === group?.color) ?? COLOR_OPTIONS[0];
 
+  const [activeTab, setActiveTab] = useState("info");
   const [groupName, setGroupName] = useState(group?.name ?? "");
   const [groupIconId, setGroupIconId] = useState(
     group?.icon ?? ICON_OPTIONS[0].id,
   );
   const [selectedColor, setSelectedColor] = useState(initialColor);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [localMembers, setLocalMembers] = useState(group?.members ?? []);
+
+  const { mutate: editGroup, isPending: isSavingGroup } = useEditGroup();
+  const { mutate: editMember } = useEditMember(group?._id);
+  const { mutate: deactivateMember } = useDeactivateMember(group?._id);
+  const { mutate: addMember } = useAddMember(group?._id);
 
   const GroupIcon = ICON_OPTIONS.find((o) => o.id === groupIconId)?.id;
 
@@ -22,29 +41,52 @@ function EditGroupModal({ open, onClose, onSubmit, group }) {
 
   const handleClose = () => {
     setError("");
+    setActiveTab("info");
     onClose?.();
   };
 
-  const handleSubmit = async () => {
+  const handleSaveInfo = () => {
     if (!groupName.trim()) {
       setError("Nama grup tidak boleh kosong");
       return;
     }
+    editGroup(
+      {
+        id: group._id,
+        data: {
+          groupName,
+          groupIcon: GroupIcon,
+          groupColor: selectedColor.bg,
+          groupIconColor: selectedColor.text,
+        },
+      },
+      {
+        onSuccess: () => handleClose(),
+        onError: (err) => setError(err.message || "Gagal menyimpan"),
+      },
+    );
+  };
 
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        groupName,
-        groupIcon: GroupIcon,
-        groupColor: selectedColor.bg,
-        groupIconColor: selectedColor.text,
-      });
-      handleClose();
-    } catch (err) {
-      setError(err.message || "Gagal mengupdate grup");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleEditMember = (memberId, data) => {
+    setLocalMembers((prev) =>
+      prev.map((m) => (m._id === memberId ? { ...m, ...data } : m)),
+    );
+    editMember({ memberId, data });
+  };
+
+  const handleDeactivateMember = (memberId) => {
+    setLocalMembers((prev) =>
+      prev.map((m) => (m._id === memberId ? { ...m, isActive: false } : m)),
+    );
+    deactivateMember(memberId);
+  };
+
+  const handleAddMember = (data) => {
+    addMember(data, {
+      onSuccess: (newMember) => {
+        setLocalMembers((prev) => [...prev, newMember]);
+      },
+    });
   };
 
   return (
@@ -55,11 +97,11 @@ function EditGroupModal({ open, onClose, onSubmit, group }) {
     >
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 pt-5 pb-4 border-b border-gray-100">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-base font-bold text-gray-900">Edit Grup</h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                Ubah nama, ikon, atau warna grup
+                Ubah info grup atau kelola member
               </p>
             </div>
             <button
@@ -69,37 +111,77 @@ function EditGroupModal({ open, onClose, onSubmit, group }) {
               <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
+
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setError("");
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === tab.id
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="overflow-y-auto px-6 py-5">
-          <GroupInfoStep
-            GroupIcon={GroupIcon}
-            groupName={groupName}
-            setGroupName={setGroupName}
-            groupIconId={groupIconId}
-            setGroupIconId={setGroupIconId}
-            selectedColor={selectedColor}
-            setSelectedColor={setSelectedColor}
-            error={error}
-            setError={setError}
-          />
+        <div className="overflow-y-auto px-6 py-5 flex-1">
+          {activeTab === "info" && (
+            <GroupInfoStep
+              GroupIcon={GroupIcon}
+              groupName={groupName}
+              setGroupName={setGroupName}
+              groupIconId={groupIconId}
+              setGroupIconId={setGroupIconId}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+              error={error}
+              setError={setError}
+            />
+          )}
+
+          {activeTab === "members" && (
+            <EditMemberStep
+              members={localMembers}
+              onEditMember={handleEditMember}
+              onDeactivateMember={handleDeactivateMember}
+              onAddMember={handleAddMember}
+            />
+          )}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
-          <button
-            onClick={handleClose}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition"
-          >
-            Batal
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-sm"
-          >
-            {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
-          </button>
-        </div>
+        {activeTab === "info" && (
+          <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+            <button
+              onClick={handleClose}
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition"
+            >
+              Batal
+            </button>
+            <button
+              onClick={handleSaveInfo}
+              disabled={isSavingGroup}
+              className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-sm disabled:opacity-60"
+            >
+              {isSavingGroup ? "Menyimpan..." : "Simpan Perubahan"}
+            </button>
+          </div>
+        )}
+
+        {activeTab === "members" && (
+          <div className="px-6 py-3 border-t border-gray-100">
+            <p className="text-center text-xs text-gray-400">
+              Perubahan member tersimpan otomatis
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
