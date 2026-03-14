@@ -15,6 +15,7 @@ const groupSchema = new mongoose.Schema(
         emoji: { type: String },
         color: { type: String },
         light: { type: String },
+        isActive: { type: Boolean, default: true },
       },
     ],
   },
