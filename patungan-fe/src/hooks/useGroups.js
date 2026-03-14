@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import groupService from "../services/groupService";
 
 export const useGroups = () => {
@@ -22,8 +22,9 @@ export const useEditGroup = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => groupService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups", id] });
     },
   });
 };
@@ -31,8 +32,41 @@ export const useEditGroup = () => {
 export const useDeleteGroup = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: groupService.delete,
+    mutationFn: (id) => groupService.remove(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+  });
+};
+
+export const useAddMember = (groupId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => groupService.addMember(groupId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+  });
+};
+
+export const useEditMember = (groupId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, data }) =>
+      groupService.updateMember(groupId, memberId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+    },
+  });
+};
+
+export const useDeactivateMember = (groupId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId) => groupService.deactivateMember(groupId, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
   });
