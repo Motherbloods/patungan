@@ -147,7 +147,16 @@ const getGroupOrThrow = async (group_id) => {
 const getGroupDataService = async (group_id, options = {}) => {
   validateObjectIds(group_id);
   const group = await getGroupOrThrow(group_id);
-  const result = { members: group.members };
+  const result = {
+    _id: group._id,
+    name: group.name,
+    icon: group.icon,
+    color: group.color,
+    expense_count: group.expenses?.length ?? 0,
+    member_count: group.members?.length ?? 0,
+    total_expenses: group.total_expenses ?? 0,
+    members: group.members,
+  };
 
   if (options.balances) {
     result.balances = await Balance.find({ group_id }).lean();
