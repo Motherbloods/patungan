@@ -2,7 +2,7 @@ import { LayoutDashboard, Menu, X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import NewGroupModal from "./NewGroupModal";
-import { useAddGroup, useGroups } from "../hooks/useGroups";
+import { useAddGroup, useDeleteGroup, useGroups } from "../hooks/useGroups";
 import ICON_OPTIONS from "../config/icons";
 import GroupMenu from "./GroupMenu";
 import EditGroupModal from "./EditGroupModal";
@@ -17,9 +17,8 @@ function Sidebar() {
 
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
-  const deleteGroup = (id) => {
-    console.log("hapus group ", id);
-  };
+
+  const { mutate: deleteGroup } = useDeleteGroup();
 
   const onSubmitModal = (groupData) => {
     addGroup(groupData);
