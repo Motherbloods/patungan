@@ -6,6 +6,22 @@ import { getMemberUtil } from "../../utils/member";
 function TabTransaksi({ members, expenses }) {
   const [selected, setSelected] = useState(null);
 
+  if (!expenses || expenses.length === 0) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          0 transaksi
+        </p>
+
+        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">
+            Belum ada transaksi di grup ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">

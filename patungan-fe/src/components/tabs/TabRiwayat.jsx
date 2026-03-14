@@ -9,6 +9,21 @@ function TabRiwayat({ members, balances, history }) {
   const [filterUser, setFilterUser] = useState(null);
   const visibleUsers = filterUser ? [filterUser] : members.map((m) => m._id);
 
+  const isEmpty =
+    !history || Object.values(history).every((arr) => !arr || arr.length === 0);
+
+  if (isEmpty) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
+          <p className="text-sm text-gray-500">
+            Belum ada riwayat transaksi di grup ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 flex-wrap">
