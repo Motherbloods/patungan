@@ -10,6 +10,8 @@ import TabRiwayat from "../components/tabs/TabRiwayat";
 import { useGroupDetail } from "../hooks/useGroups";
 import {
   useCreateExpense,
+  useDeleteExpense,
+  useEditExpense,
   useGetHistory,
   useGetSettlements,
   useGetTransactions,
@@ -22,6 +24,7 @@ function GroupDetail() {
   const { id } = useParams();
 
   const [showForm, setShowForm] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
   const [activeTab, setActiveTab] = useState("ringkasan");
 
   const {
@@ -48,11 +51,41 @@ function GroupDetail() {
     error: historyError,
   } = useGetHistory(id, activeTab === "riwayat");
 
-  const { mutate: useCreate } = useCreateExpense();
-  console.log(history);
+  const { mutate: createExpense } = useCreateExpense();
+  const { mutate: editExpense } = useEditExpense();
+  const { mutate: deleteExpense } = useDeleteExpense();
+
+  const handleSubmitExpense = (expenseData) => {
+    if (selectedExpense) {
+      editExpense(
+        { group_id: id, expense_id: selectedExpense._id, data: expenseData },
+        {
+          onSuccess: () => {
+            setShowForm(false);
+            setSelectedExpense(null);
+          },
+        },
+      );
+    } else {
+      createExpense(expenseData, {
+        onSuccess: () => setShowForm(false),
+      });
+    }
+  };
+
+  const handleEdit = (expense) => {
+    setSelectedExpense(expense);
+    setShowForm(true);
+  };
+
+  const handleDelete = (expense_id) => {
+    deleteExpense({ group_id: id, expense_id });
+  };
+
   const handleCancelExpense = () => {
     console.log("Expense addition cancelled");
     setShowForm(false);
+    setSelectedExpense(null);
   };
 
   if (isGroupLoading)
@@ -79,11 +112,16 @@ function GroupDetail() {
           <AddExpenseForm
             members={group.members}
             onCancel={handleCancelExpense}
-            onSubmit={useCreate}
+            onSubmit={handleSubmitExpense}
+            isEditing={!!selectedExpense}
+            initialData={selectedExpense}
           />
         ) : (
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setSelectedExpense(null);
+              setShowForm(true);
+            }}
             className="w-full flex items-center justify-center gap-2 bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
           >
             <span className="text-lg">＋</span>
@@ -126,6 +164,8 @@ function GroupDetail() {
               <TabTransaksi
                 members={group.members}
                 expenses={transactions.expenses}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             )}
             {activeTab === "transfer" && (

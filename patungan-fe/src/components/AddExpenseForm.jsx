@@ -1,17 +1,39 @@
-import { PlusCircle, SplitSquareVertical, X } from "lucide-react";
+import { Pencil, PlusCircle, SplitSquareVertical, X } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { fmt } from "../utils/format";
-function AddExpenseForm({ members = [], onCancel, onSubmit }) {
+function AddExpenseForm({
+  members = [],
+  onCancel,
+  onSubmit,
+  isEditing = false,
+  initialData = null,
+}) {
+  console.log(members, initialData);
   const { id } = useParams();
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState("");
-  const [participants, setParticipants] = useState(() =>
-    members.map((m) => m._id),
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [amount, setAmount] = useState(
+    initialData?.total_amount?.toString() ?? "",
   );
-  const [splitMethod, setSplitMethod] = useState("bagi-rata");
-  const [customShares, setCustomShares] = useState({});
+  const [paidBy, setPaidBy] = useState(initialData?.paid_by ?? "");
+  const [participants, setParticipants] = useState(() =>
+    initialData
+      ? initialData?.participants?.map((p) => p.user_id)
+      : members.map((m) => m._id),
+  );
+  const [splitMethod, setSplitMethod] = useState(
+    initialData?.split_method ?? "bagi-rata",
+  );
+  // reduce untuk menyederhanakan object
+  const [customShares, setCustomShares] = useState(() => {
+    if (initialData?.split_method === "custom") {
+      return initialData.participants.reduce((acc, p) => {
+        acc[p.user_id] = p.share_amount.toString();
+        return acc;
+      }, {});
+    }
+    return {};
+  });
   const [error, setError] = useState("");
 
   const totalAmount = Number(amount) || 0;
@@ -79,21 +101,28 @@ function AddExpenseForm({ members = [], onCancel, onSubmit }) {
     };
 
     onSubmit(expenseData);
-    setName("");
-    setAmount("");
-    setPaidBy(members[0]?._id ?? "");
-    setParticipants(members.map((m) => m._id));
-    setCustomShares({});
-    setError("");
+
+    if (!isEditing) {
+      setName("");
+      setAmount("");
+      setPaidBy(members[0]?._id ?? "");
+      setParticipants(members.map((m) => m._id));
+      setCustomShares({});
+      setError("");
+    }
   };
 
   return (
-    <div className="bg-red rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
         <div className="flex items-center gap-2">
-          <PlusCircle className="w-4 h-4 text-blue-500" />
+          {isEditing ? (
+            <Pencil className="w-4 h-4 text-blue-500" />
+          ) : (
+            <PlusCircle className="w-4 h-4 text-blue-500" />
+          )}
           <span className="font-semibold text-sm text-gray-800">
-            Tambah Pengeluaran
+            {isEditing ? "Edit Pengeluaran" : "Tambah Pengeluaran"}
           </span>
         </div>
         {onCancel && (
@@ -269,7 +298,7 @@ function AddExpenseForm({ members = [], onCancel, onSubmit }) {
           onClick={handleSubmit}
           className="w-full bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all duration-150 shadow-sm mt-1"
         >
-          Simpan Pengeluaran
+          {isEditing ? "Simpan Perubahan" : "Simpan Pengeluaran"}
         </button>
       </div>
     </div>
