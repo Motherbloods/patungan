@@ -1,8 +1,10 @@
 import { Receipt, Users, TrendingUp } from "lucide-react";
 import { getGroupStats } from "../config/group_stats";
+import ICON_OPTIONS from "../config/icons";
 
 export function GroupHeader({ groupConfig }) {
-  const Icon = groupConfig?.icon;
+  const iconItem = ICON_OPTIONS.find((ic) => ic.id === groupConfig.icon);
+  const Icon = iconItem?.icon;
 
   const stats = getGroupStats(groupConfig);
 
@@ -15,7 +17,7 @@ export function GroupHeader({ groupConfig }) {
               <div
                 className={`w-14 h-14 flex items-center justify-center rounded-2xl shadow-sm ${groupConfig?.color ?? "bg-gray-100"}`}
               >
-                <Icon className="w-7 h-7" />
+                {Icon && <Icon className="w-7 h-7" />}
               </div>
             )}
             <div className="flex-1 min-w-0">
