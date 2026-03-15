@@ -7,6 +7,27 @@ const applyBalances = async (
   total_amount,
   session,
 ) => {
+  const payerInParticipants = participants.some(
+    (p) => p.user_id.toString() === paid_by.toString(),
+  );
+
+  if (!payerInParticipants) {
+    const balance = await Balance.findOne({
+      group_id,
+      user_id: paid_by,
+    }).session(session);
+
+    if (balance) {
+      balance.amount += total_amount;
+      await balance.save({ session });
+    } else {
+      await Balance.create(
+        [{ group_id, user_id: paid_by, amount: total_amount }],
+        { session },
+      );
+    }
+  }
+
   for (const p of participants) {
     const isPayer = p.user_id.toString() === paid_by.toString();
     const balanceAmount = isPayer
@@ -36,6 +57,24 @@ const reverseBalances = async (
   total_amount,
   session,
 ) => {
+  const payerInParticipants = participants.some(
+    (p) => p.user_id.toString() === paid_by.toString(),
+  );
+
+  if (!payerInParticipants) {
+    const balance = await Balance.findOne({
+      group_id,
+      user_id: paid_by,
+    }).session(session);
+    if (!balance) {
+      throw new Error(
+        `Balance not found for payer ${paid_by} in group ${group_id}. Data may be corrupted.`,
+      );
+    }
+    balance.amount -= total_amount;
+    await balance.save({ session });
+  }
+
   for (const p of participants) {
     const isPayer = p.user_id.toString() === paid_by.toString();
     const reverseAmount = isPayer
