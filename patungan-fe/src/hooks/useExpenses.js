@@ -34,6 +34,7 @@ export const useCreateExpense = () => {
     mutationFn: expenseService.create,
     onSuccess: ({ group_id }) => {
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
+      client.invalidateQueries({ queryKey: ["groups", group_id] });
     },
   });
 };
@@ -46,6 +47,7 @@ export const useEditExpense = () => {
     },
     onSuccess: (_, { group_id }) => {
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
+      client.invalidateQueries({ queryKey: ["groups", group_id] });
     },
   });
 };
@@ -59,6 +61,7 @@ export const useDeleteExpense = () => {
       expenseService.remove(group_id, expense_id),
     onSuccess: (_, { group_id }) => {
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
+      client.invalidateQueries({ queryKey: ["groups", group_id] });
     },
   });
 };
@@ -72,7 +75,7 @@ export const useCreateSettlement = () => {
       client.invalidateQueries({
         queryKey: ["expenses", group_id, "settlements"],
       });
-      client.invalidateQueries({ queryKey: ["group", group_id] });
+      client.invalidateQueries({ queryKey: ["groups", group_id] });
       client.invalidateQueries({ queryKey: ["expenses", group_id, "history"] });
     },
   });
