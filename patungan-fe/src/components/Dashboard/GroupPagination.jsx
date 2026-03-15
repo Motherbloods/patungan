@@ -1,21 +1,16 @@
-import { NavLink, useSearchParams } from "react-router-dom";
-import { generateGroupSummaries } from "../../data/dashboardData";
+import { useSearchParams } from "react-router-dom";
 import GroupCard from "./GroupCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 4;
 
-function GroupPagination({ groups }) {
+function GroupPagination({ groups, pagination, myBalance }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const groupSummaries = generateGroupSummaries(groups);
 
-  const totalPages = Math.ceil(groupSummaries.length / PAGE_SIZE);
-  const page = Math.min(
-    Math.max(1, parseInt(searchParams.get("page") || "1", 10)),
-    totalPages,
-  );
+  const totalPages = pagination.totalPages ?? 1;
+  const totalItems = pagination.totalItems ?? groups.length;
+  const page = parseInt(searchParams.get("page")) || 1;
   const start = (page - 1) * PAGE_SIZE;
-  const visible = groupSummaries.slice(start, start + PAGE_SIZE);
 
   function goTo(n) {
     setSearchParams((prev) => {
@@ -27,9 +22,9 @@ function GroupPagination({ groups }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
-        {visible.map((g) => {
-          return <GroupCard key={g.id} group={g} />;
-        })}
+        {groups.map((g) => (
+          <GroupCard key={g._id} group={g} myBalance={myBalance} />
+        ))}
       </div>
 
       {totalPages > 1 && (
@@ -84,8 +79,8 @@ function GroupPagination({ groups }) {
         </div>
       )}
       <p className="text-center text-[11px] text-gray-400">
-        {start + 1}–{Math.min(start + PAGE_SIZE, groups.length)} dari{" "}
-        {groups.length} grup
+        {start + 1}–{Math.min(start + PAGE_SIZE, totalItems)} dari {totalItems}{" "}
+        grup
       </p>
     </>
   );
