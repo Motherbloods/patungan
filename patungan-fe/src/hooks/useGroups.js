@@ -24,6 +24,7 @@ export const useAddGroup = () => {
     mutationFn: groupService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -35,6 +36,7 @@ export const useEditGroup = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       queryClient.invalidateQueries({ queryKey: ["groups", id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -46,6 +48,7 @@ export const useDeleteGroup = () => {
     mutationFn: (id) => groupService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       navigate("/dashboard");
     },
   });
@@ -57,6 +60,7 @@ export const useAddMember = (groupId) => {
     mutationFn: (data) => groupService.addMember(groupId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
   });
@@ -69,6 +73,7 @@ export const useEditMember = (groupId) => {
       groupService.updateMember(groupId, memberId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -79,6 +84,7 @@ export const useDeactivateMember = (groupId) => {
     mutationFn: (memberId) => groupService.deactivateMember(groupId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
   });

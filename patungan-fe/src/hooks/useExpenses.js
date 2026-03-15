@@ -32,9 +32,11 @@ export const useCreateExpense = () => {
   const client = useQueryClient();
   return useMutation({
     mutationFn: expenseService.create,
-    onSuccess: ({ group_id }) => {
+    onSuccess: (data) => {
+      const group_id = data.group_id.toString();
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
       client.invalidateQueries({ queryKey: ["groups", group_id] });
+      client.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -48,6 +50,7 @@ export const useEditExpense = () => {
     onSuccess: (_, { group_id }) => {
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
       client.invalidateQueries({ queryKey: ["groups", group_id] });
+      client.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -62,6 +65,7 @@ export const useDeleteExpense = () => {
     onSuccess: (_, { group_id }) => {
       client.invalidateQueries({ queryKey: ["expenses", group_id] });
       client.invalidateQueries({ queryKey: ["groups", group_id] });
+      client.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -77,6 +81,7 @@ export const useCreateSettlement = () => {
       });
       client.invalidateQueries({ queryKey: ["groups", group_id] });
       client.invalidateQueries({ queryKey: ["expenses", group_id, "history"] });
+      client.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
