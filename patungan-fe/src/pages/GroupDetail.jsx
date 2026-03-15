@@ -15,6 +15,7 @@ import {
   useGetHistory,
   useGetSettlements,
   useGetTransactions,
+  useCreateSettlement,
 } from "../hooks/useExpenses";
 import LoadingFallback from "../components/fallback/LoadingFallback";
 import ErrorFallback from "../components/fallback/ErrorFallback";
@@ -44,6 +45,7 @@ function GroupDetail() {
     isLoading: isSettlementLoading,
     error: settlementError,
   } = useGetSettlements(id, activeTab === "transfer");
+  console.log(settlement);
 
   const {
     data: history = [],
@@ -54,6 +56,7 @@ function GroupDetail() {
   const { mutate: createExpense } = useCreateExpense();
   const { mutate: editExpense } = useEditExpense();
   const { mutate: deleteExpense } = useDeleteExpense();
+  const { mutate: createSettlement } = useCreateSettlement();
 
   const handleSubmitExpense = (expenseData) => {
     if (selectedExpense) {
@@ -172,6 +175,8 @@ function GroupDetail() {
               <TabTransfer
                 members={group.members}
                 settlements={settlement.settlements}
+                suggestions={settlement.suggestions}
+                onSettle={createSettlement}
               />
             )}
             {activeTab === "riwayat" && (
