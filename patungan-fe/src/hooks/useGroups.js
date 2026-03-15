@@ -1,11 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import groupService from "../services/groupService";
+import expenseService from "../services/expenseService";
 import { useNavigate } from "react-router-dom";
 
 export const useGroups = () => {
   return useQuery({
     queryKey: ["groups"],
     queryFn: groupService.getAll,
+  });
+};
+
+export const useGroupDetail = (id) => {
+  return useQuery({
+    queryKey: ["groups", id],
+    queryFn: () => expenseService.getSummary(id),
+    enabled: !!id,
   });
 };
 

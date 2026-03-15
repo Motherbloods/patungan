@@ -1,5 +1,6 @@
 export const HISTORY_LABEL = (members, h, getNameUtil) => {
-  const other = h.from || h.to;
+  const isIncoming = h.type === "received" || h.type === "settlement_received";
+  const other = isIncoming ? h.from : h.to;
   const otherName = getNameUtil(members, other);
 
   return (

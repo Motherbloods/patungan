@@ -3,8 +3,11 @@ import Avatar from "../Avatar";
 import { fmt } from "../../utils/format";
 import { EXPENSE_EMOJI } from "../../utils/historyUtils";
 import { getMemberUtil } from "../../utils/member";
-function TabTransaksi({ members, expenses }) {
+import { Pencil, Trash2 } from "lucide-react";
+
+function TabTransaksi({ members, expenses, onEdit, onDelete }) {
   const [selected, setSelected] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   if (!expenses || expenses.length === 0) {
     return (
@@ -31,6 +34,7 @@ function TabTransaksi({ members, expenses }) {
       {expenses.map((e) => {
         const payer = getMemberUtil(members, e.paid_by);
         const isOpen = selected === e._id;
+        const isConfirming = confirmDelete === e._id;
 
         return (
           <div
@@ -118,6 +122,47 @@ function TabTransaksi({ members, expenses }) {
                     {fmt(e.total_amount)}
                   </span>
                 </div>
+
+                {isConfirming ? (
+                  <div className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                    <p className="text-xs text-red-600 font-medium flex-1">
+                      Yakin hapus pengeluaran ini?
+                    </p>
+                    <button
+                      onClick={() => {
+                        onDelete(e._id);
+                        setConfirmDelete(null);
+                        setSelected(null);
+                      }}
+                      className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-lg transition"
+                    >
+                      Hapus
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="text-xs font-bold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 bg-white transition"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => onEdit(e)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold transition"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(e._id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Hapus
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
