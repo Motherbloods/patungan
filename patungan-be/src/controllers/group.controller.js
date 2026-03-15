@@ -11,6 +11,7 @@ const {
   editExpenseService,
   deleteGroupService,
   deleteExpenseService,
+  createSettlementService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -94,6 +95,12 @@ const deactivateMember = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+const createSettlement = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await createSettlementService(id, req.body);
+  res.status(201).json(result);
+});
+
 module.exports = {
   createGroup,
   createExpense,
@@ -109,4 +116,5 @@ module.exports = {
   addMember,
   editMember,
   deactivateMember,
+  createSettlement,
 };

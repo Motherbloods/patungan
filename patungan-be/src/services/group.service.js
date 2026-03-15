@@ -168,6 +168,8 @@ const getGroupDataService = async (group_id, options = {}) => {
   }
 
   if (options.settlements) {
+    const balances = await Balance.find({ group_id }).lean();
+    result.suggestions = calculateSuggestions(group_id, balances);
     result.settlements = await Settlement.find({ group_id }).lean();
   }
 
@@ -480,6 +482,111 @@ const deleteExpenseService = async (group_id, expense_id) => {
   return { message: "Expense deleted successfully" };
 };
 
+const calculateSuggestions = (group_id, balances) => {
+  const creditors = balances
+    .filter((b) => b.amount > 0)
+    .map((b) => ({ user_id: b.user_id, amount: b.amount }));
+  const debtors = balances
+    .filter((b) => b.amount < 0)
+    .map((b) => ({ user_id: b.user_id, amount: Math.abs(b.amount) }));
+
+  const suggestions = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < debtors.length && j < creditors.length) {
+    const debtor = debtors[i];
+    const creditor = creditors[j];
+    const transferAmount = Math.min(debtor.amount, creditor.amount);
+
+    suggestions.push({
+      group_id,
+      from: debtor.user_id,
+      to: creditor.user_id,
+      amount: transferAmount,
+    });
+
+    debtor.amount -= transferAmount;
+    creditor.amount -= transferAmount;
+
+    if (debtor.amount === 0) i++;
+    if (creditor.amount === 0) j++;
+  }
+
+  return suggestions;
+};
+
+const createSettlementService = async (group_id, data) => {
+  validateObjectIds(group_id);
+  const { from, to, amount } = data;
+
+  if (!from || !to || !amount) {
+    throw new Error("from, to, and amount are required");
+  }
+  if (typeof amount !== "number" || amount <= 0) {
+    throw new Error("amount must be a number greater than 0");
+  }
+  validateObjectIds(from, to);
+
+  const session = await mongoose.startSession();
+  let settlement;
+
+  try {
+    await session.withTransaction(async () => {
+      [settlement] = await Settlement.create([{ group_id, from, to, amount }], {
+        session,
+      });
+
+      const fromBalance = await Balance.findOne({
+        group_id,
+        user_id: from,
+      }).session(session);
+      if (fromBalance) {
+        fromBalance.amount = 0;
+        await fromBalance.save({ session });
+      }
+
+      const groupHistory = await getOrCreateGroupHistory(group_id, session);
+
+      const fromHistory = groupHistory.histories.find(
+        (h) => h.user_id.toString() === from.toString(),
+      );
+      if (fromHistory) {
+        fromHistory.history.push({ type: "settlement_paid", from, to, amount });
+      } else {
+        groupHistory.histories.push({
+          user_id: from,
+          history: [{ type: "settlement_paid", from, to, amount }],
+        });
+      }
+
+      const toHistory = groupHistory.histories.find(
+        (h) => h.user_id.toString() === to.toString(),
+      );
+      if (toHistory) {
+        toHistory.history.push({
+          type: "settlement_received",
+          from,
+          to,
+          amount,
+        });
+      } else {
+        groupHistory.histories.push({
+          user_id: to,
+          history: [{ type: "settlement_received", from, to, amount }],
+        });
+      }
+
+      await groupHistory.save({ session });
+    });
+  } finally {
+    session.endSession();
+  }
+
+  logger.info(`Settlement created: ${settlement._id} in group: ${group_id}`);
+  return settlement;
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
@@ -492,4 +599,6 @@ module.exports = {
   editExpenseService,
   deleteGroupService,
   deleteExpenseService,
+  calculateSuggestions,
+  createSettlementService,
 };
