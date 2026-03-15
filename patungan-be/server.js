@@ -10,6 +10,7 @@ const requestLogger = require("./src/middleware/requestLogger");
 const AppError = require("./src/errors/AppError");
 
 const groupRoutes = require("./src/routes/group.route");
+const dashboardRoutes = require("./src/routes/dashboard.route");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -45,6 +46,7 @@ app.get("/health", (req, res) => {
 
 // routes utama
 app.use("/api/v1", groupRoutes);
+app.use("/api/v1", dashboardRoutes);
 
 app.use((req, res, next) => {
   next(new AppError("Route not found", 404));
