@@ -1,16 +1,29 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Avatar from "../Avatar";
 import { fmt } from "../../utils/format";
 import { HISTORY_LABEL } from "../../utils/historyUtils";
 import { getNameUtil, getMemberUtil } from "../../utils/member";
 import Pill from "../Pill";
 
-function TabRiwayat({ members, balances, history }) {
+function TabRiwayat({ members = [], balances = [], history = [] }) {
   const [filterUser, setFilterUser] = useState(null);
-  const visibleUsers = filterUser ? [filterUser] : members.map((m) => m._id);
+  const visibleUsers = useMemo(
+    () => (filterUser ? [filterUser] : members.map((m) => m._id)),
+    [filterUser, members],
+  );
+
+  const historyMap = Array.isArray(history)
+    ? history.reduce((acc, hGroup) => {
+        hGroup.histories?.forEach((h) => {
+          acc[h.user_id] = h.history ?? [];
+        });
+        return acc;
+      }, {})
+    : (history ?? {});
 
   const isEmpty =
-    !history || Object.values(history).every((arr) => !arr || arr.length === 0);
+    !history ||
+    Object.values(historyMap).every((arr) => !arr || arr.length === 0);
 
   if (isEmpty) {
     return (
@@ -48,7 +61,8 @@ function TabRiwayat({ members, balances, history }) {
 
       {visibleUsers.map((uid) => {
         const balance = balances.find((b) => b.user_id === uid)?.amount ?? 0;
-        const m = getMemberUtil(members, uid);
+        const m = getMemberUtil(members, uid) || { name: "Unknown" };
+        const userHistory = historyMap[uid] ?? [];
 
         return (
           <div
@@ -70,10 +84,10 @@ function TabRiwayat({ members, balances, history }) {
             </div>
 
             <div className="px-4">
-              {(history[uid] ?? []).map((h, i) => {
+              {userHistory.map((h, i) => {
                 const isIn =
                   h.type === "received" || h.type === "settlement_received";
-                const isSettlement = h.type.startsWith("settlement");
+                const isSettlement = h.type?.startsWith("settlement");
 
                 return (
                   <div
@@ -81,7 +95,7 @@ function TabRiwayat({ members, balances, history }) {
                     className="flex items-center gap-3 py-3"
                     style={{
                       borderBottom:
-                        i < (history[uid] ?? []).length - 1
+                        i < userHistory.length - 1
                           ? "1px solid #F3F4F6"
                           : "none",
                     }}
