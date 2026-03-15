@@ -12,6 +12,8 @@ const expenseService = {
     client.put(`/group/${group_id}/expense/${expense_id}`, data),
   remove: (group_id, expense_id) =>
     client.delete(`/group/${group_id}/expense/${expense_id}`),
+  createSettlement: (group_id, data) =>
+    client.post(`/group/${group_id}/settlement`, data),
 };
 
 export default expenseService;

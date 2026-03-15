@@ -62,3 +62,18 @@ export const useDeleteExpense = () => {
     },
   });
 };
+
+export const useCreateSettlement = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ group_id, from, to, amount }) =>
+      expenseService.createSettlement(group_id, { from, to, amount }),
+    onSuccess: (_, { group_id }) => {
+      client.invalidateQueries({
+        queryKey: ["expenses", group_id, "settlements"],
+      });
+      client.invalidateQueries({ queryKey: ["group", group_id] });
+      client.invalidateQueries({ queryKey: ["expenses", group_id, "history"] });
+    },
+  });
+};
