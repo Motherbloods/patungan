@@ -546,6 +546,15 @@ const createSettlementService = async (group_id, data) => {
         await fromBalance.save({ session });
       }
 
+      const toBalance = await Balance.findOne({
+        group_id,
+        user_id: to,
+      }).session(session);
+      if (toBalance) {
+        toBalance.amount -= amount;
+        await toBalance.save({ session });
+      }
+
       const groupHistory = await getOrCreateGroupHistory(group_id, session);
 
       const fromHistory = groupHistory.histories.find(
