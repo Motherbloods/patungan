@@ -16,12 +16,17 @@ import {
   useDashboardSummary,
 } from "../hooks/useDashboards";
 import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const PAGE_SIZE = 4;
+const ACTIVITY_PAGE_SIZE = 10;
 
 function Dashboard() {
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page")) || 1;
+
+  const [activityPage, setActivityPage] = useState(1);
+  const [allActivities, setAllActivities] = useState([]);
 
   const {
     data: summary,
@@ -39,10 +44,21 @@ function Dashboard() {
     data: activityData,
     isLoading: isActivityLoading,
     error: activityError,
-  } = useDashboardActivity();
+  } = useDashboardActivity(activityPage, ACTIVITY_PAGE_SIZE);
+
+  // Accumulate activities on each new page load
+  useEffect(() => {
+    if (!activityData?.activities) return;
+    if (activityPage === 1) {
+      setAllActivities(activityData.activities);
+    } else {
+      setAllActivities((prev) => [...prev, ...activityData.activities]);
+    }
+  }, [activityData, activityPage]);
+
+  const hasMore = activityData?.pagination?.hasMore ?? false;
 
   const { groups = [], pagination = {}, myBalance = 0 } = groupsData || {};
-  const activities = activityData?.activities ?? [];
 
   return (
     <div className="min-h-full bg-gray-50">
@@ -158,16 +174,34 @@ function Dashboard() {
             <div className="flex justify-center items-center py-6">
               <p className="text-sm text-gray-400">Memuat aktivitas...</p>
             </div>
-          ) : activities.length === 0 ? (
+          ) : allActivities.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
               <p className="text-sm text-gray-500">Belum ada aktivitas.</p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
-              {activities.map((ra) => (
-                <ActivityItem key={ra._id ?? ra.id} activity={ra} />
-              ))}
-            </div>
+            <>
+              <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
+                {allActivities.map((ra) => (
+                  <ActivityItem key={ra._id ?? ra.id} activity={ra} />
+                ))}
+              </div>
+
+              {hasMore && (
+                <button
+                  onClick={() => setActivityPage((p) => p + 1)}
+                  disabled={isActivityLoading}
+                  className="w-full mt-3 py-2.5 text-xs font-medium text-blue-500 border border-blue-100 rounded-xl hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {isActivityLoading ? "Memuat..." : "Muat lebih banyak"}
+                </button>
+              )}
+
+              {!hasMore && allActivities.length > 0 && (
+                <p className="text-center text-xs text-gray-300 mt-3">
+                  Semua aktivitas sudah ditampilkan
+                </p>
+              )}
+            </>
           )}
         </section>
       </div>

@@ -8,7 +8,10 @@ const dashboardService = {
     client.get(`/dashboard/groups`, {
       params: { page, limit },
     }),
-  getDashboardActivity: () => client.get("/dashboard/activity"),
+  getDashboardActivity: (page, limit) =>
+    client.get("/dashboard/activity", {
+      params: { page, limit },
+    }),
 };
 
 export default dashboardService;

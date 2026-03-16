@@ -53,7 +53,7 @@ const getDashboardGroupsPaginationService = async (page, limit, user_id) => {
   };
 };
 
-const getDashboardActivityService = async (user_id) => {
+const getDashboardActivityService = async (page, limit, user_id) => {
   const historyDocs = await History.find().populate("group_id", "name").lean();
 
   const allItems = [];
@@ -80,11 +80,25 @@ const getDashboardActivityService = async (user_id) => {
     }
   }
 
-  const activities = allItems
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 10);
+  const sorted = allItems.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
 
-  return { activities };
+  const totalItems = sorted.length;
+  const totalPages = Math.ceil(totalItems / limit);
+  const skip = (page - 1) * limit;
+  const activities = sorted.slice(skip, skip + limit);
+
+  return {
+    activities,
+    pagination: {
+      page,
+      limit,
+      totalItems,
+      totalPages,
+      hasMore: page < totalPages,
+    },
+  };
 };
 
 module.exports = {

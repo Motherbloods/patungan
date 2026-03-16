@@ -15,9 +15,9 @@ export const useDashboardGroupsPagination = (page, limit) => {
   });
 };
 
-export const useDashboardActivity = () => {
+export const useDashboardActivity = (page, limit) => {
   return useQuery({
-    queryKey: ["dashboard", "activity"],
-    queryFn: dashboardService.getDashboardActivity,
+    queryKey: ["dashboard", "activity", page, limit],
+    queryFn: () => dashboardService.getDashboardActivity(page, limit),
   });
 };

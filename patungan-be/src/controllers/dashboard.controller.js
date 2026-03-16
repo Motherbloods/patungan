@@ -20,7 +20,13 @@ const getDashboardGroupsPagination = asyncHandler(async (req, res) => {
   res.json(result);
 });
 const getDashboardActivity = asyncHandler(async (req, res) => {
-  const result = await getDashboardActivityService("motherbloodss");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const result = await getDashboardActivityService(
+    page,
+    limit,
+    "motherbloodss",
+  );
   res.json(result);
 });
 
