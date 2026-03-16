@@ -28,8 +28,12 @@ function GroupMenu({ onEdit, onDelete }) {
     e.stopPropagation();
 
     const rect = btnRef.current.getBoundingClientRect();
+    const menuHeight = 80;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const showAbove = spaceBelow < menuHeight + 8;
+
     setMenuPos({
-      top: rect.bottom + 4,
+      top: showAbove ? rect.top - menuHeight - 4 : rect.bottom + 4,
       left: rect.right - 144,
     });
     setOpen((prev) => !prev);

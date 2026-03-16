@@ -23,7 +23,8 @@ export const useAddGroup = () => {
   return useMutation({
     mutationFn: groupService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -33,8 +34,9 @@ export const useEditGroup = () => {
   return useMutation({
     mutationFn: ({ id, data }) => groupService.update(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
       queryClient.invalidateQueries({ queryKey: ["groups", id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -46,6 +48,7 @@ export const useDeleteGroup = () => {
     mutationFn: (id) => groupService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       navigate("/dashboard");
     },
   });
@@ -57,7 +60,8 @@ export const useAddMember = (groupId) => {
     mutationFn: (data) => groupService.addMember(groupId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -69,6 +73,7 @@ export const useEditMember = (groupId) => {
       groupService.updateMember(groupId, memberId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
@@ -79,7 +84,8 @@ export const useDeactivateMember = (groupId) => {
     mutationFn: (memberId) => groupService.deactivateMember(groupId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
