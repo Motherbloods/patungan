@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, ExternalLink } from "lucide-react";
 import { useAuth } from "../context/authContext";
+import { useRequestLogin, useVerifyLoginToken } from "../hooks/useAuth";
 
 function Login() {
   const [isLoading, setIsLoading] = useState({
@@ -13,16 +14,67 @@ function Login() {
   const [timeLeft, setTimeLeft] = useState(0);
 
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { isAuthenticated, setUser } = useAuth();
 
-  const handleTelegramLogin = async () => {};
+  //tanpa {mutate:} ambil seluruh object dari reactquery, bisa onsuccess, onerror
+  const requestLogin = useRequestLogin();
+  const { data: verifyData } = useVerifyLoginToken(loginToken, isAuthenticated);
+
+  const handleTelegramLogin = async () => {
+    console.log("KEPANGGIL");
+    setIsLoading((prev) => ({ ...prev, telegram: true }));
+    //undefined itu variable yang akan dikirimkan ke api(ke mutationFn :(nahdisini varaiblenya) =>)
+    requestLogin.mutate(undefined, {
+      onSuccess: (data) => {
+        setLoginToken(data.token);
+        setTelegramUrl(data.telegramUrl);
+        setTimeLeft(data.expiresIn ?? 300);
+      },
+      onError: () => {
+        console.error("Telegram login failed");
+      },
+      onSettled: () => {
+        setIsLoading((prev) => ({ ...prev, telegram: false }));
+      },
+    });
+  };
+
   const handleGoogleLogin = async () => {};
-  const handleCancel = async () => {};
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const handleCancel = () => {
+    setLoginToken(null);
+    setTelegramUrl(null);
+    setTimeLeft(0);
+  };
+  useEffect(() => {
+    if (verifyData?.isAuthenticated) {
+      setUser(verifyData.user);
+      navigate("/dashboard");
+    }
+  }, [verifyData]);
+
+  useEffect(() => {
+    if (!loginToken || timeLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleCancel();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [loginToken, timeLeft]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary text-primary p-4">
