@@ -35,21 +35,15 @@ export const useLoginGoogle = (idToken) => {
   });
 };
 export const useVerifyLoginToken = (idToken, isAuthenticated) => {
-  const client = useQueryClient();
-
   return useQuery({
     queryKey: ["verifyLoginToken", idToken],
     queryFn: () => authService.verifyLoginToken(idToken),
     enabled: !!idToken && !isAuthenticated,
-    refetchInterval: (data) => {
-      if (data?.isAuthenticated) return false;
+    retry: false, // ← stop retry saat error
+    refetchInterval: (query) => {
+      if (query.state.data?.isAuthenticated) return false;
+      if (query.state.error) return false; // ← stop saat error
       return 2000;
-    },
-    onSuccess: () => {
-      client.invalidateQueries(["auth"]);
-    },
-    onError: (error) => {
-      console.error("Query failed:", error);
     },
   });
 };
