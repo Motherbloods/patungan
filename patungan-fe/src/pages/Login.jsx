@@ -29,6 +29,8 @@ function Login() {
         setLoginToken(data.token);
         setTelegramUrl(data.telegramUrl);
         setTimeLeft(data.expiresIn ?? 300);
+
+        window.open(data.telegramUrl, "_blank");
       },
       onError: () => {
         console.error("Telegram login failed");
