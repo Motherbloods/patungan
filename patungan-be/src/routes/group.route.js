@@ -16,22 +16,31 @@ const {
   deactivateMember,
   createSettlement,
 } = require("../controllers/group.controller");
+const { authMiddleware } = require("../middleware/auth.middleware");
 const router = express.Router();
 
-router.get("/groups", getAllGroup);
-router.get("/group/:id", getSummaryGroup);
-router.get("/group/:id/transactions", getGroupTransactions);
-router.get("/group/:id/settlements", getGroupSettlements);
-router.get("/group/:id/history", getGroupHistory);
-router.post("/group", createGroup);
-router.post("/group/expense", createExpense);
-router.post("/group/:id/settlement", createSettlement);
-router.put("/group/:id", editGroup);
-router.put("/group/:group_id/expense/:expense_id", editExpense);
-router.delete("/group/:id", deleteGroup);
-router.delete("/group/:group_id/expense/:expense_id", deleteExpense);
-router.post("/group/:id/members", addMember);
-router.patch("/group/:id/members/:member_id", editMember);
-router.patch("/group/:id/members/:member_id/deactivate", deactivateMember);
+router.get("/groups", authMiddleware, getAllGroup);
+router.get("/group/:id", authMiddleware, getSummaryGroup);
+router.get("/group/:id/transactions", authMiddleware, getGroupTransactions);
+router.get("/group/:id/settlements", authMiddleware, getGroupSettlements);
+router.get("/group/:id/history", authMiddleware, getGroupHistory);
+router.post("/group", authMiddleware, createGroup);
+router.post("/group/expense", authMiddleware, createExpense);
+router.post("/group/:id/settlement", authMiddleware, createSettlement);
+router.put("/group/:id", authMiddleware, editGroup);
+router.put("/group/:group_id/expense/:expense_id", authMiddleware, editExpense);
+router.delete("/group/:id", authMiddleware, deleteGroup);
+router.delete(
+  "/group/:group_id/expense/:expense_id",
+  authMiddleware,
+  deleteExpense,
+);
+router.post("/group/:id/members", authMiddleware, addMember);
+router.patch("/group/:id/members/:member_id", authMiddleware, editMember);
+router.patch(
+  "/group/:id/members/:member_id/deactivate",
+  authMiddleware,
+  deactivateMember,
+);
 
 module.exports = router;
