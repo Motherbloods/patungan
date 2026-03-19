@@ -1,6 +1,7 @@
 const app = require("./server");
 const connectDB = require("./src/config/db");
 const logger = require("./src/utils/logger");
+require("./src/bot/telegram-bot");
 
 const PORT = process.env.PORT || 3000;
 
