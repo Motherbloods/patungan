@@ -6,35 +6,27 @@ import MainLayout from "../layout/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import PublicRoute from "../components/PublicRoute.jsx";
 
-const withLayout = (Element, layout = true) =>
-  layout ? <MainLayout>{Element}</MainLayout> : Element;
-
-const withProtection = (Element, isProtected = false) =>
-  isProtected ? (
-    <ProtectedRoute>{Element}</ProtectedRoute>
-  ) : (
-    <PublicRoute>{Element}</PublicRoute>
-  );
-
 const routes = [
   {
     path: "/",
-    element: withProtection(
-      withLayout(<Navigate to="/dashboard" replace />),
-      true,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
     ),
-  },
-  {
-    path: "/dashboard",
-    element: withProtection(withLayout(<Dashboard />), true),
-  },
-  {
-    path: "/groups/:id",
-    element: withProtection(withLayout(<GroupDetail />), true),
+    children: [
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: "dashboard", element: <Dashboard /> }, // ← hapus "/"
+      { path: "groups/:id", element: <GroupDetail /> }, // ← hapus "/"
+    ],
   },
   {
     path: "/login",
-    element: withProtection(withLayout(<Login />, false), false),
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
   },
 ];
 
