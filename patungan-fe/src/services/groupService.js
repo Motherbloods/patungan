@@ -12,6 +12,8 @@ const groupService = {
     client.patch(`/group/${groupId}/members/${memberId}`, data),
   deactivateMember: (groupId, memberId) =>
     client.patch(`/group/${groupId}/members/${memberId}/deactivate`),
+  updateOwnerMember: (groupId, memberId) =>
+    client.patch(`/group/${groupId}/owner-member`, { memberId }),
 };
 
 export default groupService;
