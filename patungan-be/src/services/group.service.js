@@ -21,7 +21,14 @@ const logger = require("../utils/logger");
 const { isValidObjectId, validateObjectIds } = require("../utils/objectId");
 
 const createGroupService = async (data, user_id) => {
-  const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
+  const {
+    groupName,
+    groupIcon,
+    groupColor,
+    groupIconColor,
+    members,
+    ownerMemberIndex,
+  } = data;
 
   if (
     !groupName ||
@@ -59,6 +66,15 @@ const createGroupService = async (data, user_id) => {
   });
 
   await group.save();
+
+  if (ownerMemberIndex !== undefined && ownerMemberIndex !== null) {
+    const targetMember = group.members[ownerMemberIndex];
+    if (targetMember) {
+      group.ownerMemberId = targetMember._id;
+      await group.save();
+    }
+  }
+
   logger.info(`Group created: ${group._id} by user: ${user_id}`);
   return group;
 };
@@ -608,6 +624,26 @@ const createSettlementService = async (group_id, data) => {
   return settlement;
 };
 
+const updateOwnerMemberService = async (group_id, memberId, user_id) => {
+  validateObjectIds(group_id);
+
+  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
+  if (!group) throw new Error("Group not found");
+
+  if (memberId === null) {
+    group.ownerMemberId = null;
+  } else {
+    validateObjectIds(memberId);
+    const member = group.members.id(memberId);
+    if (!member || !member.isActive) throw new Error("Member tidak ditemukan");
+    group.ownerMemberId = member._id;
+  }
+
+  await group.save();
+  logger.info(`ownerMemberId updated for group: ${group_id}`);
+  return { ownerMemberId: group.ownerMemberId };
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
@@ -622,4 +658,5 @@ module.exports = {
   deleteExpenseService,
   calculateSuggestions,
   createSettlementService,
+  updateOwnerMemberService,
 };
