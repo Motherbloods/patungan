@@ -5,6 +5,7 @@ export const useVerifyAuth = () => {
   return useQuery({
     queryKey: ["auth"],
     queryFn: authService.verifyAuth,
+    refetchOnWindowFocus: false,
   });
 };
 
