@@ -45,7 +45,6 @@ function GroupDetail() {
     isLoading: isSettlementLoading,
     error: settlementError,
   } = useGetSettlements(id, activeTab === "transfer");
-  console.log(settlement);
 
   const {
     data: history = [],
@@ -86,7 +85,6 @@ function GroupDetail() {
   };
 
   const handleCancelExpense = () => {
-    console.log("Expense addition cancelled");
     setShowForm(false);
     setSelectedExpense(null);
   };
@@ -96,6 +94,8 @@ function GroupDetail() {
 
   if (groupError) return <ErrorFallback message={groupError} />;
   if (!group) return <NotFoundFallback message="Group not found." />;
+
+  const ownerMemberId = group.ownerMemberId ?? null;
 
   const tabIsLoading =
     (activeTab === "transaksi" && isTransactionsLoading) ||
@@ -161,12 +161,17 @@ function GroupDetail() {
         ) : (
           <>
             {activeTab === "ringkasan" && (
-              <TabRingkasan members={group.members} balances={group.balances} />
+              <TabRingkasan
+                members={group.members}
+                balances={group.balances}
+                ownerMemberId={ownerMemberId}
+              />
             )}
             {activeTab === "transaksi" && (
               <TabTransaksi
                 members={group.members}
                 expenses={transactions.expenses}
+                ownerMemberId={ownerMemberId}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
@@ -176,6 +181,7 @@ function GroupDetail() {
                 members={group.members}
                 settlements={settlement.settlements}
                 suggestions={settlement.suggestions}
+                ownerMemberId={ownerMemberId}
                 onSettle={createSettlement}
               />
             )}
@@ -184,6 +190,7 @@ function GroupDetail() {
                 members={group.members}
                 balances={group.balances}
                 history={history.history}
+                ownerMemberId={ownerMemberId}
               />
             )}
           </>

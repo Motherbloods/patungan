@@ -175,6 +175,7 @@ const getGroupDataService = async (group_id, options = {}, user_id) => {
     color: group.color,
     expense_count: group.expense_count ?? 0,
     member_count: group.member_count ?? 0,
+    ownerMemberId: group.ownerMemberId,
     total_expenses: group.total_expenses ?? 0,
     members: group.members,
   };
