@@ -4,7 +4,10 @@ const Balance = require("../models/balance");
 const History = require("../models/history");
 
 const getDashboardSummaryService = async (user_id) => {
-  const balances = await Balance.find().lean();
+  const userGroups = await Group.find({ createdBy: user_id }, "_id").lean();
+  const groupIds = userGroups.map((g) => g._id);
+
+  const balances = await Balance.find({ group_id: { $in: groupIds } }).lean();
 
   const totalOwe = balances
     .filter((b) => b.amount < 0)
@@ -15,10 +18,12 @@ const getDashboardSummaryService = async (user_id) => {
     .reduce((sum, { amount }) => sum + amount, 0);
 
   const activeGroups = await Group.countDocuments({
+    createdBy: user_id,
     expense_count: { $gt: 0 },
   });
 
   const totalExpenseResult = await Expense.aggregate([
+    { $match: { group_id: { $in: groupIds } } },
     { $group: { _id: null, total: { $sum: "$total_amount" } } },
   ]);
   const totalExpenses = totalExpenseResult[0]?.total ?? 0;
@@ -31,14 +36,14 @@ const getDashboardGroupsPaginationService = async (page, limit, user_id) => {
 
   const [groups, totalItems] = await Promise.all([
     Group.find(
-      {},
+      { createdBy: user_id },
       "_id name icon color expense_count total_expenses member_count",
     )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(),
-    Group.countDocuments(),
+    Group.countDocuments({ createdBy: user_id }),
   ]);
 
   return {
@@ -54,7 +59,12 @@ const getDashboardGroupsPaginationService = async (page, limit, user_id) => {
 };
 
 const getDashboardActivityService = async (page, limit, user_id) => {
-  const historyDocs = await History.find().populate("group_id", "name").lean();
+  const userGroups = await Group.find({ createdBy: user_id }, "_id").lean();
+  const groupIds = userGroups.map((g) => g._id);
+
+  const historyDocs = await History.find({ group_id: { $in: groupIds } })
+    .populate("group_id", "name")
+    .lean();
 
   const allItems = [];
 
