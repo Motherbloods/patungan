@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { TABS } from "../config/tabs";
 import { GroupHeader } from "../components/GroupHeader";
 import AddExpenseForm from "../components/AddExpenseForm";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import TabRingkasan from "../components/tabs/TabRingkasan";
 import TabTransaksi from "../components/tabs/TabTransaksi";
 import TabTransfer from "../components/tabs/TabTransfer";
@@ -20,6 +20,7 @@ import {
 import LoadingFallback from "../components/fallback/LoadingFallback";
 import ErrorFallback from "../components/fallback/ErrorFallback";
 import NotFoundFallback from "../components/fallback/NotFoundFallback";
+import toast from "react-hot-toast";
 
 function GroupDetail() {
   const { id } = useParams();
@@ -27,6 +28,10 @@ function GroupDetail() {
   const [showForm, setShowForm] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [activeTab, setActiveTab] = useState("ringkasan");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const formRef = useRef(null);
 
   const {
     data: group = null,
@@ -57,7 +62,17 @@ function GroupDetail() {
   const { mutate: deleteExpense } = useDeleteExpense();
   const { mutate: createSettlement } = useCreateSettlement();
 
+  useEffect(() => {
+    if (showForm && formRef.current) {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  }, [showForm]);
+
   const handleSubmitExpense = (expenseData) => {
+    setIsSubmitting(true);
+
     if (selectedExpense) {
       editExpense(
         { group_id: id, expense_id: selectedExpense._id, data: expenseData },
@@ -65,12 +80,26 @@ function GroupDetail() {
           onSuccess: () => {
             setShowForm(false);
             setSelectedExpense(null);
+            setIsSubmitting(false);
+            toast.success("Pengeluaran berhasil diperbarui");
+          },
+          onError: () => {
+            setIsSubmitting(false);
+            toast.error("Gagal memperbarui pengeluaran");
           },
         },
       );
     } else {
       createExpense(expenseData, {
-        onSuccess: () => setShowForm(false),
+        onSuccess: () => {
+          setShowForm(false);
+          setIsSubmitting(false);
+          toast.success("Pengeluaran berhasil ditambahkan");
+        },
+        onError: () => {
+          setIsSubmitting(false);
+          toast.error("Gagal menambahkan pengeluaran");
+        },
       });
     }
   };
@@ -81,7 +110,20 @@ function GroupDetail() {
   };
 
   const handleDelete = (expense_id) => {
-    deleteExpense({ group_id: id, expense_id });
+    setDeletingId(expense_id);
+    deleteExpense(
+      { group_id: id, expense_id },
+      {
+        onSuccess: () => {
+          setDeletingId(null);
+          toast.success("Pengeluaran berhasil dihapus");
+        },
+        onError: () => {
+          setDeletingId(null);
+          toast.error("Gagal menghapus pengeluaran");
+        },
+      },
+    );
   };
 
   const handleCancelExpense = () => {
@@ -111,26 +153,29 @@ function GroupDetail() {
     <div className="min-h-full bg-gray-50 flex flex-col">
       <GroupHeader groupConfig={group} />
       <div className="flex-1 px-4 py-5 sm:px-6 max-w-2xl mx-auto w-full space-y-4">
-        {showForm ? (
-          <AddExpenseForm
-            members={group.members}
-            onCancel={handleCancelExpense}
-            onSubmit={handleSubmitExpense}
-            isEditing={!!selectedExpense}
-            initialData={selectedExpense}
-          />
-        ) : (
-          <button
-            onClick={() => {
-              setSelectedExpense(null);
-              setShowForm(true);
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
-          >
-            <span className="text-lg">＋</span>
-            Tambah Pengeluaran
-          </button>
-        )}
+        <div ref={formRef}>
+          {showForm ? (
+            <AddExpenseForm
+              members={group.members}
+              onCancel={handleCancelExpense}
+              onSubmit={handleSubmitExpense}
+              isEditing={!!selectedExpense}
+              initialData={selectedExpense}
+              isSubmitting={isSubmitting}
+            />
+          ) : (
+            <button
+              onClick={() => {
+                setSelectedExpense(null);
+                setShowForm(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
+            >
+              <span className="text-lg">＋</span>
+              Tambah Pengeluaran
+            </button>
+          )}
+        </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-1 flex gap-1">
           {TABS.map((tab) => (
@@ -148,6 +193,7 @@ function GroupDetail() {
             </button>
           ))}
         </div>
+
         {tabIsLoading ? (
           <div className="flex justify-center items-center py-12">
             <p className="text-sm text-gray-400">Memuat data...</p>
@@ -174,6 +220,7 @@ function GroupDetail() {
                 ownerMemberId={ownerMemberId}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                deletingId={deletingId}
               />
             )}
             {activeTab === "transfer" && (
@@ -182,7 +229,12 @@ function GroupDetail() {
                 settlements={settlement.settlements}
                 suggestions={settlement.suggestions}
                 ownerMemberId={ownerMemberId}
-                onSettle={createSettlement}
+                onSettle={(s) => {
+                  createSettlement(s, {
+                    onSuccess: () => toast.success("Transfer berhasil dicatat"),
+                    onError: () => toast.error("Gagal mencatat transfer"),
+                  });
+                }}
               />
             )}
             {activeTab === "riwayat" && (

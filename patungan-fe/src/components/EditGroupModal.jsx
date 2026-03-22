@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import ICON_OPTIONS from "../config/icons";
 import COLOR_OPTIONS from "../config/colors";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
@@ -11,6 +11,7 @@ import {
   useAddMember,
   useUpdateOwnerMember,
 } from "../hooks/useGroups";
+import toast from "react-hot-toast";
 
 const TABS = [
   { id: "info", label: "Info Grup" },
@@ -67,8 +68,15 @@ function EditGroupModal({ open, onClose, group }) {
         },
       },
       {
-        onSuccess: () => handleClose(),
-        onError: (err) => setError(err.message || "Gagal menyimpan"),
+        onSuccess: () => {
+          toast.success("Info grup berhasil disimpan");
+          handleClose();
+        },
+        onError: (err) => {
+          const msg = err.message || "Gagal menyimpan";
+          setError(msg);
+          toast.error(msg);
+        },
       },
     );
   };
@@ -77,27 +85,52 @@ function EditGroupModal({ open, onClose, group }) {
     setLocalMembers((prev) =>
       prev.map((m) => (m._id === memberId ? { ...m, ...data } : m)),
     );
-    editMember({ memberId, data });
+    editMember(
+      { memberId, data },
+      {
+        onSuccess: () => toast.success("Nama member diperbarui"),
+        onError: () => toast.error("Gagal memperbarui member"),
+      },
+    );
   };
 
   const handleDeactivateMember = (memberId) => {
     setLocalMembers((prev) =>
       prev.map((m) => (m._id === memberId ? { ...m, isActive: false } : m)),
     );
-    deactivateMember(memberId);
+    deactivateMember(memberId, {
+      onSuccess: () => toast.success("Member dinonaktifkan"),
+      onError: () => {
+        setLocalMembers((prev) =>
+          prev.map((m) => (m._id === memberId ? { ...m, isActive: true } : m)),
+        );
+        toast.error("Gagal menonaktifkan member");
+      },
+    });
   };
 
   const handleAddMember = (data) => {
     addMember(data, {
       onSuccess: (newMember) => {
         setLocalMembers((prev) => [...prev, newMember]);
+        toast.success("Member berhasil ditambahkan");
       },
+      onError: () => toast.error("Gagal menambahkan member"),
     });
   };
 
   const handleTagOwner = (memberId) => {
     setOwnerMemberId(memberId);
-    updateOwnerMember({ memberId: memberId ?? null });
+    updateOwnerMember(
+      { memberId: memberId ?? null },
+      {
+        onSuccess: () => toast.success("Owner berhasil diperbarui"),
+        onError: () => {
+          setOwnerMemberId(group?.ownerMemberId ?? null);
+          toast.error("Gagal memperbarui owner");
+        },
+      },
+    );
   };
 
   return (
@@ -174,16 +207,24 @@ function EditGroupModal({ open, onClose, group }) {
           <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
             <button
               onClick={handleClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition"
+              disabled={isSavingGroup}
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition disabled:opacity-40"
             >
               Batal
             </button>
             <button
               onClick={handleSaveInfo}
               disabled={isSavingGroup}
-              className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-sm disabled:opacity-60"
+              className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] disabled:bg-blue-400 text-white text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
             >
-              {isSavingGroup ? "Menyimpan..." : "Simpan Perubahan"}
+              {isSavingGroup ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                "Simpan Perubahan"
+              )}
             </button>
           </div>
         )}

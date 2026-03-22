@@ -1,15 +1,22 @@
-import { Pencil, PlusCircle, SplitSquareVertical, X } from "lucide-react";
+import {
+  Pencil,
+  PlusCircle,
+  SplitSquareVertical,
+  X,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { fmt } from "../utils/format";
+
 function AddExpenseForm({
   members = [],
   onCancel,
   onSubmit,
   isEditing = false,
   initialData = null,
+  isSubmitting = false,
 }) {
-  console.log(members, initialData);
   const { id } = useParams();
   const [name, setName] = useState(initialData?.name ?? "");
   const [amount, setAmount] = useState(
@@ -24,7 +31,6 @@ function AddExpenseForm({
   const [splitMethod, setSplitMethod] = useState(
     initialData?.split_method ?? "bagi-rata",
   );
-  // reduce untuk menyederhanakan object
   const [customShares, setCustomShares] = useState(() => {
     if (initialData?.split_method === "custom") {
       return initialData.participants.reduce((acc, p) => {
@@ -37,16 +43,13 @@ function AddExpenseForm({
   const [error, setError] = useState("");
 
   const totalAmount = Number(amount) || 0;
-
   const perPerson =
     participants.length > 0 ? Math.floor(totalAmount / participants.length) : 0;
+
   const toggleParticipant = (id) => {
-    setParticipants((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((pid) => pid !== id);
-      }
-      return [...prev, id];
-    });
+    setParticipants((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id],
+    );
   };
 
   const handleAmountInput = (value) => {
@@ -55,6 +58,8 @@ function AddExpenseForm({
   };
 
   const handleSubmit = () => {
+    if (isSubmitting) return;
+
     if (!name.trim()) {
       setError("Nama pengeluaran wajib diisi.");
       return;
@@ -76,7 +81,6 @@ function AddExpenseForm({
         (sum, uid) => sum + Number(customShares[uid] || 0),
         0,
       );
-
       if (totalCustom !== totalAmount) {
         setError("Total pembagian tidak sama dengan jumlah pengeluaran.");
         return;
@@ -100,6 +104,7 @@ function AddExpenseForm({
       split_method: splitMethod,
     };
 
+    setError("");
     onSubmit(expenseData);
 
     if (!isEditing) {
@@ -108,12 +113,14 @@ function AddExpenseForm({
       setPaidBy(members[0]?._id ?? "");
       setParticipants(members.map((m) => m._id));
       setCustomShares({});
-      setError("");
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all"
+      style={{ opacity: isSubmitting ? 0.8 : 1 }}
+    >
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
         <div className="flex items-center gap-2">
           {isEditing ? (
@@ -128,8 +135,9 @@ function AddExpenseForm({
         {onCancel && (
           <button
             onClick={onCancel}
+            disabled={isSubmitting}
             aria-label="Close"
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition disabled:opacity-40"
           >
             <X className="w-4 h-4 text-gray-400" />
           </button>
@@ -146,7 +154,8 @@ function AddExpenseForm({
             placeholder="cth. Makan Malam, Bensin..."
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+            disabled={isSubmitting}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:bg-gray-50"
           />
         </div>
 
@@ -164,7 +173,8 @@ function AddExpenseForm({
               placeholder="0"
               value={totalAmount ? totalAmount.toLocaleString("id-ID") : ""}
               onChange={(e) => handleAmountInput(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+              disabled={isSubmitting}
+              className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:bg-gray-50"
             />
           </div>
         </div>
@@ -178,7 +188,8 @@ function AddExpenseForm({
               <button
                 key={m._id}
                 onClick={() => setPaidBy(m._id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all"
+                disabled={isSubmitting}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all disabled:opacity-50"
                 style={{
                   borderColor: paidBy === m._id ? m.color : "#E5E7EB",
                   background: paidBy === m._id ? m.light : "transparent",
@@ -203,7 +214,8 @@ function AddExpenseForm({
                   sm === "bagi-rata" ? "custom" : "bagi-rata",
                 )
               }
-              className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-600 transition"
+              disabled={isSubmitting}
+              className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-600 transition disabled:opacity-50"
             >
               <SplitSquareVertical className="w-3.5 h-3.5" />
               {splitMethod === "bagi-rata" ? "Custom" : "Sama Rata"}
@@ -225,7 +237,8 @@ function AddExpenseForm({
               >
                 <button
                   onClick={() => toggleParticipant(m._id)}
-                  className="flex items-center gap-2 flex-1 text-left"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 flex-1 text-left disabled:opacity-50"
                 >
                   <div
                     className="w-5 h-5 rounded-md border-2 flex items-center justify-center text-white text-xs transition-all"
@@ -251,6 +264,7 @@ function AddExpenseForm({
                       <input
                         type="text"
                         inputMode="numeric"
+                        disabled={isSubmitting}
                         value={
                           customShares[m._id]
                             ? Number(customShares[m._id]).toLocaleString(
@@ -265,7 +279,7 @@ function AddExpenseForm({
                             [m._id]: numeric,
                           }));
                         }}
-                        className="w-24 border rounded-lg px-2 py-1 text-sm text-right"
+                        className="w-24 border rounded-lg px-2 py-1 text-sm text-right disabled:bg-gray-50"
                         placeholder="0"
                       />
                     )
@@ -276,6 +290,7 @@ function AddExpenseForm({
               </div>
             );
           })}
+
           {splitMethod === "bagi-rata" &&
             participants.length > 0 &&
             totalAmount > 0 && (
@@ -296,9 +311,19 @@ function AddExpenseForm({
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all duration-150 shadow-sm mt-1"
+          disabled={isSubmitting}
+          className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl text-sm transition-all duration-150 shadow-sm mt-1"
         >
-          {isEditing ? "Simpan Perubahan" : "Simpan Pengeluaran"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {isEditing ? "Menyimpan..." : "Menambahkan..."}
+            </>
+          ) : isEditing ? (
+            "Simpan Perubahan"
+          ) : (
+            "Simpan Pengeluaran"
+          )}
         </button>
       </div>
     </div>
