@@ -1,17 +1,15 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import MainLayout from "./layout/MainLayout";
+import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
 import routes from "./config/routes";
-
+import { AuthProvider } from "./context/authContext.jsx";
+function AppRoutes() {
+  return useRoutes(routes);
+}
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<MainLayout />}>
-          {routes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

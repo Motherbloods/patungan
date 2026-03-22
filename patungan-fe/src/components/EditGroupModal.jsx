@@ -18,7 +18,9 @@ const TABS = [
 
 function EditGroupModal({ open, onClose, group }) {
   const initialColor =
-    COLOR_OPTIONS.find((c) => c.bg === group?.color) ?? COLOR_OPTIONS[0];
+    COLOR_OPTIONS.find(
+      (c) => group?.color?.includes(c.bg) && group?.color?.includes(c.text),
+    ) ?? COLOR_OPTIONS[0];
 
   const [activeTab, setActiveTab] = useState("info");
   const [groupName, setGroupName] = useState(group?.name ?? "");
@@ -56,8 +58,7 @@ function EditGroupModal({ open, onClose, group }) {
         data: {
           groupName,
           groupIcon: GroupIcon,
-          groupColor: selectedColor.bg,
-          groupIconColor: selectedColor.text,
+          groupColor: `${selectedColor.bg} ${selectedColor.text}`,
         },
       },
       {

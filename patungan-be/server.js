@@ -11,6 +11,8 @@ const AppError = require("./src/errors/AppError");
 
 const groupRoutes = require("./src/routes/group.route");
 const dashboardRoutes = require("./src/routes/dashboard.route");
+const authRoutes = require("./src/routes/auth.route");
+const { handleWebhook } = require("./src/controllers/telegram.controller");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -45,6 +47,8 @@ app.get("/health", (req, res) => {
 });
 
 // routes utama
+app.post("/api/v1/webhook", handleWebhook);
+app.use("/api/v1", authRoutes);
 app.use("/api/v1", groupRoutes);
 app.use("/api/v1", dashboardRoutes);
 

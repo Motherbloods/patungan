@@ -1,0 +1,62 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import authService from "../services/authService";
+
+export const useVerifyAuth = () => {
+  return useQuery({
+    queryKey: ["auth"],
+    queryFn: authService.verifyAuth,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useRequestLogin = () => {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: authService.requestLogin,
+    onSuccess: () => {
+      client.invalidateQueries(["auth"]);
+    },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
+    },
+  });
+};
+
+export const useLoginGoogle = (idToken) => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => authService.loginGoogle(idToken),
+    onSuccess: () => {
+      client.invalidateQueries(["auth"]);
+    },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
+    },
+  });
+};
+export const useVerifyLoginToken = (idToken, isAuthenticated) => {
+  return useQuery({
+    queryKey: ["verifyLoginToken", idToken],
+    queryFn: () => authService.verifyLoginToken(idToken),
+    enabled: !!idToken && !isAuthenticated,
+    retry: false, // ← stop retry saat error
+    refetchInterval: (query) => {
+      if (query.state.data?.isAuthenticated) return false;
+      if (query.state.error) return false; // ← stop saat error
+      return 2000;
+    },
+  });
+};
+export const useLogout = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: authService.logout,
+    onSuccess: () => {
+      client.invalidateQueries(["auth"]);
+    },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
+    },
+  });
+};
