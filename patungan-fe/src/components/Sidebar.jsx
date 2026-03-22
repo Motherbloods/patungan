@@ -6,6 +6,7 @@ import { useAddGroup, useDeleteGroup, useGroups } from "../hooks/useGroups";
 import ICON_OPTIONS from "../config/icons";
 import GroupMenu from "./GroupMenu";
 import EditGroupModal from "./EditGroupModal";
+import toast from "react-hot-toast";
 
 function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -17,11 +18,49 @@ function Sidebar() {
 
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
-
   const { mutate: deleteGroup } = useDeleteGroup();
 
   const onSubmitModal = (groupData) => {
-    addGroup(groupData);
+    return new Promise((resolve, reject) => {
+      addGroup(groupData, {
+        onSuccess: resolve,
+        onError: reject,
+      });
+    });
+  };
+
+  const handleDelete = (groupId) => {
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-gray-800">Hapus grup ini?</p>
+          <p className="text-xs text-gray-500">
+            Semua data akan hilang permanen.
+          </p>
+          <div className="flex gap-2 mt-1">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                deleteGroup(groupId, {
+                  onSuccess: () => toast.success("Grup berhasil dihapus"),
+                  onError: () => toast.error("Gagal menghapus grup"),
+                });
+              }}
+              className="flex-1 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition"
+            >
+              Hapus
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="flex-1 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs font-semibold hover:bg-gray-50 transition"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
   };
 
   useEffect(() => {
@@ -36,6 +75,7 @@ function Sidebar() {
       }
     }
   }, [location]);
+
   return (
     <>
       <button
@@ -54,18 +94,17 @@ function Sidebar() {
 
       <div
         className={`
-  fixed md:static top-0 left-0 h-screen bg-white p-4 flex flex-col
-  w-full md:w-64 transition-transform duration-300 z-50
-  ${open ? "translate-x-0" : "-translate-x-full"}
-  md:translate-x-0
-  `}
+          fixed md:static top-0 left-0 h-screen bg-white p-4 flex flex-col
+          w-full md:w-64 transition-transform duration-300 z-50
+          ${open ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0
+        `}
       >
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-blue-600">Patungan</h2>
             <p className="text-xs text-gray-500">Kelola grup patungan</p>
           </div>
-
           <button
             onClick={() => setOpen(false)}
             aria-label="Close"
@@ -99,7 +138,6 @@ function Sidebar() {
           <div className="w-9 h-9 flex items-center justify-center rounded-lg shrink-0 bg-blue-100 text-blue-600">
             <LayoutDashboard className="w-5 h-5 stroke-2" />
           </div>
-
           <span className="text-sm font-medium text-gray-700">Dashboard</span>
         </NavLink>
 
@@ -117,6 +155,7 @@ function Sidebar() {
               Belum ada group. Buat group baru.
             </p>
           )}
+
           {!isLoading &&
             groupList.map((group) => {
               const Icon = ICON_OPTIONS.find((i) => i.id === group.icon)?.icon;
@@ -127,7 +166,7 @@ function Sidebar() {
                     to={`/groups/${group._id}`}
                     className={({ isActive }) =>
                       `flex items-center gap-3 p-2 rounded-xl transition pr-8
-          ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
+                      ${isActive ? "bg-blue-100" : "hover:bg-blue-50"}`
                     }
                   >
                     <div
@@ -142,7 +181,7 @@ function Sidebar() {
 
                   <GroupMenu
                     onEdit={() => setEditTarget(group)}
-                    onDelete={() => deleteGroup(group._id)}
+                    onDelete={() => handleDelete(group._id)}
                   />
                 </div>
               );
