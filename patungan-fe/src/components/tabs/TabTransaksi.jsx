@@ -4,9 +4,16 @@ import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
 import { EXPENSE_EMOJI } from "../../utils/historyUtils";
 import { getMemberUtil } from "../../utils/member";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 
-function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
+function TabTransaksi({
+  members,
+  expenses,
+  ownerMemberId,
+  onEdit,
+  onDelete,
+  deletingId,
+}) {
   const [selected, setSelected] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -37,6 +44,7 @@ function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
         const isConfirming = confirmDelete === e._id;
         const payerIsOwner =
           e.paid_by?.toString() === ownerMemberId?.toString();
+        const isDeleting = deletingId === e._id;
 
         return (
           <div
@@ -44,11 +52,13 @@ function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
             className="bg-white rounded-2xl overflow-hidden shadow-sm transition-all"
             style={{
               border: `1.5px solid ${isOpen ? payer.color : "#E5E7EB"}`,
+              opacity: isDeleting ? 0.6 : 1,
             }}
           >
             <button
               onClick={() => setSelected(isOpen ? null : e._id)}
-              className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition"
+              disabled={isDeleting}
+              className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition disabled:cursor-wait"
             >
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -77,16 +87,22 @@ function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-extrabold text-sm text-gray-900">
-                  {fmt(e.total_amount)}
-                </div>
-                <div className="text-[10px] text-gray-400 mt-0.5">
-                  {isOpen ? "▲ tutup" : "▼ detail"}
-                </div>
+                {isDeleting ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
+                ) : (
+                  <>
+                    <div className="font-extrabold text-sm text-gray-900">
+                      {fmt(e.total_amount)}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-0.5">
+                      {isOpen ? "▲ tutup" : "▼ detail"}
+                    </div>
+                  </>
+                )}
               </div>
             </button>
 
-            {isOpen && (
+            {isOpen && !isDeleting && (
               <div className="border-t border-gray-50 px-4 pt-3 pb-4">
                 <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">
                   Pembagian
@@ -126,6 +142,7 @@ function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
                     </div>
                   );
                 })}
+
                 <div className="mt-3 pt-3 border-t border-dashed border-gray-200 flex justify-between text-sm">
                   <span className="text-gray-400">Total</span>
                   <span className="font-extrabold text-gray-900">
