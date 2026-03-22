@@ -1,10 +1,11 @@
 import Avatar from "../Avatar";
 import Pill from "../Pill";
 import InfoBox from "../InfoBox";
+import OwnerBadge from "../OwnerBadge";
 import { getMemberUtil } from "../../utils/member";
 import { fmt } from "../../utils/format";
 
-function TabRingkasan({ members, balances }) {
+function TabRingkasan({ members, balances, ownerMemberId }) {
   if (!balances || balances.length === 0) {
     return (
       <div className="flex flex-col gap-3">
@@ -18,11 +19,22 @@ function TabRingkasan({ members, balances }) {
     );
   }
 
+  // tampilkan member user login paling atas
+  const sorted = ownerMemberId
+    ? [...balances].sort((a, b) => {
+        if (a.user_id?.toString() === ownerMemberId?.toString()) return -1;
+        if (b.user_id?.toString() === ownerMemberId?.toString()) return 1;
+        return 0;
+      })
+    : balances;
+
   return (
     <div className="flex flex-col gap-3">
-      {balances.map((b) => {
+      {sorted.map((b) => {
         const isPos = b.amount > 0;
         const isZero = b.amount === 0;
+        const isOwner = b.user_id?.toString() === ownerMemberId?.toString();
+        console.log(isOwner, "ini", b.user_id, "dan member", ownerMemberId);
         const m = getMemberUtil(members, b.user_id);
 
         return (
@@ -30,12 +42,17 @@ function TabRingkasan({ members, balances }) {
             key={b.user_id}
             className="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm"
             style={{
-              border: `1.5px solid ${isZero ? "#E5E7EB" : isPos ? "#BBF7D0" : "#FECACA"}`,
+              border: `1.5px solid ${isOwner ? "#BFDBFE" : isZero ? "#E5E7EB" : isPos ? "#BBF7D0" : "#FECACA"}`,
             }}
           >
             <Avatar members={members} uid={b.user_id} size={48} />
             <div className="flex-1">
-              <div className="font-bold text-sm text-gray-900">{m.name}</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-sm text-gray-900">
+                  {m.name}
+                </span>
+                {isOwner && <OwnerBadge />}
+              </div>
               <div className="mt-1">
                 {isZero ? (
                   <Pill bg="#F3F4F6" color="#6B7280">

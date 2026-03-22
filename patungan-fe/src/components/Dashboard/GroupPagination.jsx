@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 4;
 
-function GroupPagination({ groups, pagination, myBalance }) {
+function GroupPagination({ groups, pagination }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const totalPages = pagination.totalPages ?? 1;
@@ -23,7 +23,7 @@ function GroupPagination({ groups, pagination, myBalance }) {
     <>
       <div className="grid grid-cols-2 gap-3">
         {groups.map((g) => (
-          <GroupCard key={g._id} group={g} myBalance={myBalance} />
+          <GroupCard key={g._id} group={g} />
         ))}
       </div>
 

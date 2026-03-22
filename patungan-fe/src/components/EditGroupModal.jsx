@@ -9,6 +9,7 @@ import {
   useEditMember,
   useDeactivateMember,
   useAddMember,
+  useUpdateOwnerMember,
 } from "../hooks/useGroups";
 
 const TABS = [
@@ -31,11 +32,15 @@ function EditGroupModal({ open, onClose, group }) {
   const [error, setError] = useState("");
 
   const [localMembers, setLocalMembers] = useState(group?.members ?? []);
+  const [ownerMemberId, setOwnerMemberId] = useState(
+    group?.ownerMemberId ?? null,
+  );
 
   const { mutate: editGroup, isPending: isSavingGroup } = useEditGroup();
   const { mutate: editMember } = useEditMember(group?._id);
   const { mutate: deactivateMember } = useDeactivateMember(group?._id);
   const { mutate: addMember } = useAddMember(group?._id);
+  const { mutate: updateOwnerMember } = useUpdateOwnerMember(group?._id);
 
   const GroupIcon = ICON_OPTIONS.find((o) => o.id === groupIconId)?.id;
 
@@ -88,6 +93,11 @@ function EditGroupModal({ open, onClose, group }) {
         setLocalMembers((prev) => [...prev, newMember]);
       },
     });
+  };
+
+  const handleTagOwner = (memberId) => {
+    setOwnerMemberId(memberId);
+    updateOwnerMember({ memberId: memberId ?? null });
   };
 
   return (
@@ -151,9 +161,11 @@ function EditGroupModal({ open, onClose, group }) {
           {activeTab === "members" && (
             <EditMemberStep
               members={localMembers}
+              ownerMemberId={ownerMemberId}
               onEditMember={handleEditMember}
               onDeactivateMember={handleDeactivateMember}
               onAddMember={handleAddMember}
+              onTagOwner={handleTagOwner}
             />
           )}
         </div>

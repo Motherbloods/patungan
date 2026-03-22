@@ -1,5 +1,6 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, UserCheck } from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
+import OwnerBadge from "../OwnerBadge";
 import { useEffect, useRef } from "react";
 
 function MemberStep({
@@ -9,6 +10,8 @@ function MemberStep({
   setInputEmoji,
   members,
   setMembers,
+  ownerMemberId,
+  setOwnerMemberId,
   showEmojiPicker,
   setShowEmoji,
   error,
@@ -39,6 +42,16 @@ function MemberStep({
     setInputName("");
     setError("");
   };
+
+  const handleTagOwner = (memberId) => {
+    setOwnerMemberId((prev) => (prev === memberId ? null : memberId));
+  };
+
+  const handleRemove = (id) => {
+    setMembers((prev) => prev.filter((x) => x.id !== id));
+    if (ownerMemberId === id) setOwnerMemberId(null);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-xs text-gray-400 text-center">
@@ -102,28 +115,58 @@ function MemberStep({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {members.map((m, i) => (
-            <div
-              key={m.id}
-              className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-100"
-            >
-              <span className="text-xl">{m.emoji}</span>
-              <span className="flex-1 text-sm font-medium text-gray-700">
-                {m.name}
-              </span>
-              <span className="text-[11px] text-gray-400 font-medium">
-                #{i + 1}
-              </span>
-              <button
-                onClick={() =>
-                  setMembers((prev) => prev.filter((x) => x.id !== m.id))
-                }
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition"
+          {ownerMemberId === null && (
+            <p className="text-[11px] text-blue-400 text-center font-medium bg-blue-50 rounded-xl py-2 px-3">
+              Tandai dirimu dengan menekan{" "}
+              <UserCheck className="w-3 h-3 inline-block" /> di salah satu
+              anggota
+            </p>
+          )}
+
+          {members.map((m, i) => {
+            const isOwner = ownerMemberId === m.id;
+            return (
+              <div
+                key={m.id}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all ${
+                  isOwner
+                    ? "bg-blue-50 border-blue-200"
+                    : "bg-gray-50 border-gray-100"
+                }`}
               >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
+                <span className="text-xl">{m.emoji}</span>
+                <span className="flex-1 text-sm font-medium text-gray-700">
+                  {m.name}
+                </span>
+
+                {isOwner && <OwnerBadge />}
+
+                <span className="text-[11px] text-gray-400 font-medium">
+                  #{i + 1}
+                </span>
+
+                <button
+                  onClick={() => handleTagOwner(m.id)}
+                  title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}
+                  className={`w-7 h-7 flex items-center justify-center rounded-full transition ${
+                    isOwner
+                      ? "bg-blue-100 text-blue-500 hover:bg-blue-200"
+                      : "text-gray-300 hover:bg-blue-50 hover:text-blue-400"
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => handleRemove(m.id)}
+                  className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+
           <p className="text-center text-xs text-gray-400">
             {members.length} anggota
           </p>

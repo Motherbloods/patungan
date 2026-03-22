@@ -13,6 +13,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
   const [groupIconId, setGroupIconId] = useState(ICON_OPTIONS[0].id);
   const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0]);
   const [members, setMembers] = useState([]);
+  const [ownerMemberId, setOwnerMemberId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputName, setInputName] = useState("");
   const [inputEmoji, setInputEmoji] = useState(MEMBER_EMOJIS[0]);
@@ -29,6 +30,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     setGroupIconId(ICON_OPTIONS[0].id);
     setSelectedColor(COLOR_OPTIONS[0]);
     setMembers([]);
+    setOwnerMemberId(null);
     setError("");
     setInputName("");
     setInputEmoji(MEMBER_EMOJIS[0]);
@@ -58,12 +60,18 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     }
     setIsSubmitting(true);
     try {
+      const ownerMemberIndex =
+        ownerMemberId !== null
+          ? members.findIndex((m) => m.id === ownerMemberId)
+          : null;
+
       await onSubmit({
         groupName,
         groupIcon: GroupIcon,
         groupColor: selectedColor.bg,
         groupIconColor: selectedColor.text,
         members,
+        ownerMemberIndex: ownerMemberIndex !== -1 ? ownerMemberIndex : null,
       });
       setIsSubmitting(false);
       handleClose();
@@ -118,6 +126,8 @@ function NewGroupModal({ open, onClose, onSubmit }) {
             <MemberStep
               members={members}
               setMembers={setMembers}
+              ownerMemberId={ownerMemberId}
+              setOwnerMemberId={setOwnerMemberId}
               inputName={inputName}
               setInputName={setInputName}
               inputEmoji={inputEmoji}

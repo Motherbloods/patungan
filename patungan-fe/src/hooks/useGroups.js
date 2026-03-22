@@ -89,3 +89,15 @@ export const useDeactivateMember = (groupId) => {
     },
   });
 };
+export const useUpdateOwnerMember = (groupId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId }) =>
+      groupService.updateOwnerMember(groupId, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+};

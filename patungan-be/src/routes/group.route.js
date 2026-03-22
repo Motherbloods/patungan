@@ -15,6 +15,7 @@ const {
   editMember,
   deactivateMember,
   createSettlement,
+  updateOwnerMember,
 } = require("../controllers/group.controller");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const router = express.Router();
@@ -42,5 +43,6 @@ router.patch(
   authMiddleware,
   deactivateMember,
 );
+router.patch("/group/:id/owner-member", authMiddleware, updateOwnerMember);
 
 module.exports = router;

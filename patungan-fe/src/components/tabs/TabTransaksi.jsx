@@ -1,11 +1,12 @@
 import { useState } from "react";
 import Avatar from "../Avatar";
+import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
 import { EXPENSE_EMOJI } from "../../utils/historyUtils";
 import { getMemberUtil } from "../../utils/member";
 import { Pencil, Trash2 } from "lucide-react";
 
-function TabTransaksi({ members, expenses, onEdit, onDelete }) {
+function TabTransaksi({ members, expenses, ownerMemberId, onEdit, onDelete }) {
   const [selected, setSelected] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -15,7 +16,6 @@ function TabTransaksi({ members, expenses, onEdit, onDelete }) {
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
           0 transaksi
         </p>
-
         <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
           <p className="text-sm text-gray-500">
             Belum ada transaksi di grup ini.
@@ -35,6 +35,8 @@ function TabTransaksi({ members, expenses, onEdit, onDelete }) {
         const payer = getMemberUtil(members, e.paid_by);
         const isOpen = selected === e._id;
         const isConfirming = confirmDelete === e._id;
+        const payerIsOwner =
+          e.paid_by?.toString() === ownerMemberId?.toString();
 
         return (
           <div
@@ -65,7 +67,12 @@ function TabTransaksi({ members, expenses, onEdit, onDelete }) {
                     style={{ color: payer.color }}
                   >
                     {payer.name}
-                  </span>{" "}
+                  </span>
+                  {payerIsOwner && (
+                    <span className="ml-1 text-[9px] font-semibold text-blue-500 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                      Kamu
+                    </span>
+                  )}{" "}
                   · {e.participants.length} orang
                 </div>
               </div>
@@ -87,19 +94,22 @@ function TabTransaksi({ members, expenses, onEdit, onDelete }) {
                 {e.participants.map((p) => {
                   const m = getMemberUtil(members, p.user_id);
                   const isPayer = p.user_id === e.paid_by;
+                  const isOwner =
+                    p.user_id?.toString() === ownerMemberId?.toString();
                   return (
                     <div
                       key={p.user_id}
                       className="flex items-center gap-3 mb-2"
                     >
                       <Avatar members={members} uid={p.user_id} size={32} />
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 flex items-center gap-1.5 flex-wrap">
                         <span className="text-sm font-semibold text-gray-700">
                           {m.name}
                         </span>
+                        {isOwner && <OwnerBadge />}
                         {isPayer && (
                           <span
-                            className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                             style={{ background: m.light, color: m.color }}
                           >
                             bayar duluan

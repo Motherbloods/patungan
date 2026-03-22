@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Pencil, Plus, UserX, Check, X } from "lucide-react";
+import { Pencil, Plus, UserX, Check, X, UserCheck } from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
+import OwnerBadge from "../OwnerBadge";
 
-function MemberRow({ member, onEdit, onDeactivate }) {
+function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(member?.name);
   const [emoji, setEmoji] = useState(member?.emoji || "👤");
   const [showEmoji, setShowEmoji] = useState(false);
+
   const handleSave = () => {
     if (!name.trim()) return;
     onEdit(member?._id, { name: name.trim(), emoji });
@@ -93,13 +95,31 @@ function MemberRow({ member, onEdit, onDeactivate }) {
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-100 group">
+    <div
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border group transition-all ${
+        isOwner ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"
+      }`}
+    >
       <span className="text-xl">{member?.emoji || "👤"}</span>
       <span className="flex-1 text-sm font-medium text-gray-700">
         {member?.name}
       </span>
 
+      {isOwner && <OwnerBadge />}
+
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={() => onTagOwner(member?._id)}
+          title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}
+          className={`w-7 h-7 flex items-center justify-center rounded-full transition ${
+            isOwner
+              ? "bg-blue-100 text-blue-500 hover:bg-blue-200"
+              : "text-gray-400 hover:bg-blue-50 hover:text-blue-400"
+          }`}
+        >
+          <UserCheck className="w-3.5 h-3.5" />
+        </button>
+
         <button
           onClick={() => setEditing(true)}
           className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 text-gray-400 hover:text-blue-500 transition"
@@ -154,9 +174,11 @@ function DeactivateConfirm({ member, onConfirm, onCancel }) {
 
 function EditMemberStep({
   members = [],
+  ownerMemberId,
   onEditMember,
   onDeactivateMember,
   onAddMember,
+  onTagOwner,
 }) {
   const [confirmTarget, setConfirmTarget] = useState(null);
   const [inputName, setInputName] = useState("");
@@ -180,6 +202,19 @@ function EditMemberStep({
     onAddMember({ name: trimmed, emoji: inputEmoji });
     setInputName("");
     setAddError("");
+  };
+
+  const handleDeactivate = (memberId) => {
+    if (ownerMemberId?.toString() === memberId?.toString()) {
+      onTagOwner(null);
+    }
+    onDeactivateMember(memberId);
+    setConfirmTarget(null);
+  };
+
+  const handleTagOwner = (memberId) => {
+    const isSame = ownerMemberId?.toString() === memberId?.toString();
+    onTagOwner(isSame ? null : memberId);
   };
 
   return (
@@ -246,17 +281,16 @@ function EditMemberStep({
                 key={m._id}
                 member={m}
                 onCancel={() => setConfirmTarget(null)}
-                onConfirm={() => {
-                  onDeactivateMember(m._id);
-                  setConfirmTarget(null);
-                }}
+                onConfirm={() => handleDeactivate(m._id)}
               />
             ) : (
               <MemberRow
                 key={m._id}
                 member={m}
+                isOwner={ownerMemberId?.toString() === m._id?.toString()}
                 onEdit={onEditMember}
                 onDeactivate={(member) => setConfirmTarget(member)}
+                onTagOwner={handleTagOwner}
               />
             ),
           )
@@ -272,8 +306,10 @@ function EditMemberStep({
             <MemberRow
               key={m?._id}
               member={m}
+              isOwner={false}
               onEdit={() => {}}
               onDeactivate={() => {}}
+              onTagOwner={() => {}}
             />
           ))}
         </div>

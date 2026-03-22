@@ -1,12 +1,19 @@
 import { useState, useMemo } from "react";
 import Avatar from "../Avatar";
+import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
 import { HISTORY_LABEL } from "../../utils/historyUtils";
 import { getNameUtil, getMemberUtil } from "../../utils/member";
 import Pill from "../Pill";
 
-function TabRiwayat({ members = [], balances = [], history = [] }) {
+function TabRiwayat({
+  members = [],
+  balances = [],
+  history = [],
+  ownerMemberId,
+}) {
   const [filterUser, setFilterUser] = useState(null);
+
   const visibleUsers = useMemo(
     () => (filterUser ? [filterUser] : members.map((m) => m._id)),
     [filterUser, members],
@@ -37,11 +44,21 @@ function TabRiwayat({ members = [], balances = [], history = [] }) {
     );
   }
 
+  // tampilkan member user login paling depan di filter
+  const sortedMembers = ownerMemberId
+    ? [...members].sort((a, b) => {
+        if (a._id?.toString() === ownerMemberId?.toString()) return -1;
+        if (b._id?.toString() === ownerMemberId?.toString()) return 1;
+        return 0;
+      })
+    : members;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 flex-wrap">
-        {members.map((m) => {
+        {sortedMembers.map((m) => {
           const active = filterUser === m._id;
+          const isOwner = m._id?.toString() === ownerMemberId?.toString();
           return (
             <button
               key={m._id}
@@ -54,6 +71,11 @@ function TabRiwayat({ members = [], balances = [], history = [] }) {
               }}
             >
               {m.emoji} {m.name}
+              {isOwner && (
+                <span className="text-[9px] font-semibold text-blue-500 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                  Kamu
+                </span>
+              )}
             </button>
           );
         })}
@@ -63,18 +85,20 @@ function TabRiwayat({ members = [], balances = [], history = [] }) {
         const balance = balances.find((b) => b.user_id === uid)?.amount ?? 0;
         const m = getMemberUtil(members, uid) || { name: "Unknown" };
         const userHistory = historyMap[uid] ?? [];
+        const isOwner = uid?.toString() === ownerMemberId?.toString();
 
         return (
           <div
             key={uid}
             className="bg-white rounded-2xl shadow-sm overflow-hidden"
-            style={{ border: "1.5px solid #E5E7EB" }}
+            style={{ border: `1.5px solid ${isOwner ? "#BFDBFE" : "#E5E7EB"}` }}
           >
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50">
               <Avatar members={members} uid={uid} size={36} />
               <span className="font-bold text-sm text-gray-900 flex-1">
                 {m.name}
               </span>
+              {isOwner && <OwnerBadge />}
               <span
                 className="font-extrabold text-sm"
                 style={{ color: balance >= 0 ? "#16A34A" : "#DC2626" }}

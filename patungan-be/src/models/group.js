@@ -9,6 +9,18 @@ const groupSchema = new mongoose.Schema(
     expense_count: { type: Number, default: 0 },
     member_count: { type: Number, default: 0 },
 
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User-Patungan",
+      required: true,
+      index: true,
+    },
+
+    ownerMemberId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
+
     members: [
       {
         name: { type: String, required: true },

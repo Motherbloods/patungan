@@ -20,8 +20,15 @@ const MEMBER_COLORS = require("../utils/colors");
 const logger = require("../utils/logger");
 const { isValidObjectId, validateObjectIds } = require("../utils/objectId");
 
-const createGroupService = async (data) => {
-  const { groupName, groupIcon, groupColor, groupIconColor, members } = data;
+const createGroupService = async (data, user_id) => {
+  const {
+    groupName,
+    groupIcon,
+    groupColor,
+    groupIconColor,
+    members,
+    ownerMemberIndex,
+  } = data;
 
   if (
     !groupName ||
@@ -54,11 +61,21 @@ const createGroupService = async (data) => {
     total_expenses: 0,
     expense_count: 0,
     member_count: formattedMembers.length,
+    createdBy: user_id,
     members: formattedMembers,
   });
 
   await group.save();
-  logger.info(`Group created: ${group._id}`);
+
+  if (ownerMemberIndex !== undefined && ownerMemberIndex !== null) {
+    const targetMember = group.members[ownerMemberIndex];
+    if (targetMember) {
+      group.ownerMemberId = targetMember._id;
+      await group.save();
+    }
+  }
+
+  logger.info(`Group created: ${group._id} by user: ${user_id}`);
   return group;
 };
 
@@ -133,21 +150,24 @@ const createExpenseService = async (data) => {
   return expense;
 };
 
-const getAllGroupService = async () => {
-  const groups = await Group.find();
+const getAllGroupService = async (user_id) => {
+  const groups = await Group.find({ createdBy: user_id });
 
   return groups;
 };
 
-const getGroupOrThrow = async (group_id) => {
-  const group = await Group.findById(group_id).lean();
+const getGroupOrThrow = async (group_id, user_id) => {
+  const query = { _id: group_id };
+  if (user_id) query.createdBy = user_id;
+
+  const group = await Group.findOne(query).lean();
   if (!group) throw new Error("Group not found");
   return group;
 };
 
-const getGroupDataService = async (group_id, options = {}) => {
+const getGroupDataService = async (group_id, options = {}, user_id) => {
   validateObjectIds(group_id);
-  const group = await getGroupOrThrow(group_id);
+  const group = await getGroupOrThrow(group_id, user_id);
   const result = {
     _id: group._id,
     name: group.name,
@@ -155,6 +175,7 @@ const getGroupDataService = async (group_id, options = {}) => {
     color: group.color,
     expense_count: group.expense_count ?? 0,
     member_count: group.member_count ?? 0,
+    ownerMemberId: group.ownerMemberId,
     total_expenses: group.total_expenses ?? 0,
     members: group.members,
   };
@@ -180,12 +201,12 @@ const getGroupDataService = async (group_id, options = {}) => {
   return result;
 };
 
-const editGroupService = async (group_id, data) => {
+const editGroupService = async (group_id, data, user_id) => {
   validateObjectIds(group_id);
   const { groupName, groupIcon, groupColor } = data;
 
-  const group = await Group.findByIdAndUpdate(
-    group_id,
+  const group = await Group.findOneAndUpdate(
+    { _id: group_id, createdBy: user_id },
     {
       name: groupName,
       icon: groupIcon,
@@ -198,16 +219,18 @@ const editGroupService = async (group_id, data) => {
   );
 
   if (!group) throw new Error("Group not found");
-  logger.info(`Group updated: ${group_id}`);
+  logger.info(`Group updated: ${group_id} by user: ${user_id}`);
 
   return group;
 };
 
-const editMemberService = async (group_id, member_id, data) => {
+const editMemberService = async (group_id, member_id, data, user_id) => {
   validateObjectIds(group_id, member_id);
 
   const { name, emoji } = data;
   if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
+
+  await getGroupOrThrow(group_id, user_id);
 
   const group = await Group.findOneAndUpdate(
     {
@@ -229,8 +252,10 @@ const editMemberService = async (group_id, member_id, data) => {
   return group.members.id(member_id);
 };
 
-const deactivateMemberService = async (group_id, member_id) => {
+const deactivateMemberService = async (group_id, member_id, user_id) => {
   validateObjectIds(group_id, member_id);
+
+  await getGroupOrThrow(group_id, user_id);
 
   const expenseCount = await Expense.countDocuments({
     group_id,
@@ -258,13 +283,13 @@ const deactivateMemberService = async (group_id, member_id) => {
   };
 };
 
-const addMemberService = async (group_id, data) => {
+const addMemberService = async (group_id, data, user_id) => {
   validateObjectIds(group_id);
 
   const { name, emoji } = data;
   if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
 
-  const group = await Group.findById(group_id);
+  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
   if (!group) throw new Error("Group tidak ditemukan");
 
   const isDuplicate = group.members.some(
@@ -286,11 +311,12 @@ const addMemberService = async (group_id, data) => {
 
   await group.save();
 
-  logger.info(`Member added to group: ${group_id}`);
+  logger.info(`Member added to group: ${group_id} by user: ${user_id}`);
   return group.members[group.members.length - 1];
 };
 
 const editExpenseService = async (group_id, expense_id, data) => {
+  validateObjectIds(group_id, expense_id);
   const { name, total_amount, paid_by, participants, split_method } = data;
 
   if (!group_id || !expense_id)
@@ -410,13 +436,16 @@ const editExpenseService = async (group_id, expense_id, data) => {
   return updatedExpense;
 };
 
-const deleteGroupService = async (group_id) => {
+const deleteGroupService = async (group_id, user_id) => {
   validateObjectIds(group_id);
   const session = await mongoose.startSession();
 
   try {
     await session.withTransaction(async () => {
-      const group = await Group.findById(group_id).session(session);
+      const group = await Group.findOne({
+        _id: group_id,
+        createdBy: user_id,
+      }).session(session);
       if (!group) {
         throw new Error("Group not found");
       }
@@ -432,7 +461,7 @@ const deleteGroupService = async (group_id) => {
     session.endSession();
   }
 
-  logger.info(`Group deleted: ${group_id}`);
+  logger.info(`Group deleted: ${group_id} by user: ${user_id}`);
   return { message: "Group and related data deleted successfully" };
 };
 
@@ -596,6 +625,26 @@ const createSettlementService = async (group_id, data) => {
   return settlement;
 };
 
+const updateOwnerMemberService = async (group_id, memberId, user_id) => {
+  validateObjectIds(group_id);
+
+  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
+  if (!group) throw new Error("Group not found");
+
+  if (memberId === null) {
+    group.ownerMemberId = null;
+  } else {
+    validateObjectIds(memberId);
+    const member = group.members.id(memberId);
+    if (!member || !member.isActive) throw new Error("Member tidak ditemukan");
+    group.ownerMemberId = member._id;
+  }
+
+  await group.save();
+  logger.info(`ownerMemberId updated for group: ${group_id}`);
+  return { ownerMemberId: group.ownerMemberId };
+};
+
 module.exports = {
   createGroupService,
   createExpenseService,
@@ -610,4 +659,5 @@ module.exports = {
   deleteExpenseService,
   calculateSuggestions,
   createSettlementService,
+  updateOwnerMemberService,
 };

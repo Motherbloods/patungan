@@ -12,10 +12,11 @@ const {
   deleteGroupService,
   deleteExpenseService,
   createSettlementService,
+  updateOwnerMemberService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
-  const result = await createGroupService(req.body);
+  const result = await createGroupService(req.body, req.userId);
   res.json(result);
 });
 
@@ -25,37 +26,45 @@ const createExpense = asyncHandler(async (req, res) => {
 });
 
 const getAllGroup = asyncHandler(async (req, res) => {
-  const groups = await getAllGroupService();
+  const groups = await getAllGroupService(req.userId);
   res.json(groups);
 });
 
 const getSummaryGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const summary = await getGroupDataService(id, { balances: true });
+  const summary = await getGroupDataService(id, { balances: true }, req.userId);
   res.json(summary);
 });
 
 const getGroupTransactions = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const transaksi = await getGroupDataService(id, { expenses: true });
+  const transaksi = await getGroupDataService(
+    id,
+    { expenses: true },
+    req.userId,
+  );
   res.json(transaksi);
 });
 
 const getGroupSettlements = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const settlement = await getGroupDataService(id, { settlements: true });
+  const settlement = await getGroupDataService(
+    id,
+    { settlements: true },
+    req.userId,
+  );
   res.json(settlement);
 });
 
 const getGroupHistory = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const history = await getGroupDataService(id, { history: true });
+  const history = await getGroupDataService(id, { history: true }, req.userId);
   res.json(history);
 });
 
 const editGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await editGroupService(id, req.body);
+  const result = await editGroupService(id, req.body, req.userId);
   res.json(result);
 });
 
@@ -67,7 +76,7 @@ const editExpense = asyncHandler(async (req, res) => {
 
 const deleteGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await deleteGroupService(id);
+  const result = await deleteGroupService(id, req.userId);
   res.json(result);
 });
 
@@ -79,19 +88,19 @@ const deleteExpense = asyncHandler(async (req, res) => {
 
 const addMember = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await addMemberService(id, req.body);
+  const result = await addMemberService(id, req.body, req.userId);
   res.status(201).json(result);
 });
 
 const editMember = asyncHandler(async (req, res) => {
   const { id, member_id } = req.params;
-  const result = await editMemberService(id, member_id, req.body);
+  const result = await editMemberService(id, member_id, req.body, req.userId);
   res.json(result);
 });
 
 const deactivateMember = asyncHandler(async (req, res) => {
   const { id, member_id } = req.params;
-  const result = await deactivateMemberService(id, member_id);
+  const result = await deactivateMemberService(id, member_id, req.userId);
   res.json(result);
 });
 
@@ -99,6 +108,17 @@ const createSettlement = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await createSettlementService(id, req.body);
   res.status(201).json(result);
+});
+
+const updateOwnerMember = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { memberId } = req.body;
+  const result = await updateOwnerMemberService(
+    id,
+    memberId ?? null,
+    req.userId,
+  );
+  res.json(result);
 });
 
 module.exports = {
@@ -117,4 +137,5 @@ module.exports = {
   editMember,
   deactivateMember,
   createSettlement,
+  updateOwnerMember,
 };
