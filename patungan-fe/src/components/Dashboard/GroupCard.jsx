@@ -3,11 +3,14 @@ import { fmt } from "../../utils/format";
 import { Receipt, Users } from "lucide-react";
 import ICON_OPTIONS from "../../config/icons";
 
-function GroupCard({ group, myBalance }) {
+function GroupCard({ group }) {
   const iconItem = ICON_OPTIONS.find((item) => item.id === group.icon);
   const Icon = iconItem?.icon;
-  const isPos = myBalance > 0;
-  const isZero = myBalance === 0;
+
+  const myBalance = group.myBalance;
+  const hasTag = myBalance !== null;
+  const isPos = hasTag && myBalance > 0;
+  const isZero = hasTag && myBalance === 0;
 
   return (
     <NavLink
@@ -21,15 +24,22 @@ function GroupCard({ group, myBalance }) {
         >
           {Icon && <Icon className="w-5 h-5 stroke-2" />}
         </div>
-        <span
-          className="text-xs font-bold px-2 py-1 rounded-lg"
-          style={{
-            background: isZero ? "#F3F4F6" : isPos ? "#DCFCE7" : "#FEE2E2",
-            color: isZero ? "#9CA3AF" : isPos ? "#16A34A" : "#DC2626",
-          }}
-        >
-          {isZero ? "Lunas" : (isPos ? "+" : "-") + fmt(Math.abs(myBalance))}
-        </span>
+
+        {hasTag ? (
+          <span
+            className="text-xs font-bold px-2 py-1 rounded-lg"
+            style={{
+              background: isZero ? "#F3F4F6" : isPos ? "#DCFCE7" : "#FEE2E2",
+              color: isZero ? "#9CA3AF" : isPos ? "#16A34A" : "#DC2626",
+            }}
+          >
+            {isZero ? "Lunas" : (isPos ? "+" : "-") + fmt(Math.abs(myBalance))}
+          </span>
+        ) : (
+          <span className="text-xs font-medium px-2 py-1 rounded-lg bg-gray-50 text-gray-300">
+            —
+          </span>
+        )}
       </div>
 
       <div>
