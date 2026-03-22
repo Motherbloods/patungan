@@ -1,5 +1,6 @@
 import { Plus, Trash2, UserCheck } from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
+import OwnerBadge from "../OwnerBadge";
 import { useEffect, useRef } from "react";
 
 function MemberStep({
@@ -138,17 +139,12 @@ function MemberStep({
                   {m.name}
                 </span>
 
-                {isOwner && (
-                  <span className="text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
-                    Kamu
-                  </span>
-                )}
+                {isOwner && <OwnerBadge />}
 
                 <span className="text-[11px] text-gray-400 font-medium">
                   #{i + 1}
                 </span>
 
-                {/* tombol tandai sebagai kamu */}
                 <button
                   onClick={() => handleTagOwner(m.id)}
                   title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}

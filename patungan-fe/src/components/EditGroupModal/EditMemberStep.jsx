@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Pencil, Plus, UserX, Check, X, UserCheck } from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
+import OwnerBadge from "../OwnerBadge";
 
 function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
   const [editing, setEditing] = useState(false);
@@ -104,11 +105,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
         {member?.name}
       </span>
 
-      {isOwner && (
-        <span className="text-[10px] font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full shrink-0">
-          Kamu
-        </span>
-      )}
+      {isOwner && <OwnerBadge />}
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
