@@ -16,6 +16,11 @@ const groupSchema = new mongoose.Schema(
       index: true,
     },
 
+    ownerMemberId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
+
     members: [
       {
         name: { type: String, required: true },
