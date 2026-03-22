@@ -102,9 +102,7 @@ const verifyLoginTokenService = async (loginToken) => {
 
     console.log("🎉 Final result:", result);
 
-    // Optional:
-    // console.log("🗑️ Deleting login token");
-    // await LoginToken.deleteOne({ _id: tokenDoc._id });
+    await LoginToken.deleteOne({ _id: tokenDoc._id });
 
     return result;
   }
