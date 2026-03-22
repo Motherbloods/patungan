@@ -12,6 +12,7 @@ const {
   deleteGroupService,
   deleteExpenseService,
   createSettlementService,
+  updateOwnerMemberService,
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
@@ -109,6 +110,17 @@ const createSettlement = asyncHandler(async (req, res) => {
   res.status(201).json(result);
 });
 
+const updateOwnerMember = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { memberId } = req.body;
+  const result = await updateOwnerMemberService(
+    id,
+    memberId ?? null,
+    req.userId,
+  );
+  res.json(result);
+});
+
 module.exports = {
   createGroup,
   createExpense,
@@ -125,4 +137,5 @@ module.exports = {
   editMember,
   deactivateMember,
   createSettlement,
+  updateOwnerMember,
 };
