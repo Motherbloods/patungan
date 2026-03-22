@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import ICON_OPTIONS from "../config/icons";
 import COLOR_OPTIONS from "../config/colors";
 import MEMBER_EMOJIS from "../config/emoji";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
 import MemberStep from "./NewGroupModal/MemberStep";
 import STEP_META from "../config/step_meta";
+import toast from "react-hot-toast";
 
 function NewGroupModal({ open, onClose, onSubmit }) {
   const [step, setStep] = useState(1);
@@ -54,11 +55,14 @@ function NewGroupModal({ open, onClose, onSubmit }) {
       setError("Nama grup tidak boleh kosong");
       return;
     }
+
     if (members.length === 0) {
       setError("Minimal tambahkan 1 anggota");
       return;
     }
+
     setIsSubmitting(true);
+
     try {
       const ownerMemberIndex =
         ownerMemberId !== null
@@ -73,9 +77,12 @@ function NewGroupModal({ open, onClose, onSubmit }) {
         members,
         ownerMemberIndex: ownerMemberIndex !== -1 ? ownerMemberIndex : null,
       });
+
+      toast.success("Grup berhasil dibuat 🎉");
       setIsSubmitting(false);
       handleClose();
     } catch (err) {
+      toast.error(err.message || "Gagal membuat grup");
       setError(err.message || "Gagal membuat grup");
       setIsSubmitting(false);
     }
@@ -104,6 +111,18 @@ function NewGroupModal({ open, onClose, onSubmit }) {
             >
               <X className="w-4 h-4 text-gray-400" />
             </button>
+          </div>
+
+          <div className="flex gap-1.5 mt-1">
+            {[1, 2].map((s) => (
+              <div
+                key={s}
+                className="h-1 rounded-full flex-1 transition-all duration-300"
+                style={{
+                  background: s <= step ? "#3B82F6" : "#E5E7EB",
+                }}
+              />
+            ))}
           </div>
         </div>
 
@@ -163,16 +182,24 @@ function NewGroupModal({ open, onClose, onSubmit }) {
                   setStep(1);
                   setError("");
                 }}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition flex items-center justify-center gap-1.5"
+                disabled={isSubmitting}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition flex items-center justify-center gap-1.5 disabled:opacity-40"
               >
                 <ChevronLeft className="w-4 h-4" /> Kembali
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-sm"
+                className="flex-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 active:scale-[0.98] disabled:bg-blue-400 text-white text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
               >
-                {isSubmitting ? "Membuat..." : "Buat Grup 🎉"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Membuat...
+                  </>
+                ) : (
+                  "Buat Grup 🎉"
+                )}
               </button>
             </>
           )}
