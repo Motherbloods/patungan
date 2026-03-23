@@ -213,7 +213,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
         .progress-ring { transition: stroke-dashoffset 1s linear; }
       `}</style>
 
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
         <div
           className="backdrop-enter absolute inset-0 bg-black/40 backdrop-blur-md"
           onClick={step !== "loading" ? onClose : undefined}
@@ -221,19 +221,19 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
 
         <div className={`modal-enter relative w-full max-w-sm z-10`}>
           <div
-            className={`absolute -inset-[1px] rounded-2xl blur-sm opacity-40 ${isGoogle ? "bg-gradient-to-br from-blue-400 to-blue-600" : "bg-gradient-to-br from-sky-400 to-cyan-500"}`}
+            className={`absolute -inset-px rounded-2xl blur-sm opacity-40 ${isGoogle ? "bg-linear-to-br from-blue-400 to-blue-600" : "bg-linear-to-br from-sky-400 to-cyan-500"}`}
           />
 
           <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
             <div
-              className={`h-1 w-full ${isGoogle ? "bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500" : "bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500"}`}
+              className={`h-1 w-full ${isGoogle ? "bg-linear-to-r from-blue-500 via-blue-400 to-indigo-500" : "bg-linear-to-r from-sky-400 via-cyan-400 to-sky-500"}`}
             />
 
             <div className="p-6">
               <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm ${isGoogle ? "bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100" : "bg-gradient-to-br from-sky-50 to-cyan-50 border border-sky-100"}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm ${isGoogle ? "bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100" : "bg-linear-to-br from-sky-50 to-cyan-50 border border-sky-100"}`}
                   >
                     {isGoogle ? <GoogleIcon /> : <TelegramIcon />}
                   </div>
@@ -257,7 +257,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 )}
               </div>
 
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-100 to-transparent mb-5" />
+              <div className="h-px bg-linear-to-r from-transparent via-gray-100 to-transparent mb-5" />
 
               {step === "idle" && (
                 <div className="slide-up flex flex-col gap-4">
@@ -419,7 +419,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
               {step === "success" && (
                 <div className="slide-up flex flex-col items-center gap-4 py-4">
                   <div className="check-enter relative">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-200">
+                    <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-200">
                       <CheckCircle2
                         size={38}
                         className="text-white"
@@ -438,7 +438,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-md shadow-green-200"
+                    className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-md shadow-green-200"
                   >
                     Lanjutkan
                   </button>
