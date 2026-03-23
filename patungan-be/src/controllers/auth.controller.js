@@ -3,6 +3,10 @@ const {
   requestLoginService,
   verifyLoginTokenService,
   verifyAuthService,
+  loginWithGoogleService,
+  linkGoogleService,
+  requestLinkTelegramService,
+  verifyLinkTokenService,
 } = require("../services/auth.service");
 
 const cookieOptions = {
@@ -40,17 +44,61 @@ const verifyAuth = asyncHandler(async (req, res) => {
 });
 
 const loginGoogle = asyncHandler(async (req, res) => {
-  res.json([]);
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({
+      success: false,
+      error: "Google ID token is required",
+    });
+  }
+
+  const { user, token } = await loginWithGoogleService(idToken);
+
+  res.cookie("auth_token", token, cookieOptions);
+
+  return res.status(200).json({
+    success: true,
+    user,
+  });
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.json([]);
+  res.clearCookie("auth_token", cookieOptions);
+  return res.status(200).json({ message: "Logout successful" });
 });
 
+const linkGoogle = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken)
+    return res.status(400).json({ error: "Google ID token is required" });
+
+  const user = await linkGoogleService(req.userId, idToken);
+  return res.status(200).json({ success: true, user });
+});
+
+const requestLinkTelegram = asyncHandler(async (req, res) => {
+  const data = await requestLinkTelegramService(req.userId);
+
+  return res.status(200).json(data);
+});
+
+const verifyLinkToken = asyncHandler(async (req, res) => {
+  const { linkToken } = req.body;
+  if (!linkToken) return res.status(400).json({ error: "Link token required" });
+
+  const result = await verifyLinkTokenService(linkToken, req.userId);
+
+  if (result.status === "pending") return res.status(202).json(result);
+  return res.status(200).json(result);
+});
 module.exports = {
   verifyAuth,
   requestLogin,
   loginGoogle,
+  linkGoogle,
   verifyLoginToken,
   logout,
+  requestLinkTelegram,
+  verifyLinkToken,
 };

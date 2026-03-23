@@ -14,6 +14,11 @@ const authService = {
   verifyLoginToken: (loginToken) =>
     client.post("/auth/verify-login", { loginToken }),
   logout: () => client.post("/auth/logout"),
+
+  linkGoogle: (idToken) => client.post("/auth//link/google", { idToken }),
+  requestLinkTelegram: () => client.post("/auth/link/telegram/request"),
+  verifyLinkToken: (linkToken) =>
+    client.post("/auth/link/telegram/verify", { linkToken }),
 };
 
 export default authService;
