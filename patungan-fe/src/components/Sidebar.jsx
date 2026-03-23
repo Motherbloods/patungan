@@ -17,13 +17,15 @@ import EditGroupModal from "./EditGroupModal";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { getGradient } from "../utils/getGradient";
+import LinkAccountModal from "./LinkAccountModal";
 
 function Sidebar() {
-  const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
+  const { user, setUser, isAuthenticated, logout, isLoggingOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [linkingProvider, setLinkingProvider] = useState(null);
   const [gradStart, gradEnd] = getGradient(user?.username);
   const groupRefs = useRef({});
   const listRef = useRef(null);
@@ -33,6 +35,10 @@ function Sidebar() {
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
   const { mutate: deleteGroup } = useDeleteGroup();
+
+  const hasGoogle = user?.providers?.includes("google");
+  const hasTelegram = user?.providers?.includes("telegram");
+  const allLinked = hasGoogle && hasTelegram;
 
   const onSubmitModal = (groupData) => {
     return new Promise((resolve, reject) => {
@@ -86,6 +92,11 @@ function Sidebar() {
     });
   };
 
+  const handleLinkSuccess = (updatedUser) => {
+    setUser(updatedUser);
+    setLinkingProvider(null);
+  };
+
   useEffect(() => {
     if (!location.state?.autoScrollSidebar) return;
 
@@ -98,6 +109,16 @@ function Sidebar() {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -266,6 +287,53 @@ function Sidebar() {
 
             {menuOpen && (
               <div className="absolute bottom-full right-0 mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-50 overflow-hidden">
+                <div className="px-3 pb-1">
+                  <p className="text-xs text-gray-400 font-medium px-1 pb-1.5 uppercase tracking-wide">
+                    Tautkan Akun
+                  </p>
+
+                  {!hasGoogle && (
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setLinkingProvider("google");
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-gray-50 transition text-left"
+                    >
+                      <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-50 text-blue-500 text-xs font-bold flex-shrink-0">
+                        G
+                      </span>
+                      <span className="text-gray-700">Tautkan Google</span>
+                      <Link2 size={13} className="ml-auto text-gray-400" />
+                    </button>
+                  )}
+
+                  {!hasTelegram && (
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setLinkingProvider("telegram");
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-gray-50 transition text-left"
+                    >
+                      <span className="w-6 h-6 flex items-center justify-center rounded-full bg-sky-50 text-sky-500 text-xs font-bold flex-shrink-0">
+                        TG
+                      </span>
+                      <span className="text-gray-700">Tautkan Telegram</span>
+                      <Link2 size={13} className="ml-auto text-gray-400" />
+                    </button>
+                  )}
+
+                  {allLinked && (
+                    <div className="flex items-center gap-2.5 px-3 py-2 text-sm text-green-500">
+                      <span className="w-6 h-6 flex items-center justify-center rounded-full bg-green-50">
+                        <Check size={13} />
+                      </span>
+                      <span>Semua akun tertaut</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="border-t border-gray-100 my-1.5 mx-2" />
 
                 <div className="px-3">
@@ -319,6 +387,14 @@ function Sidebar() {
           open={showModal}
           onClose={() => setShowModal(false)}
           onSubmit={onSubmitModal}
+        />
+      )}
+
+      {linkingProvider && (
+        <LinkAccountModal
+          provider={linkingProvider}
+          onClose={() => setLinkingProvider(null)}
+          onSuccess={handleLinkSuccess}
         />
       )}
     </>
