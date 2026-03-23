@@ -3,6 +3,7 @@ const {
   requestLoginService,
   verifyLoginTokenService,
   verifyAuthService,
+  loginWithGoogleService,
 } = require("../services/auth.service");
 
 const cookieOptions = {
@@ -40,7 +41,23 @@ const verifyAuth = asyncHandler(async (req, res) => {
 });
 
 const loginGoogle = asyncHandler(async (req, res) => {
-  res.json([]);
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({
+      success: false,
+      error: "Google ID token is required",
+    });
+  }
+
+  const { user, token } = await loginWithGoogleService(idToken);
+
+  res.cookie("auth_token", token, cookieOptions);
+
+  return res.status(200).json({
+    success: true,
+    user,
+  });
 });
 
 const logout = asyncHandler(async (req, res) => {

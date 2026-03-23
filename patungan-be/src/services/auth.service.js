@@ -2,6 +2,9 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const User = require("../models/user");
 const LoginToken = require("../models/login-token");
+const { OAuth2Client } = require("google-auth-library");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -121,8 +124,86 @@ const verifyAuthService = async (userId) => {
 
   return formatUser(user);
 };
+
+const loginWithGoogleService = async (tokenId) => {
+  if (!tokenId) {
+    throw new Error("Google tokenId is required");
+  }
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokenId,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload) {
+    throw new Error("Invalid Google token payload");
+  }
+
+  const {
+    sub: googleId,
+    email,
+    name,
+    picture,
+    given_name,
+    family_name,
+  } = payload;
+
+  let user = await User.findOne({ "providers.google.id": googleId }).select(
+    "-__v",
+  );
+
+  if (!user && email) {
+    user = await User.findOne({ email }).select("-__v");
+
+    if (user) {
+      const existingGoogle = await User.findOne({
+        "providers.google.id": googleId,
+      });
+
+      if (
+        existingGoogle &&
+        existingGoogle._id.toString() !== user._id.toString()
+      ) {
+        throw new Error("Google account already linked to another user.");
+      }
+
+      user.providers.google = {
+        id: googleId,
+        email: email,
+      };
+
+      if (!user.avatar) {
+        user.avatar = picture;
+      }
+
+      await user.save();
+    }
+  }
+
+  if (!user) {
+    user = await User.create({
+      email,
+      username: name || email,
+      firstName: given_name || null,
+      lastName: family_name || null,
+      avatar: picture || null,
+      providers: {
+        google: {
+          id: googleId,
+          email: email,
+        },
+      },
+    });
+  }
+
+  const token = generateToken(user._id);
+  return { token, user: formatUser(user) };
+};
 module.exports = {
   requestLoginService,
   verifyLoginTokenService,
   verifyAuthService,
+  loginWithGoogleService,
 };
