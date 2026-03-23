@@ -12,7 +12,6 @@ const apiClient = () => {
   client.interceptors.request.use(
     (config) => config,
     (err) => {
-      console.log("API Request Error:", err.message || err);
       return Promise.reject(err);
     },
   );
@@ -20,10 +19,6 @@ const apiClient = () => {
   client.interceptors.response.use(
     (res) => res.data,
     (err) => {
-      console.log(
-        "API Response Error:",
-        err.response?.data || err.message || err,
-      );
       return Promise.reject(err);
     },
   );

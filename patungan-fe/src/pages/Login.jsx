@@ -28,7 +28,6 @@ function Login() {
   const { mutateAsync: loginGoogle } = useLoginGoogle();
 
   const handleTelegramLogin = async () => {
-    console.log("KEPANGGIL");
     setIsLoading((prev) => ({ ...prev, telegram: true }));
     //undefined itu variable yang akan dikirimkan ke api(ke mutationFn :(nahdisini varaiblenya) =>)
     requestLogin.mutate(undefined, {

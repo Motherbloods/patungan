@@ -46,33 +46,21 @@ const requestLoginService = async () => {
   };
 };
 const verifyLoginTokenService = async (loginToken) => {
-  console.log("🚀 verifyLoginTokenService called:", loginToken);
-
   if (!loginToken) {
-    console.log("❌ Login token missing");
     throw { status: 400, message: "Login token required" };
   }
 
   const tokenDoc = await LoginToken.findOne({ token: loginToken });
-  console.log("🔎 Token from DB:", tokenDoc);
 
   if (!tokenDoc) {
-    console.log("❌ Token not found in DB");
     throw { status: 404, message: "Invalid token" };
   }
 
-  console.log("📌 Token status:", tokenDoc.status);
-  console.log("⏰ Token expiresAt:", tokenDoc.expiresAt);
-
   if (tokenDoc.status === "expired" || tokenDoc.expiresAt < new Date()) {
-    console.log("⏰ Token expired condition met");
-
     throw { status: 401, message: "Token expired" };
   }
 
   if (tokenDoc.status === "pending") {
-    console.log("⌛ Token still pending (waiting for Telegram)");
-
     return {
       status: "pending",
       isAuthenticated: false,
@@ -81,20 +69,13 @@ const verifyLoginTokenService = async (loginToken) => {
   }
 
   if (tokenDoc.status === "used" && tokenDoc.telegramId) {
-    console.log("✅ Token already used, fetching user...");
-
     const user = await User.findOne({
       "providers.telegram.id": tokenDoc.telegramId,
     }).select("-__v");
 
-    console.log("👤 User found:", user);
-
     if (!user) {
-      console.log("❌ User not found");
       throw { status: 404, message: "User not found" };
     }
-
-    console.log("🔐 Generating JWT token");
 
     const jwtToken = generateToken(user._id);
 
@@ -104,14 +85,10 @@ const verifyLoginTokenService = async (loginToken) => {
       user: formatUser(user),
     };
 
-    console.log("🎉 Final result:", result);
-
     await LoginToken.deleteOne({ _id: tokenDoc._id });
 
     return result;
   }
-
-  console.log("❌ Invalid token status:", tokenDoc.status);
 
   throw { status: 400, message: "Invalid token status" };
 };
@@ -222,7 +199,7 @@ const linkGoogleService = async (userId, idToken) => {
   }
 
   const user = await User.findById(userId);
-  console.log(user, "dan ini ", userId);
+
   if (!user) throw { status: 404, message: "User not found" };
   if (user.providers?.google?.id)
     throw { status: 400, message: "Akun Google sudah terhubung ke akun ini." };

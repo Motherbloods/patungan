@@ -34,7 +34,6 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
         const isPos = b.amount > 0;
         const isZero = b.amount === 0;
         const isOwner = b.user_id?.toString() === ownerMemberId?.toString();
-        console.log(isOwner, "ini", b.user_id, "dan member", ownerMemberId);
         const m = getMemberUtil(members, b.user_id);
 
         return (
