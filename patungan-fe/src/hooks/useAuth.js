@@ -23,15 +23,13 @@ export const useRequestLogin = () => {
   });
 };
 
-export const useLoginGoogle = (idToken) => {
+export const useLoginGoogle = () => {
   const client = useQueryClient();
+
   return useMutation({
-    mutationFn: () => authService.loginGoogle(idToken),
+    mutationFn: (idToken) => authService.loginGoogle(idToken),
     onSuccess: () => {
       client.invalidateQueries(["auth"]);
-    },
-    onError: (error) => {
-      console.error("Mutation failed:", error);
     },
   });
 };
