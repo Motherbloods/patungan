@@ -58,3 +58,34 @@ export const useLogout = () => {
     },
   });
 };
+
+export const useLinkGoogle = () => {
+  return useMutation({
+    mutationFn: (idToken) => authService.linkGoogle(idToken),
+  });
+};
+
+export const useLinkTelegram = () => {
+  return useMutation({
+    mutationFn: authService.requestLinkTelegram,
+    onError: (error) => {
+      console.error("Link telegram failed:", error);
+    },
+  });
+};
+
+export const useVerifyLinkToken = (linkToken) => {
+  return useQuery({
+    queryKey: ["verifyLinkToken", linkToken],
+    queryFn: () => authService.verifyLinkToken(linkToken),
+    enabled: !!linkToken,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false, // tambah ini juga
+    refetchInterval: (query) => {
+      if (query.state.data?.linked === true) return false; // stop kalau linked
+      if (query.state.error) return false;
+      return 2000;
+    },
+  });
+};
