@@ -1,4 +1,12 @@
-import { LayoutDashboard, Menu, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  Menu,
+  X,
+  MoreVertical,
+  LogOut,
+  Link2,
+  Check,
+} from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import NewGroupModal from "./NewGroupModal";
@@ -7,13 +15,19 @@ import ICON_OPTIONS from "../config/icons";
 import GroupMenu from "./GroupMenu";
 import EditGroupModal from "./EditGroupModal";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/authContext";
+import { getGradient } from "../utils/getGradient";
 
 function Sidebar() {
+  const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [gradStart, gradEnd] = getGradient(user?.username);
   const groupRefs = useRef({});
   const listRef = useRef(null);
+  const menuRef = useRef(null);
   const location = useLocation();
 
   const { data: groupList = [], isLoading } = useGroups();
@@ -61,6 +75,15 @@ function Sidebar() {
       ),
       { duration: Infinity },
     );
+  };
+
+  const handleLogout = () => {
+    setMenuOpen(false);
+
+    logout({
+      onSuccess: () => toast.success("Berhasil logout"),
+      onError: () => toast.error("Gagal logout"),
+    });
   };
 
   useEffect(() => {
@@ -145,7 +168,10 @@ function Sidebar() {
           Groups
         </p>
 
-        <div ref={listRef} className="flex flex-col gap-1 overflow-y-auto">
+        <div
+          ref={listRef}
+          className="flex flex-col gap-1 overflow-y-auto flex-1"
+        >
           {isLoading && (
             <p className="text-sm text-gray-400 px-2 py-1">Loading groups...</p>
           )}
@@ -187,6 +213,97 @@ function Sidebar() {
               );
             })}
         </div>
+
+        {isAuthenticated && (
+          <div
+            className="mt-4 pt-4 border-t border-gray-100 relative"
+            ref={menuRef}
+          >
+            <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+              <div className="relative shrink-0">
+                {user?.avatar ? (
+                  <img
+                    src={
+                      user.avatar.includes("googleusercontent.com")
+                        ? user.avatar.replace(/=s\d+-c/, "=s40-c")
+                        : user.avatar
+                    }
+                    alt={user?.username}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md"
+                    style={{
+                      background: `linear-gradient(135deg, ${gradStart}, ${gradEnd})`,
+                    }}
+                  >
+                    {user?.username?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                )}
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" />
+              </div>
+
+              <div className="flex flex-col justify-center min-w-0 flex-1">
+                <span className="text-gray-800 font-semibold text-sm truncate leading-tight">
+                  {user?.username}
+                </span>
+                {(user?.firstName || user?.lastName) && (
+                  <span className="text-gray-400 text-xs truncate leading-tight">
+                    {[user.firstName, user.lastName].filter(Boolean).join(" ")}
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className={`p-1.5 rounded-lg transition-colors shrink-0 ${menuOpen ? "bg-gray-100 text-gray-700" : "hover:bg-gray-100 text-gray-400"}`}
+                aria-label="More options"
+              >
+                <MoreVertical size={16} />
+              </button>
+            </div>
+
+            {menuOpen && (
+              <div className="absolute bottom-full right-0 mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-50 overflow-hidden">
+                <div className="border-t border-gray-100 my-1.5 mx-2" />
+
+                <div className="px-3">
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-red-50 transition text-left text-red-500 disabled:opacity-60"
+                  >
+                    {isLoggingOut ? (
+                      <svg
+                        className="animate-spin h-4 w-4 text-red-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                    ) : (
+                      <LogOut size={15} className="shrink-0" />
+                    )}
+                    <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {editTarget && (
