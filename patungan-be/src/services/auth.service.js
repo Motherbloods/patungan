@@ -201,9 +201,41 @@ const loginWithGoogleService = async (tokenId) => {
   const token = generateToken(user._id);
   return { token, user: formatUser(user) };
 };
+
+const linkGoogleService = async (userId, idToken) => {
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload) throw { status: 400, message: "Invalid Google token" };
+
+  const { sub: googleId, email, picture } = payload;
+
+  const existing = await User.findOne({ "providers.google.id": googleId });
+  if (existing && existing._id.toString() !== userId) {
+    throw {
+      status: 409,
+      message: "Akun Google ini sudah terhubung ke akun lain.",
+    };
+  }
+
+  const user = await User.findById(userId);
+  console.log(user, "dan ini ", userId);
+  if (!user) throw { status: 404, message: "User not found" };
+  if (user.providers?.google?.id)
+    throw { status: 400, message: "Akun Google sudah terhubung ke akun ini." };
+
+  user.providers.google = { id: googleId, email };
+  if (!user.avatar) user.avatar = picture;
+  await user.save();
+
+  return formatUser(user);
+};
 module.exports = {
   requestLoginService,
   verifyLoginTokenService,
   verifyAuthService,
   loginWithGoogleService,
+  linkGoogleService,
 };
