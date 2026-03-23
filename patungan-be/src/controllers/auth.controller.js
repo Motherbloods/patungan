@@ -61,7 +61,8 @@ const loginGoogle = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.json([]);
+  res.clearCookie("auth_token", cookieOptions);
+  return res.status(200).json({ message: "Logout successful" });
 });
 
 module.exports = {
