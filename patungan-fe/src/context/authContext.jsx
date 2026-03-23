@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     authService
       .verifyAuth()
-      .then((data) => setUser(data))
+      .then((data) => setUser(data?.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
