@@ -250,6 +250,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 {step !== "loading" && (
                   <button
                     onClick={onClose}
+                    aria-label="Close"
                     className="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 mt-0.5"
                   >
                     <X size={15} />

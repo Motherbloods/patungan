@@ -53,6 +53,7 @@ function GroupInfoStep({
               <button
                 key={id}
                 title={label}
+                aria-label={label}
                 onClick={() => setGroupIconId(id)}
                 className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all ${
                   active
@@ -75,6 +76,7 @@ function GroupInfoStep({
           {COLOR_OPTIONS.map((c) => (
             <button
               key={c.id}
+              aria-label={c.text}
               onClick={() => setSelectedColor(c)}
               className={`w-8 h-8 rounded-full border-2 transition-all ${c.bg} ${
                 selectedColor.id === c.id

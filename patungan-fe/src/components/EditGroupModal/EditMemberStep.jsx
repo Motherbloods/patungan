@@ -44,6 +44,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
           <div className="relative shrink-0">
             <button
               onClick={() => setShowEmoji((v) => !v)}
+              aria-label={`Emoji ${emoji}`}
               className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-xl hover:border-blue-300 transition"
             >
               {emoji}
@@ -53,6 +54,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
                 {MEMBER_EMOJIS.map((em) => (
                   <button
                     key={em}
+                    aria-label={`Member Emoji ${em}`}
                     onClick={() => {
                       setEmoji(em);
                       setShowEmoji(false);
@@ -79,12 +81,14 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
 
           <button
             onClick={handleSave}
+            aria-label="Centang"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 text-white transition shrink-0"
           >
             <Check className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleCancel}
+            aria-label="Close"
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400 transition shrink-0"
           >
             <X className="w-3.5 h-3.5" />
@@ -110,6 +114,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={() => onTagOwner(member?._id)}
+          aria-label="Tandai"
           title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}
           className={`w-7 h-7 flex items-center justify-center rounded-full transition ${
             isOwner
@@ -122,6 +127,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
 
         <button
           onClick={() => setEditing(true)}
+          aria-label="Edit Member"
           className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 text-gray-400 hover:text-blue-500 transition"
           title="Edit member"
         >
@@ -129,6 +135,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
         </button>
         <button
           onClick={() => onDeactivate(member)}
+          aria-label="Nonaktifkan Member"
           className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-400 hover:text-red-400 transition"
           title="Nonaktifkan member"
         >
@@ -223,6 +230,7 @@ function EditMemberStep({
         <div className="relative shrink-0">
           <button
             onClick={() => setShowEmojiPicker((v) => !v)}
+            aria-label="Input Emoji"
             className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-xl hover:border-gray-300 hover:bg-gray-50 transition"
           >
             {inputEmoji}
@@ -232,6 +240,7 @@ function EditMemberStep({
               {MEMBER_EMOJIS.map((em) => (
                 <button
                   key={em}
+                  aria-label={`Member Emoji ${em}`}
                   onClick={() => {
                     setInputEmoji(em);
                     setShowEmojiPicker(false);
@@ -258,6 +267,7 @@ function EditMemberStep({
         />
         <button
           onClick={handleAdd}
+          aria-label="Tambah Member"
           className="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl shadow-sm transition-all shrink-0"
         >
           <Plus className="w-4 h-4" />

@@ -41,6 +41,7 @@ function GroupPagination({ groups, pagination }) {
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
               <button
                 key={n}
+                aria-label={`Go to page ${n}`}
                 onClick={() => goTo(n)}
                 className="transition-all duration-200"
                 style={{

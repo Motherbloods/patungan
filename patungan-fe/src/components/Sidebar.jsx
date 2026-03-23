@@ -136,6 +136,7 @@ function Sidebar() {
 
       <button
         onClick={() => setOpen(true)}
+        aria-label="Menu"
         className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
       >
         <Menu className="w-5 h-5 text-gray-600" />
@@ -166,6 +167,7 @@ function Sidebar() {
             </div>
             <button
               onClick={() => setOpen(false)}
+              aria-label="Close"
               className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg transition"
             >
               <X className="w-4 h-4 text-gray-500" />

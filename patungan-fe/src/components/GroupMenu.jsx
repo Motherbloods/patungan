@@ -58,6 +58,7 @@ function GroupMenu({ onEdit, onDelete }) {
       <button
         ref={btnRef}
         onClick={handleToggle}
+        aria-label="Menu"
         className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 transition"
       >
         <MoreHorizontal className="w-4 h-4 text-gray-400" />
