@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useLogout } from "../hooks/useAuth";
 import authService from "../services/authService";
+import LayoutSkeleton from "../components/LayoutSkeleton";
 
 const AuthContext = createContext();
 
@@ -40,7 +41,10 @@ export const AuthProvider = ({ children }) => {
       },
     });
   };
-  if (loading) return <div>Loading...</div>;
+
+  if (loading) {
+    return <LayoutSkeleton />;
+  }
 
   return (
     <AuthContext.Provider
