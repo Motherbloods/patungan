@@ -1,6 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
 const messages = require("../utils/messages");
-const { confirmLoginService } = require("../services/telegram.service");
+const {
+  confirmLoginService,
+  confirmLinkTelegramService,
+} = require("../services/telegram.service");
 
 const token = process.env.TOKEN;
 if (!token) console.error("❌ TELEGRAM TOKEN NOT FOUND");
@@ -15,6 +18,40 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const param = match[1].trim();
   if (!param) {
     return bot.sendMessage(chatId, messages.welcome);
+  }
+
+  if (param.startsWith("link_")) {
+    const linkToken = param.slice(5);
+
+    if (!uuidRegex.test(linkToken)) {
+      return bot.sendMessage(chatId, messages.invalidLink);
+    }
+
+    try {
+      await confirmLinkTelegramService({
+        linkToken,
+        telegramId: msg.from.id.toString(),
+        username: msg.from.username || "",
+        firstName: msg.from.first_name || "",
+        lastName: msg.from.last_name || "",
+      });
+      return bot.sendMessage(chatId, messages.linkSuccess);
+    } catch (error) {
+      console.error("❌ Link telegram error:", error);
+      const errorMessages = {
+        "Token expired": messages.tokenExpired,
+        "Token already used": messages.tokenUsed,
+        "Invalid token": messages.invalidLink,
+        "Akun Telegram ini sudah terhubung ke akun lain.":
+          messages.alreadyLinkedOther,
+        "Akun Telegram sudah terhubung ke akun ini.":
+          messages.alreadyLinkedSelf,
+      };
+      return bot.sendMessage(
+        chatId,
+        errorMessages[error.message] || messages.generalError,
+      );
+    }
   }
 
   if (!uuidRegex.test(param)) {

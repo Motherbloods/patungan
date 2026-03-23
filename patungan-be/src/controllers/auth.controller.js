@@ -5,6 +5,8 @@ const {
   verifyAuthService,
   loginWithGoogleService,
   linkGoogleService,
+  requestLinkTelegramService,
+  verifyLinkTokenService,
 } = require("../services/auth.service");
 
 const cookieOptions = {
@@ -75,6 +77,21 @@ const linkGoogle = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, user });
 });
 
+const requestLinkTelegram = asyncHandler(async (req, res) => {
+  const data = await requestLinkTelegramService(req.userId);
+
+  return res.status(200).json(data);
+});
+
+const verifyLinkToken = asyncHandler(async (req, res) => {
+  const { linkToken } = req.body;
+  if (!linkToken) return res.status(400).json({ error: "Link token required" });
+
+  const result = await verifyLinkTokenService(linkToken, req.userId);
+
+  if (result.status === "pending") return res.status(202).json(result);
+  return res.status(200).json(result);
+});
 module.exports = {
   verifyAuth,
   requestLogin,
@@ -82,4 +99,6 @@ module.exports = {
   linkGoogle,
   verifyLoginToken,
   logout,
+  requestLinkTelegram,
+  verifyLinkToken,
 };

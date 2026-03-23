@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const User = require("../models/user");
 const LoginToken = require("../models/login-token");
+const LinkToken = require("../models/link-token");
 const { OAuth2Client } = require("google-auth-library");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -232,10 +233,61 @@ const linkGoogleService = async (userId, idToken) => {
 
   return formatUser(user);
 };
+
+const requestLinkTelegramService = async (userId) => {
+  await LinkToken.deleteMany({ userId, status: "pending" });
+
+  const linkToken = uuidv4();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  await LinkToken.create({
+    token: linkToken,
+    userId,
+    status: "pending",
+    expiresAt,
+  });
+
+  const botUsername = process.env.TELEGRAM_BOT;
+  const telegramUrl = `https://t.me/${botUsername}?start=link_${linkToken}`;
+
+  return { linkToken, telegramUrl, expiresIn: 300 };
+};
+
+const verifyLinkTokenService = async (linkToken, userId) => {
+  const tokenDoc = await LinkToken.findOne({ token: linkToken, userId });
+
+  if (!tokenDoc) throw { status: 404, message: "Invalid token" };
+  if (tokenDoc.status === "expired" || tokenDoc.expiresAt < new Date())
+    throw { status: 401, message: "Token expired" };
+  if (tokenDoc.status === "pending")
+    return { status: "pending", linked: false };
+
+  if (tokenDoc.status === "failed") {
+    await LinkToken.deleteOne({ _id: tokenDoc._id });
+    throw {
+      status: 409,
+      message: tokenDoc.failReason || "Gagal menautkan akun.",
+    };
+  }
+
+  if (tokenDoc.status === "used" || tokenDoc.status === "delivered") {
+    const user = await User.findById(userId).select("-__v");
+
+    // Tandai sebagai delivered, jangan hapus dulu
+    if (tokenDoc.status === "used") {
+      await LinkToken.updateOne({ _id: tokenDoc._id }, { status: "delivered" });
+    }
+
+    return { status: "success", linked: true, user: formatUser(user) };
+  }
+
+  throw { status: 400, message: "Invalid token status" };
+};
 module.exports = {
   requestLoginService,
   verifyLoginTokenService,
   verifyAuthService,
   loginWithGoogleService,
   linkGoogleService,
+  requestLinkTelegramService,
+  verifyLinkTokenService,
 };
