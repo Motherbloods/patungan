@@ -1,6 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap");
-
-.login-root * {
+.login-root {
   font-family: "Sora", sans-serif;
 }
 
