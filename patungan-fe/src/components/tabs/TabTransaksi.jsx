@@ -55,7 +55,7 @@ function TabTransaksi({
         return (
           <div
             key={e._id}
-            className="bg-primary rounded-2xl overflow-hidden shadow-sm transition-all"
+            className="bg-primary rounded-2xl overflow-hidden shadow-sm transition-all w-full"
             style={{
               border: `1.5px solid ${isOpen ? payer.color : "var(--color-border)"}`,
               opacity: isDeleting ? 0.6 : 1,
@@ -64,7 +64,7 @@ function TabTransaksi({
             <button
               onClick={() => setSelected(isOpen ? null : e._id)}
               disabled={isDeleting}
-              className="w-full flex items-center gap-3 px-4 py-4 text-left transition disabled:cursor-wait"
+              className="w-full flex items-center gap-3 px-4 py-4 text-left transition disabled:cursor-wait overflow-hidden"
               style={{ ["--tw-hover-bg"]: "var(--color-bg-secondary)" }}
               onMouseEnter={(ev) =>
                 (ev.currentTarget.style.background =
@@ -81,17 +81,26 @@ function TabTransaksi({
                 {EXPENSE_EMOJI(e.name)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-primary truncate">
+                <div
+                  className="font-bold text-sm text-primary truncate"
+                  style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+                >
                   {e.name}
                 </div>
                 <div
                   className="text-xs mt-0.5"
-                  style={{ color: "var(--color-text-secondary)" }}
+                  style={{
+                    fontSize: "clamp(10px, 2.2vw, 12px)",
+                    color: "var(--color-text-secondary)",
+                  }}
                 >
                   Dibayar{" "}
                   <span
                     className="font-semibold"
-                    style={{ color: payer.color }}
+                    style={{
+                      color: payer.color,
+                      fontSize: "clamp(11px, 2.4vw, 13px)",
+                    }}
                   >
                     {payer.name}
                   </span>
@@ -111,12 +120,20 @@ function TabTransaksi({
                   />
                 ) : (
                   <>
-                    <div className="font-extrabold text-sm text-primary">
+                    <div
+                      className="font-extrabold"
+                      style={{
+                        fontSize: "clamp(14px, 3vw, 16px)",
+                      }}
+                    >
                       {fmt(e.total_amount)}
                     </div>
                     <div
                       className="text-[10px] mt-0.5"
-                      style={{ color: "var(--color-text-secondary)" }}
+                      style={{
+                        fontSize: "clamp(9px, 2vw, 11px)",
+                        color: "var(--color-text-secondary)",
+                      }}
                     >
                       {isOpen ? "▲ tutup" : "▼ detail"}
                     </div>
@@ -132,7 +149,10 @@ function TabTransaksi({
               >
                 <p
                   className="text-[11px] font-bold uppercase tracking-wide mb-3"
-                  style={{ color: "var(--color-text-secondary)" }}
+                  style={{
+                    fontSize: "clamp(10px, 2.2vw, 12px)",
+                    color: "var(--color-text-secondary)",
+                  }}
                 >
                   Pembagian
                 </p>
@@ -149,8 +169,10 @@ function TabTransaksi({
                       <Avatar members={members} uid={p.user_id} size={32} />
                       <div className="flex-1 min-w-0 flex items-center gap-1.5 flex-wrap">
                         <span
-                          className="text-sm font-semibold"
-                          style={{ color: "var(--color-text-primary)" }}
+                          className="text-sm font-semibold truncate"
+                          style={{
+                            fontSize: "clamp(13px, 2.6vw, 14px)",
+                          }}
                         >
                           {m.name}
                         </span>
@@ -166,7 +188,10 @@ function TabTransaksi({
                       </div>
                       <span
                         className="text-sm font-bold"
-                        style={{ color: isPayer ? "#16A34A" : "#DC2626" }}
+                        style={{
+                          fontSize: "clamp(12px, 2.6vw, 14px)",
+                          color: isPayer ? "#16A34A" : "#DC2626",
+                        }}
                       >
                         {isPayer ? "+" : "-"}
                         {fmt(p.share_amount)}

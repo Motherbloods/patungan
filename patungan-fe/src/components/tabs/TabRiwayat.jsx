@@ -54,7 +54,7 @@ function TabRiwayat({
     : members;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full">
       <div className="flex gap-2 flex-wrap">
         {sortedMembers.map((m) => {
           const active = filterUser === m._id;
@@ -68,6 +68,7 @@ function TabRiwayat({
                 borderColor: active ? m.color : "var(--color-border)",
                 background: active ? m.light : "var(--color-bg-primary)",
                 color: active ? m.color : "var(--color-text-secondary)",
+                fontSize: "clamp(10px, 2.2vw, 12px)",
               }}
             >
               {m.emoji} {m.name}
@@ -100,13 +101,19 @@ function TabRiwayat({
               style={{ borderBottom: "1px solid var(--color-bg-tertiary)" }}
             >
               <Avatar members={members} uid={uid} size={36} />
-              <span className="font-bold text-sm text-primary flex-1">
+              <span
+                className="font-bold text-primary flex-1 truncate"
+                style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+              >
                 {m.name}
               </span>
               {isOwner && <OwnerBadge />}
               <span
-                className="font-extrabold text-sm"
-                style={{ color: balance >= 0 ? "#16A34A" : "#DC2626" }}
+                className="font-extrabold"
+                style={{
+                  fontSize: "clamp(13px, 3vw, 15px)",
+                  color: balance >= 0 ? "#16A34A" : "#DC2626",
+                }}
               >
                 {(balance >= 0 ? "+" : "-") + fmt(balance)}
               </span>
@@ -121,7 +128,7 @@ function TabRiwayat({
                 return (
                   <div
                     key={i}
-                    className="flex items-center gap-3 py-3"
+                    className="flex items-center gap-3 py-3 w-full overflow-hidden"
                     style={{
                       borderBottom:
                         i < userHistory.length - 1
@@ -147,8 +154,11 @@ function TabRiwayat({
                           </Pill>
                         )}
                         <span
-                          className="text-xs font-medium"
-                          style={{ color: "var(--color-text-secondary)" }}
+                          className="text-xs font-medium truncate"
+                          style={{
+                            fontSize: "clamp(11px, 2.5vw, 13px)",
+                            color: "var(--color-text-secondary)",
+                          }}
                         >
                           {HISTORY_LABEL(members, h, getNameUtil)}
                         </span>
@@ -156,15 +166,21 @@ function TabRiwayat({
                       {h.expense && (
                         <div
                           className="text-[11px] mt-0.5"
-                          style={{ color: "var(--color-text-secondary)" }}
+                          style={{
+                            fontSize: "clamp(10px, 2.2vw, 12px)",
+                            color: "var(--color-text-secondary)",
+                          }}
                         >
                           📌 {h.expense}
                         </div>
                       )}
                     </div>
                     <span
-                      className="text-sm font-bold shrink-0"
-                      style={{ color: isIn ? "#16A34A" : "#DC2626" }}
+                      className="font-bold shrink-0"
+                      style={{
+                        fontSize: "clamp(12px, 2.6vw, 14px)",
+                        color: isIn ? "#16A34A" : "#DC2626",
+                      }}
                     >
                       {isIn ? "+" : "-"}
                       {fmt(h.amount)}

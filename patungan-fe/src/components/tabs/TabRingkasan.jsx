@@ -46,8 +46,7 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
 
         return (
           <div
-            key={b.user_id}
-            className="bg-primary rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+            className="bg-primary rounded-2xl p-4 flex items-center gap-4 shadow-sm w-full overflow-hidden"
             style={{
               border: `1.5px solid ${borderColor}`,
             }}
@@ -55,32 +54,40 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
             <Avatar members={members} uid={b.user_id} size={48} />
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-sm text-primary">{m.name}</span>
+                <span
+                  className="font-bold text-sm text-primary truncate"
+                  style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+                >
+                  {m.name}
+                </span>
                 {isOwner && <OwnerBadge />}
               </div>
               <div className="mt-1">
-                {isZero ? (
-                  <Pill
-                    bg="var(--color-bg-tertiary)"
-                    color="var(--color-text-secondary)"
-                  >
-                    ✅ Sudah lunas
-                  </Pill>
-                ) : isPos ? (
-                  <Pill bg="rgba(74, 222, 128, 0.15)" color="#16A34A">
-                    💰 Berhak terima
-                  </Pill>
-                ) : (
-                  <Pill bg="rgba(248, 113, 113, 0.15)" color="#DC2626">
-                    ⚠️ Perlu transfer
-                  </Pill>
-                )}
+                <div style={{ fontSize: "clamp(10px, 2.2vw, 12px)" }}>
+                  {isZero ? (
+                    <Pill
+                      bg="var(--color-bg-tertiary)"
+                      color="var(--color-text-secondary)"
+                    >
+                      ✅ Sudah lunas
+                    </Pill>
+                  ) : isPos ? (
+                    <Pill bg="rgba(74, 222, 128, 0.15)" color="#16A34A">
+                      💰 Berhak terima
+                    </Pill>
+                  ) : (
+                    <Pill bg="rgba(248, 113, 113, 0.15)" color="#DC2626">
+                      ⚠️ Perlu transfer
+                    </Pill>
+                  )}
+                </div>
               </div>
             </div>
             <div className="text-right">
               <div
-                className="text-xl font-extrabold"
+                className="text-right font-extrabold"
                 style={{
+                  fontSize: "clamp(16px, 3.5vw, 20px)",
                   color: isZero
                     ? "var(--color-text-secondary)"
                     : isPos
@@ -91,8 +98,11 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
                 {isZero ? "—" : (isPos ? "+" : "-") + fmt(b.amount)}
               </div>
               <div
-                className="text-[11px] mt-0.5"
-                style={{ color: "var(--color-text-secondary)" }}
+                className="mt-0.5"
+                style={{
+                  fontSize: "clamp(10px, 2.2vw, 11px)",
+                  color: "var(--color-text-secondary)",
+                }}
               >
                 {isZero
                   ? "selesai"

@@ -21,10 +21,13 @@ function TabTransfer({
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 w-full">
         <p
           className="text-xs font-semibold uppercase tracking-wide"
-          style={{ color: "var(--color-text-secondary)" }}
+          style={{
+            color: "var(--color-text-secondary)",
+            fontSize: "clamp(10px, 2.2vw, 12px)",
+          }}
         >
           0 transfer
         </p>
@@ -57,7 +60,7 @@ function TabTransfer({
             return (
               <div
                 key={i}
-                className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm transition-all"
+                className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm transition-all w-full overflow-hidden"
                 style={{
                   border: `1.5px solid ${
                     fromIsOwner || toIsOwner
@@ -68,7 +71,7 @@ function TabTransfer({
                   }`,
                 }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                     style={{
@@ -84,24 +87,38 @@ function TabTransfer({
                       className="text-sm flex items-center gap-1.5 flex-wrap"
                       style={{ color: "var(--color-text-primary)" }}
                     >
-                      <span className="font-bold">
+                      <span
+                        className="font-bold"
+                        style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+                      >
                         {getNameUtil(members, s.from)}
                       </span>
                       {fromIsOwner && <OwnerBadge />}
                       <span style={{ color: "var(--color-text-secondary)" }}>
                         transfer ke
                       </span>
-                      <span className="font-bold">
+                      <span
+                        className="font-bold"
+                        style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+                      >
                         {getNameUtil(members, s.to)}
                       </span>
                       {toIsOwner && <OwnerBadge />}
                     </div>
-                    <div className="font-extrabold text-base text-primary mt-0.5">
+                    <div
+                      className="font-extrabold mt-0.5"
+                      style={{
+                        fontSize: "clamp(15px, 3.2vw, 18px)",
+                      }}
+                    >
                       {fmt(s.amount)}
                     </div>
                     <div
                       className="text-[11px] mt-0.5"
-                      style={{ color: "var(--color-text-secondary)" }}
+                      style={{
+                        fontSize: "clamp(10px, 2.2vw, 12px)",
+                        color: "var(--color-text-secondary)",
+                      }}
                     >
                       1 kali transfer · langsung lunas
                     </div>
@@ -127,6 +144,9 @@ function TabTransfer({
                       onClick={() => setConfirming(null)}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
                       style={{
+                        fontSize: "clamp(11px, 2.3vw, 13px)",
+                      }}
+                      style={{
                         color: "var(--color-text-secondary)",
                         border: "1px solid var(--color-border)",
                         background: "var(--color-bg-primary)",
@@ -139,6 +159,9 @@ function TabTransfer({
                   <button
                     onClick={() => setConfirming(i)}
                     className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 text-green-600 text-xs font-bold transition"
+                    style={{
+                      fontSize: "clamp(11px, 2.4vw, 13px)",
+                    }}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Tandai Sudah Transfer
@@ -169,7 +192,7 @@ function TabTransfer({
                 className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm opacity-70"
                 style={{ border: "1.5px solid rgba(74, 222, 128, 0.4)" }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0"
                     style={{ background: "rgba(74, 222, 128, 0.15)" }}
@@ -186,7 +209,12 @@ function TabTransfer({
                         {getNameUtil(members, s.from)}
                       </span>
                       {fromIsOwner && <OwnerBadge />}
-                      <span style={{ color: "var(--color-text-secondary)" }}>
+                      <span
+                        style={{
+                          color: "var(--color-text-secondary)",
+                          fontSize: "clamp(11px, 2.4vw, 13px)",
+                        }}
+                      >
                         transfer ke
                       </span>
                       <span className="font-bold">
@@ -194,15 +222,23 @@ function TabTransfer({
                       </span>
                       {toIsOwner && <OwnerBadge />}
                     </div>
-                    <div className="font-extrabold text-base text-primary mt-0.5">
+                    <div
+                      className="font-extrabold mt-0.5"
+                      style={{
+                        fontSize: "clamp(15px, 3.2vw, 18px)",
+                      }}
+                    >
                       {fmt(s.amount)}
                     </div>
                   </div>
                   <Avatar members={members} uid={s.to} size={38} />
                 </div>
                 <div
-                  className="mt-2 text-center text-xs text-green-600 font-semibold rounded-lg py-1.5"
-                  style={{ background: "rgba(74, 222, 128, 0.1)" }}
+                  className="mt-2 text-center text-xs font-semibold rounded-lg py-1.5"
+                  style={{
+                    fontSize: "clamp(10px, 2.2vw, 12px)",
+                    background: "rgba(74, 222, 128, 0.1)",
+                  }}
                 >
                   ✓ Sudah ditransfer
                 </div>
