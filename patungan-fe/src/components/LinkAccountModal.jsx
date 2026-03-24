@@ -14,6 +14,7 @@ import {
   useLinkTelegram,
   useVerifyLinkToken,
 } from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 function LinkAccountModal({ provider, onClose, onSuccess }) {
   const [step, setStep] = useState("idle");
@@ -36,58 +37,76 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
 
   useEffect(() => {
     if (!linkData) return;
-    if (linkData.linked === true) {
+    if (linkData?.linked) {
       setStep("success");
       onSuccess(linkData.user);
+      toast.success("Akun berhasil ditautkan 🎉");
     }
   }, [linkData, onSuccess]);
 
   useEffect(() => {
     if (!linkError) return;
-    if (step === "success") return;
 
     const status = linkError.response?.status;
     const msg = linkError.response?.data?.error;
+
     if (status === 401) {
       setStep("error");
       setErrorMsg("Link kedaluwarsa. Silakan coba lagi.");
+      toast.error("Link kedaluwarsa");
     } else if (status === 409 || status === 400) {
       setStep("error");
       setErrorMsg(msg || "Gagal menautkan akun.");
+      toast.error(msg || "Gagal menautkan akun");
     }
-  }, [linkError, step]);
+  }, [linkError]);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
+
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setStep("error");
           setErrorMsg("Link kedaluwarsa. Silakan coba lagi.");
+          toast.error("Link kedaluwarsa");
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(timer);
   }, [timeLeft]);
 
   const handleRequestTelegram = () => {
     setStep("loading");
     setErrorMsg("");
+
+    const newWindow = window.open("", "_blank");
+
     requestLinkTelegram(undefined, {
       onSuccess: (res) => {
         setLinkToken(res.linkToken);
         setTelegramUrl(res.telegramUrl);
         setTimeLeft(res.expiresIn);
         setStep("waiting");
-        window.open(res.telegramUrl, "_blank");
+
+        if (newWindow) {
+          newWindow.opener = null;
+          newWindow.location.href = res.telegramUrl;
+        }
+
+        toast.success("Silakan konfirmasi di Telegram");
       },
       onError: (err) => {
+        if (newWindow) newWindow.close();
+
         setStep("error");
         setErrorMsg(
           err.response?.data?.error || "Gagal membuat link. Coba lagi.",
         );
+        toast.error("Gagal membuat link Telegram");
       },
     });
   };
@@ -95,16 +114,19 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
   const handleGoogleSuccess = (credentialResponse) => {
     setStep("loading");
     setErrorMsg("");
+
     linkGoogle(credentialResponse.credential, {
       onSuccess: (res) => {
         setStep("success");
         onSuccess(res.user);
+        toast.success("Akun Google berhasil ditautkan");
       },
       onError: (err) => {
         setStep("error");
         setErrorMsg(
           err.response?.data?.error || "Gagal menautkan Google. Coba lagi.",
         );
+        toast.error("Gagal menautkan Google");
       },
     });
   };
@@ -114,6 +136,10 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     setErrorMsg("");
     setTimeLeft(0);
     setLinkToken("");
+
+    toast("Silakan coba lagi", {
+      icon: "🔄",
+    });
   };
 
   const formatTime = (s) =>
@@ -195,32 +221,27 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
         .progress-ring { transition: stroke-dashoffset 1s linear; }
       `}</style>
 
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
         <div
           className="backdrop-enter absolute inset-0 bg-black/40 backdrop-blur-md"
           onClick={step !== "loading" ? onClose : undefined}
         />
 
-        {/* Modal */}
         <div className={`modal-enter relative w-full max-w-sm z-10`}>
-          {/* Decorative glow */}
           <div
-            className={`absolute -inset-[1px] rounded-2xl blur-sm opacity-40 ${isGoogle ? "bg-gradient-to-br from-blue-400 to-blue-600" : "bg-gradient-to-br from-sky-400 to-cyan-500"}`}
+            className={`absolute -inset-px rounded-2xl blur-sm opacity-40 ${isGoogle ? "bg-linear-to-br from-blue-400 to-blue-600" : "bg-linear-to-br from-sky-400 to-cyan-500"}`}
           />
 
           <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
-            {/* Top accent bar */}
             <div
-              className={`h-1 w-full ${isGoogle ? "bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500" : "bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500"}`}
+              className={`h-1 w-full ${isGoogle ? "bg-linear-to-r from-blue-500 via-blue-400 to-indigo-500" : "bg-linear-to-r from-sky-400 via-cyan-400 to-sky-500"}`}
             />
 
             <div className="p-6">
-              {/* Header */}
               <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm ${isGoogle ? "bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100" : "bg-gradient-to-br from-sky-50 to-cyan-50 border border-sky-100"}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm ${isGoogle ? "bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100" : "bg-linear-to-br from-sky-50 to-cyan-50 border border-sky-100"}`}
                   >
                     {isGoogle ? <GoogleIcon /> : <TelegramIcon />}
                   </div>
@@ -237,6 +258,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 {step !== "loading" && (
                   <button
                     onClick={onClose}
+                    aria-label="Close"
                     className="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 mt-0.5"
                   >
                     <X size={15} />
@@ -244,12 +266,8 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 )}
               </div>
 
-              {/* Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-100 to-transparent mb-5" />
+              <div className="h-px bg-linear-to-r from-transparent via-gray-100 to-transparent mb-5" />
 
-              {/* Steps */}
-
-              {/* IDLE */}
               {step === "idle" && (
                 <div className="slide-up flex flex-col gap-4">
                   <p className="text-gray-500 text-sm leading-relaxed">
@@ -258,7 +276,6 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                       : "Klik tombol di bawah, lalu konfirmasi di Telegram Bot untuk menautkan akunmu."}
                   </p>
 
-                  {/* Benefits */}
                   <div
                     className={`rounded-xl p-3.5 flex items-start gap-3 ${isGoogle ? "bg-blue-50/70 border border-blue-100" : "bg-sky-50/70 border border-sky-100"}`}
                   >
@@ -296,7 +313,6 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 </div>
               )}
 
-              {/* LOADING */}
               {step === "loading" && (
                 <div className="slide-up flex flex-col items-center gap-4 py-6">
                   <div className="relative">
@@ -343,10 +359,8 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 </div>
               )}
 
-              {/* WAITING (Telegram) */}
               {step === "waiting" && (
                 <div className="slide-up flex flex-col gap-3">
-                  {/* Countdown ring */}
                   <div className="flex flex-col items-center py-3">
                     <div className="relative w-24 h-24">
                       <svg
@@ -395,13 +409,16 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => window.open(telegramUrl, "_blank")}
+                  <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-sm"
+                    aria-label="Buka Telegram lagi di tab baru"
                   >
                     <ExternalLink size={15} />
                     Buka Telegram Lagi
-                  </button>
+                  </a>
                   <button
                     onClick={onClose}
                     className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl font-medium text-sm transition-all"
@@ -411,11 +428,10 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 </div>
               )}
 
-              {/* SUCCESS */}
               {step === "success" && (
                 <div className="slide-up flex flex-col items-center gap-4 py-4">
                   <div className="check-enter relative">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-200">
+                    <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-200">
                       <CheckCircle2
                         size={38}
                         className="text-white"
@@ -434,14 +450,13 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-md shadow-green-200"
+                    className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] shadow-md shadow-green-200"
                   >
                     Lanjutkan
                   </button>
                 </div>
               )}
 
-              {/* ERROR */}
               {step === "error" && (
                 <div className="slide-up flex flex-col gap-3">
                   <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3">

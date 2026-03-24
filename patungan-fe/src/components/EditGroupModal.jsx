@@ -150,6 +150,7 @@ function EditGroupModal({ open, onClose, group }) {
             </div>
             <button
               onClick={handleClose}
+              aria-label="Close"
               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition mt-0.5"
             >
               <X className="w-4 h-4 text-gray-400" />

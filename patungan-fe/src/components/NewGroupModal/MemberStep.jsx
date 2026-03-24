@@ -62,6 +62,7 @@ function MemberStep({
         <div className="relative shrink-0" ref={pickerRef}>
           <button
             onClick={() => setShowEmoji((v) => !v)}
+            aria-label="Input Emoji"
             className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-xl hover:border-gray-300 hover:bg-gray-50 transition"
           >
             {inputEmoji}
@@ -71,6 +72,7 @@ function MemberStep({
               {MEMBER_EMOJIS.map((em) => (
                 <button
                   key={em}
+                  aria-label={`Member Emoji ${em}`}
                   onClick={() => {
                     setInputEmoji(em);
                     setShowEmoji(false);
@@ -98,6 +100,7 @@ function MemberStep({
         />
         <button
           onClick={addMember}
+          aria-label="Tambah Member"
           className="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl shadow-sm transition-all shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -147,6 +150,7 @@ function MemberStep({
 
                 <button
                   onClick={() => handleTagOwner(m.id)}
+                  aria-label="Tandai"
                   title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}
                   className={`w-7 h-7 flex items-center justify-center rounded-full transition ${
                     isOwner
@@ -159,6 +163,7 @@ function MemberStep({
 
                 <button
                   onClick={() => handleRemove(m.id)}
+                  aria-label="Delete"
                   className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

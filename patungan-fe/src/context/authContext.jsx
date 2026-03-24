@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useLogout } from "../hooks/useAuth";
 import authService from "../services/authService";
+import LayoutSkeleton from "../components/LayoutSkeleton";
 
 const AuthContext = createContext();
 
@@ -20,15 +21,30 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const logout = () => {
+  const logout = (options = {}) => {
     logoutApiRef.current.mutate(undefined, {
-      onSuccess: () => setUser(null),
-      onError: (err) => console.error("Logout gagal:", err),
-      onSettled: () => setLoading(false),
+      ...options,
+
+      onSuccess: (data, variables, context) => {
+        setUser(null);
+        options.onSuccess?.(data, variables, context);
+      },
+
+      onError: (err, variables, context) => {
+        console.error("Logout gagal:", err);
+        options.onError?.(err, variables, context);
+      },
+
+      onSettled: (data, error, variables, context) => {
+        setLoading(false);
+        options.onSettled?.(data, error, variables, context);
+      },
     });
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return <LayoutSkeleton />;
+  }
 
   return (
     <AuthContext.Provider
