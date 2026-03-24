@@ -83,6 +83,8 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     setStep("loading");
     setErrorMsg("");
 
+    const newWindow = window.open("", "_blank");
+
     requestLinkTelegram(undefined, {
       onSuccess: (res) => {
         setLinkToken(res.linkToken);
@@ -90,10 +92,16 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
         setTimeLeft(res.expiresIn);
         setStep("waiting");
 
-        window.open(res.telegramUrl, "_blank");
+        if (newWindow) {
+          newWindow.opener = null;
+          newWindow.location.href = res.telegramUrl;
+        }
+
         toast.success("Silakan konfirmasi di Telegram");
       },
       onError: (err) => {
+        if (newWindow) newWindow.close();
+
         setStep("error");
         setErrorMsg(
           err.response?.data?.error || "Gagal membuat link. Coba lagi.",
@@ -401,13 +409,16 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => window.open(telegramUrl, "_blank")}
+                  <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-sm"
+                    aria-label="Buka Telegram lagi di tab baru"
                   >
                     <ExternalLink size={15} />
                     Buka Telegram Lagi
-                  </button>
+                  </a>
                   <button
                     onClick={onClose}
                     className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl font-medium text-sm transition-all"

@@ -19,7 +19,7 @@ const TelegramIcon = () => (
 
 const FloatingDots = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {[...Array(6)].map((_, i) => (
+    {[...Array(3)].map((_, i) => (
       <div
         key={i}
         className="absolute rounded-full opacity-[0.07]"
@@ -62,14 +62,24 @@ function Login() {
 
   const handleTelegramLogin = () => {
     setIsLoading((p) => ({ ...p, telegram: true }));
+
+    const newWindow = window.open("", "_blank");
+
     requestLogin.mutate(undefined, {
       onSuccess: (data) => {
         setLoginToken(data.token);
         setTelegramUrl(data.telegramUrl);
         setTimeLeft(data.expiresIn ?? 300);
-        window.open(data.telegramUrl, "_blank");
+
+        if (newWindow) {
+          newWindow.opener = null;
+          newWindow.location.href = data.telegramUrl;
+        }
       },
-      onError: () => toast.error("Gagal login via Telegram"),
+      onError: () => {
+        if (newWindow) newWindow.close();
+        toast.error("Gagal login via Telegram");
+      },
       onSettled: () => setIsLoading((p) => ({ ...p, telegram: false })),
     });
   };
@@ -330,15 +340,16 @@ function Login() {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => window.open(telegramUrl, "_blank")}
+                  <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="btn-open-tg w-full py-3 text-white rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 mb-3"
                   >
                     <TelegramIcon />
                     Buka Telegram
                     <ExternalLink size={14} className="opacity-70" />
-                  </button>
-
+                  </a>
                   <button
                     onClick={handleCancel}
                     className="btn-cancel w-full py-3 border border-gray-200 text-gray-500 rounded-2xl font-medium text-sm"
