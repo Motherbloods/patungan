@@ -2,6 +2,72 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
+// Calculate the max radius needed to cover the entire screen from a corner
+function getMaxRadius(x, y) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  return Math.hypot(Math.max(x, w - x), Math.max(y, h - y));
+}
+
+async function animateThemeTransition(isDarkNext, applyTheme) {
+  // Origin: top-left corner
+  const x = 0;
+  const y = 0;
+  const radius = getMaxRadius(x, y);
+
+  const clipStart = `circle(0px at ${x}px ${y}px)`;
+  const clipEnd = `circle(${radius}px at ${x}px ${y}px)`;
+
+  // Fallback: no animation support
+  if (!document.startViewTransition) {
+    applyTheme(isDarkNext);
+    return;
+  }
+
+  // Inject keyframe style once
+  if (!document.getElementById("theme-transition-style")) {
+    const style = document.createElement("style");
+    style.id = "theme-transition-style";
+    style.textContent = `
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      ::view-transition-new(root) {
+        animation: theme-clip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @keyframes theme-clip-in {
+        from { clip-path: ${clipStart}; }
+        to   { clip-path: ${clipEnd}; }
+      }
+    `;
+    document.head.appendChild(style);
+  } else {
+    // Update keyframe with current clip values (in case window resized)
+    document.getElementById("theme-transition-style").textContent = `
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      ::view-transition-new(root) {
+        animation: theme-clip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @keyframes theme-clip-in {
+        from { clip-path: ${clipStart}; }
+        to   { clip-path: ${clipEnd}; }
+      }
+    `;
+  }
+
+  const transition = document.startViewTransition(() => {
+    applyTheme(isDarkNext);
+  });
+
+  await transition.finished;
+}
+
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem("theme");
@@ -9,23 +75,24 @@ export function ThemeProvider({ children }) {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
-  useEffect(() => {
+  // Apply theme class to <html> without animation (used on init & inside transition)
+  const applyThemeClass = (dark) => {
     const root = document.documentElement;
-
-    // Remove both classes first
     root.classList.remove("dark", "light");
+    root.classList.add(dark ? "dark" : "light");
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  };
 
-    // Add the appropriate class
-    if (isDark) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.add("light");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDark]);
+  // On mount: apply theme immediately (no animation)
+  useEffect(() => {
+    applyThemeClass(isDark);
+  }, []);
 
-  const toggleTheme = () => setIsDark(!isDark);
+  const toggleTheme = async () => {
+    const next = !isDark;
+    await animateThemeTransition(next, applyThemeClass);
+    setIsDark(next);
+  };
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>
