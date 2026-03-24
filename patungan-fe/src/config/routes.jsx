@@ -1,13 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { GOOGLE_CLIENT_ID } from "./env.js";
 import MainLayout from "../layout/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
-import PublicRoute from "../components/PublicRoute.jsx";
 import LayoutSkeleton from "../components/LayoutSkeleton.jsx";
-
-const Login = lazy(() => import("../pages/Login"));
+const LoginRoute = lazy(() => import("./LoginRoute.jsx"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const GroupDetail = lazy(() => import("../pages/GroupDetail"));
 
@@ -24,7 +20,7 @@ const routes = [
       {
         path: "dashboard",
         element: (
-          <Suspense fallback={<LayoutSkeleton />}>
+          <Suspense fallback={null}>
             <Dashboard />
           </Suspense>
         ),
@@ -32,7 +28,7 @@ const routes = [
       {
         path: "groups/:id",
         element: (
-          <Suspense fallback={<LayoutSkeleton />}>
+          <Suspense fallback={null}>
             <GroupDetail />
           </Suspense>
         ),
@@ -42,13 +38,9 @@ const routes = [
   {
     path: "/login",
     element: (
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <Suspense fallback={<LayoutSkeleton />}>
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        </Suspense>
-      </GoogleOAuthProvider>
+      <Suspense fallback={null}>
+        <LoginRoute />
+      </Suspense>
     ),
   },
 ];

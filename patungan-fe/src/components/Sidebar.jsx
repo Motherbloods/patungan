@@ -9,16 +9,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import NewGroupModal from "./NewGroupModal";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
+const NewGroupModal = lazy(() => import("./NewGroupModal"));
 import { useAddGroup, useDeleteGroup, useGroups } from "../hooks/useGroups";
 import ICON_OPTIONS from "../config/icons";
 import GroupMenu from "./GroupMenu";
-import EditGroupModal from "./EditGroupModal";
+const EditGroupModal = lazy(() => import("./EditGroupModal"));
 import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { getGradient } from "../utils/getGradient";
-import LinkAccountModal from "./LinkAccountModal";
+const LinkAccountModal = lazy(() => import("./LinkAccountModal"));
 import { useQueryClient } from "@tanstack/react-query";
 import expenseService from "../services/expenseService";
 
@@ -526,25 +526,31 @@ function Sidebar() {
       </div>
 
       {editTarget && (
-        <EditGroupModal
-          open={!!editTarget}
-          group={editTarget}
-          onClose={() => setEditTarget(null)}
-        />
+        <Suspense fallback={null}>
+          <EditGroupModal
+            open={!!editTarget}
+            group={editTarget}
+            onClose={() => setEditTarget(null)}
+          />
+        </Suspense>
       )}
       {showModal && (
-        <NewGroupModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          onSubmit={onSubmitModal}
-        />
+        <Suspense fallback={null}>
+          <NewGroupModal
+            open={showModal}
+            onClose={() => setShowModal(false)}
+            onSubmit={onSubmitModal}
+          />
+        </Suspense>
       )}
       {linkingProvider && (
-        <LinkAccountModal
-          provider={linkingProvider}
-          onClose={() => setLinkingProvider(null)}
-          onSuccess={handleLinkSuccess}
-        />
+        <Suspense fallback={null}>
+          <LinkAccountModal
+            provider={linkingProvider}
+            onClose={() => setLinkingProvider(null)}
+            onSuccess={handleLinkSuccess}
+          />
+        </Suspense>
       )}
     </>
   );
