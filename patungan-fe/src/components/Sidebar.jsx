@@ -7,6 +7,8 @@ import {
   Link2,
   Check,
   ChevronRight,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
@@ -21,6 +23,8 @@ import { getGradient } from "../utils/getGradient";
 const LinkAccountModal = lazy(() => import("./LinkAccountModal"));
 import { useQueryClient } from "@tanstack/react-query";
 import expenseService from "../services/expenseService";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../context/themeContext";
 
 function Sidebar() {
   const { user, setUser, isAuthenticated, logout, isLoggingOut } = useAuth();
@@ -38,6 +42,7 @@ function Sidebar() {
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
   const { mutate: deleteGroup } = useDeleteGroup();
+  const { isDark } = useTheme();
 
   const hasGoogle = user?.providers?.includes("google");
   const hasTelegram = user?.providers?.includes("telegram");
@@ -56,8 +61,8 @@ function Sidebar() {
     toast(
       (t) => (
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-800">Hapus grup ini?</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm font-medium text-primary">Hapus grup ini?</p>
+          <p className="text-xs text-secondary">
             Semua data akan hilang permanen.
           </p>
           <div className="flex gap-2 mt-1">
@@ -75,7 +80,7 @@ function Sidebar() {
             </button>
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="flex-1 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs font-semibold hover:bg-gray-50 transition"
+              className="flex-1 py-1.5 rounded-lg border border-custom text-secondary text-xs font-semibold hover:bg-tertiary transition"
             >
               Batal
             </button>
@@ -134,16 +139,16 @@ function Sidebar() {
         .group-item:hover .group-actions { opacity: 1; }
         .sidebar-scrollbar::-webkit-scrollbar { width: 3px; }
         .sidebar-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
       `}</style>
 
       <button
         onClick={() => setOpen(true)}
         aria-label="Menu"
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-primary rounded-xl shadow-md border border-custom hover:shadow-lg transition-shadow"
       >
-        <Menu className="w-5 h-5 text-gray-600" />
+        <Menu className="w-5 h-5 text-secondary" />
       </button>
 
       {open && (
@@ -155,7 +160,7 @@ function Sidebar() {
 
       <div
         className={`
-          fixed md:static top-0 left-0 h-screen bg-white flex flex-col
+          fixed md:static top-0 left-0 h-screen bg-primary flex flex-col
           w-full md:w-64 transition-transform duration-300 z-50
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
@@ -167,14 +172,14 @@ function Sidebar() {
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold text-blue-600">Patungan</h2>
               </div>
-              <p className="text-xs text-gray-500">Kelola grup patungan</p>
+              <p className="text-xs text-secondary">Kelola grup patungan</p>
             </div>
             <button
               onClick={() => setOpen(false)}
               aria-label="Close"
-              className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg transition"
+              className="md:hidden p-1.5 hover:bg-tertiary rounded-lg transition"
             >
-              <X className="w-4 h-4 text-gray-500" />
+              <X className="w-4 h-4 text-secondary" />
             </button>
           </div>
 
@@ -183,7 +188,7 @@ function Sidebar() {
               setShowModal(true);
               setOpen(false);
             }}
-            className="bg-blue-500  mx-1 mb-5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md shadow-blue-100 hover:shadow-blue-200"
+            className="btn-primary mx-1 mb-5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md shadow-blue-100 hover:shadow-blue-200"
           >
             <span className="text-white text-lg leading-none mb-0.5">+</span>
             <span className="text-white">Buat Grup Baru</span>
@@ -200,7 +205,7 @@ function Sidebar() {
               ${
                 isActive
                   ? "bg-blue-50 text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  : "text-secondary hover:bg-tertiary hover:text-primary"
               }`
             }
           >
@@ -210,10 +215,10 @@ function Sidebar() {
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-full -ml-1" />
                 )}
                 <div
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isActive ? "bg-blue-100" : "bg-gray-100 group-hover:bg-blue-50"}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isActive ? "bg-blue-100" : "bg-tertiary group-hover:bg-blue-50"}`}
                 >
                   <LayoutDashboard
-                    className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-gray-500 group-hover:text-blue-500"}`}
+                    className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-secondary group-hover:text-blue-500"}`}
                   />
                 </div>
                 <span className="text-sm font-medium">Dashboard</span>
@@ -225,11 +230,11 @@ function Sidebar() {
           </NavLink>
 
           <div className="flex items-center justify-between px-3 mt-3 mb-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-secondary uppercase tracking-widest">
               Grup
             </p>
             {!isLoading && groupList.length > 0 && (
-              <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-secondary bg-tertiary px-1.5 py-0.5 rounded-full">
                 {groupList.length}
               </span>
             )}
@@ -244,7 +249,7 @@ function Sidebar() {
                 {[...Array(3)].map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 bg-gray-100 rounded-xl animate-pulse"
+                    className="h-10 bg-tertiary rounded-xl animate-pulse"
                     style={{ opacity: 1 - i * 0.25 }}
                   />
                 ))}
@@ -253,10 +258,10 @@ function Sidebar() {
 
             {!isLoading && groupList.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-tertiary flex items-center justify-center">
                   <span className="text-xl">📂</span>
                 </div>
-                <p className="text-xs text-gray-400 leading-relaxed">
+                <p className="text-xs text-secondary leading-relaxed">
                   Belum ada grup.
                   <br />
                   Buat grup pertamamu!
@@ -287,7 +292,7 @@ function Sidebar() {
                         ${
                           isActive
                             ? "bg-blue-50 text-blue-700 shadow-sm"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                            : "text-secondary hover:bg-tertiary hover:text-primary"
                         }`
                       }
                     >
@@ -318,7 +323,7 @@ function Sidebar() {
 
           {isAuthenticated && (
             <div
-              className="mt-3 pt-3 border-t border-gray-100 relative"
+              className="mt-3 pt-3 border-t border-custom relative"
               ref={menuRef}
             >
               {!allLinked && (
@@ -345,7 +350,7 @@ function Sidebar() {
               )}
 
               <div
-                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all cursor-pointer ${menuOpen ? "bg-gray-100" : "hover:bg-gray-50"}`}
+                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all cursor-pointer ${menuOpen ? "bg-tertiary" : "hover:bg-secondary"}`}
                 onClick={() => setMenuOpen((prev) => !prev)}
               >
                 <div className="relative shrink-0">
@@ -357,11 +362,11 @@ function Sidebar() {
                           : user.avatar
                       }
                       alt={user?.username}
-                      className="w-9 h-9 rounded-xl object-cover ring-2 ring-white shadow-sm"
+                      className="w-9 h-9 rounded-xl object-cover ring-2 ring-primary shadow-sm"
                     />
                   ) : (
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white"
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-primary"
                       style={{
                         background: `linear-gradient(135deg, ${gradStart}, ${gradEnd})`,
                       }}
@@ -369,15 +374,15 @@ function Sidebar() {
                       {user?.username?.charAt(0)?.toUpperCase() || "?"}
                     </div>
                   )}
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full shadow-sm" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 border-2 border-primary rounded-full shadow-sm" />
                 </div>
 
                 <div className="flex flex-col justify-center min-w-0 flex-1">
-                  <span className="text-gray-800 font-semibold text-sm truncate leading-tight">
+                  <span className="text-primary font-semibold text-sm truncate leading-tight">
                     {user?.username}
                   </span>
                   {(user?.firstName || user?.lastName) && (
-                    <span className="text-gray-400 text-[11px] truncate leading-tight">
+                    <span className="text-secondary text-[11px] truncate leading-tight">
                       {[user.firstName, user.lastName]
                         .filter(Boolean)
                         .join(" ")}
@@ -387,16 +392,29 @@ function Sidebar() {
 
                 <MoreVertical
                   size={15}
-                  className={`shrink-0 transition-colors ${menuOpen ? "text-gray-600" : "text-gray-300"}`}
+                  className={`shrink-0 transition-colors ${menuOpen ? "text-primary" : "text-secondary"}`}
                 />
               </div>
 
               {menuOpen && (
-                <div className="menu-enter absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden">
+                <div className="menu-enter absolute bottom-full left-0 right-0 mb-2 bg-primary border border-custom rounded-2xl shadow-2xl overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 hover:bg-secondary transition-colors">
+                    <div className="flex items-center gap-2.5 text-sm text-primary">
+                      {isDark ? (
+                        <Moon size={15} className="text-blue-400" />
+                      ) : (
+                        <Sun size={15} className="text-yellow-400" />
+                      )}
+                      <span>Tema</span>
+                    </div>
+                    <ThemeToggle />
+                  </div>
+                  <div className="border-t border-custom my-1.5 mx-2" />
+
                   {!allLinked && (
                     <>
                       <div className="px-3 pt-3 pb-1">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider px-1 mb-1.5">
+                        <p className="text-[10px] text-secondary font-bold uppercase tracking-wider px-1 mb-1.5">
                           Tautkan Akun
                         </p>
                         {!hasGoogle && (
@@ -427,12 +445,12 @@ function Sidebar() {
                                 />
                               </svg>
                             </div>
-                            <span className="text-gray-700 font-medium group-hover/btn:text-blue-600 transition-colors">
+                            <span className="text-primary font-medium group-hover/btn:text-blue-600 transition-colors">
                               Tautkan Google
                             </span>
                             <Link2
                               size={12}
-                              className="ml-auto text-gray-300 group-hover/btn:text-blue-400 transition-colors"
+                              className="ml-auto text-secondary group-hover/btn:text-blue-400 transition-colors"
                             />
                           </button>
                         )}
@@ -453,17 +471,17 @@ function Sidebar() {
                                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.488c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 14.71l-2.95-.924c-.642-.202-.654-.642.136-.95l11.532-4.448c.534-.194 1.002.13.674.86z" />
                               </svg>
                             </div>
-                            <span className="text-gray-700 font-medium group-hover/btn:text-sky-600 transition-colors">
+                            <span className="text-primary font-medium group-hover/btn:text-sky-600 transition-colors">
                               Tautkan Telegram
                             </span>
                             <Link2
                               size={12}
-                              className="ml-auto text-gray-300 group-hover/btn:text-sky-400 transition-colors"
+                              className="ml-auto text-secondary group-hover/btn:text-sky-400 transition-colors"
                             />
                           </button>
                         )}
                       </div>
-                      <div className="border-t border-gray-100 mx-3 my-1" />
+                      <div className="border-t border-custom mx-3 my-1" />
                     </>
                   )}
 
@@ -477,7 +495,7 @@ function Sidebar() {
                           Semua akun tertaut
                         </span>
                       </div>
-                      <div className="border-t border-gray-100 mx-3 my-0.5" />
+                      <div className="border-t border-custom mx-3 my-0.5" />
                     </>
                   )}
 

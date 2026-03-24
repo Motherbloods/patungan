@@ -35,8 +35,8 @@ function TabRiwayat({
   if (isEmpty) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">
+        <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+          <p className="text-sm text-secondary">
             Belum ada riwayat transaksi di grup ini.
           </p>
         </div>
@@ -65,9 +65,9 @@ function TabRiwayat({
               onClick={() => setFilterUser(active ? null : m._id)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 text-xs font-bold transition-all"
               style={{
-                borderColor: active ? m.color : "#E5E7EB",
-                background: active ? m.light : "#fff",
-                color: active ? m.color : "#6B7280",
+                borderColor: active ? m.color : "var(--color-border)",
+                background: active ? m.light : "var(--color-bg-primary)",
+                color: active ? m.color : "var(--color-text-secondary)",
               }}
             >
               {m.emoji} {m.name}
@@ -90,12 +90,17 @@ function TabRiwayat({
         return (
           <div
             key={uid}
-            className="bg-white rounded-2xl shadow-sm overflow-hidden"
-            style={{ border: `1.5px solid ${isOwner ? "#BFDBFE" : "#E5E7EB"}` }}
+            className="bg-primary rounded-2xl shadow-sm overflow-hidden"
+            style={{
+              border: `1.5px solid ${isOwner ? "rgba(96, 165, 250, 0.5)" : "var(--color-border)"}`,
+            }}
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50">
+            <div
+              className="flex items-center gap-3 px-4 py-3"
+              style={{ borderBottom: "1px solid var(--color-bg-tertiary)" }}
+            >
               <Avatar members={members} uid={uid} size={36} />
-              <span className="font-bold text-sm text-gray-900 flex-1">
+              <span className="font-bold text-sm text-primary flex-1">
                 {m.name}
               </span>
               {isOwner && <OwnerBadge />}
@@ -120,29 +125,39 @@ function TabRiwayat({
                     style={{
                       borderBottom:
                         i < userHistory.length - 1
-                          ? "1px solid #F3F4F6"
+                          ? "1px solid var(--color-bg-tertiary)"
                           : "none",
                     }}
                   >
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
-                      style={{ background: isIn ? "#DCFCE7" : "#FEE2E2" }}
+                      style={{
+                        background: isIn
+                          ? "rgba(74, 222, 128, 0.15)"
+                          : "rgba(248, 113, 113, 0.15)",
+                      }}
                     >
                       {isIn ? "⬇️" : "⬆️"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {isSettlement && (
-                          <Pill bg="#DBEAFE" color="#1D4ED8">
+                          <Pill bg="rgba(59, 130, 246, 0.15)" color="#3B82F6">
                             Transfer akhir
                           </Pill>
                         )}
-                        <span className="text-xs text-gray-600 font-medium">
+                        <span
+                          className="text-xs font-medium"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
                           {HISTORY_LABEL(members, h, getNameUtil)}
                         </span>
                       </div>
                       {h.expense && (
-                        <div className="text-[11px] text-gray-400 mt-0.5">
+                        <div
+                          className="text-[11px] mt-0.5"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
                           📌 {h.expense}
                         </div>
                       )}

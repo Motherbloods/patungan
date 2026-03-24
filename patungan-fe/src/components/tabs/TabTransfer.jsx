@@ -22,11 +22,14 @@ function TabTransfer({
   if (isEmpty) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        <p
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           0 transfer
         </p>
-        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">
+        <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+          <p className="text-sm text-secondary">
             Tidak ada transfer yang diperlukan.
           </p>
         </div>
@@ -39,7 +42,10 @@ function TabTransfer({
     <div className="flex flex-col gap-3">
       {suggestions.length > 0 && (
         <>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          <p
+            className="text-xs font-semibold uppercase tracking-wide"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             {suggestions.length} transfer perlu diselesaikan
           </p>
 
@@ -51,38 +57,52 @@ function TabTransfer({
             return (
               <div
                 key={i}
-                className="bg-white rounded-2xl px-4 py-3.5 shadow-sm transition-all"
+                className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm transition-all"
                 style={{
                   border: `1.5px solid ${
                     fromIsOwner || toIsOwner
-                      ? "#BFDBFE"
+                      ? "rgba(96, 165, 250, 0.5)"
                       : isConfirming
-                        ? "#FCA5A5"
-                        : "#E5E7EB"
+                        ? "rgba(248, 113, 113, 0.5)"
+                        : "var(--color-border)"
                   }`,
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                    style={{
+                      background: "var(--color-bg-tertiary)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
                     {i + 1}
                   </div>
                   <Avatar members={members} uid={s.from} size={38} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-800 flex items-center gap-1.5 flex-wrap">
+                    <div
+                      className="text-sm flex items-center gap-1.5 flex-wrap"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       <span className="font-bold">
                         {getNameUtil(members, s.from)}
                       </span>
                       {fromIsOwner && <OwnerBadge />}
-                      <span className="text-gray-400">transfer ke</span>
+                      <span style={{ color: "var(--color-text-secondary)" }}>
+                        transfer ke
+                      </span>
                       <span className="font-bold">
                         {getNameUtil(members, s.to)}
                       </span>
                       {toIsOwner && <OwnerBadge />}
                     </div>
-                    <div className="font-extrabold text-base text-gray-900 mt-0.5">
+                    <div className="font-extrabold text-base text-primary mt-0.5">
                       {fmt(s.amount)}
                     </div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">
+                    <div
+                      className="text-[11px] mt-0.5"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       1 kali transfer · langsung lunas
                     </div>
                   </div>
@@ -105,7 +125,12 @@ function TabTransfer({
                     </button>
                     <button
                       onClick={() => setConfirming(null)}
-                      className="text-xs font-bold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 bg-white transition"
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
+                      style={{
+                        color: "var(--color-text-secondary)",
+                        border: "1px solid var(--color-border)",
+                        background: "var(--color-bg-primary)",
+                      }}
                     >
                       Batal
                     </button>
@@ -127,7 +152,10 @@ function TabTransfer({
 
       {settlements.length > 0 && (
         <>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-1">
+          <p
+            className="text-xs font-semibold uppercase tracking-wide mt-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             {settlements.length} transfer selesai
           </p>
 
@@ -138,33 +166,44 @@ function TabTransfer({
             return (
               <div
                 key={s._id ?? i}
-                className="bg-white rounded-2xl px-4 py-3.5 shadow-sm opacity-70"
-                style={{ border: "1.5px solid #BBF7D0" }}
+                className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm opacity-70"
+                style={{ border: "1.5px solid rgba(74, 222, 128, 0.4)" }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-xs shrink-0">
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0"
+                    style={{ background: "rgba(74, 222, 128, 0.15)" }}
+                  >
                     ✅
                   </div>
                   <Avatar members={members} uid={s.from} size={38} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-800 flex items-center gap-1.5 flex-wrap">
+                    <div
+                      className="text-sm flex items-center gap-1.5 flex-wrap"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       <span className="font-bold">
                         {getNameUtil(members, s.from)}
                       </span>
                       {fromIsOwner && <OwnerBadge />}
-                      <span className="text-gray-400">transfer ke</span>
+                      <span style={{ color: "var(--color-text-secondary)" }}>
+                        transfer ke
+                      </span>
                       <span className="font-bold">
                         {getNameUtil(members, s.to)}
                       </span>
                       {toIsOwner && <OwnerBadge />}
                     </div>
-                    <div className="font-extrabold text-base text-gray-900 mt-0.5">
+                    <div className="font-extrabold text-base text-primary mt-0.5">
                       {fmt(s.amount)}
                     </div>
                   </div>
                   <Avatar members={members} uid={s.to} size={38} />
                 </div>
-                <div className="mt-2 text-center text-xs text-green-600 font-semibold bg-green-50 rounded-lg py-1.5">
+                <div
+                  className="mt-2 text-center text-xs text-green-600 font-semibold rounded-lg py-1.5"
+                  style={{ background: "rgba(74, 222, 128, 0.1)" }}
+                >
                   ✓ Sudah ditransfer
                 </div>
               </div>

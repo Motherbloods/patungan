@@ -2,12 +2,21 @@ function InfoBox({ title = "💡 Gimana cara hitung ini?", children }) {
   return (
     <div
       className="rounded-2xl p-4"
-      style={{ background: "#EFF6FF", border: "1.5px solid #BFDBFE" }}
+      style={{
+        background: "rgba(59, 130, 246, 0.08)",
+        border: "1.5px solid rgba(96, 165, 250, 0.4)",
+      }}
     >
-      <div className="font-bold text-sm mb-2" style={{ color: "#1D4ED8" }}>
+      <div
+        className="font-bold text-sm mb-2"
+        style={{ color: "var(--color-blue)" }}
+      >
         {title}
       </div>
-      <p className="text-xs leading-relaxed m-0" style={{ color: "#3B82F6" }}>
+      <p
+        className="text-xs leading-relaxed m-0"
+        style={{ color: "rgba(96, 165, 250, 0.9)" }}
+      >
         {children ?? (
           <>
             Semua hutang-piutang digabung jadi{" "}

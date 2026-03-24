@@ -20,11 +20,14 @@ function TabTransaksi({
   if (!expenses || expenses.length === 0) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        <p
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           0 transaksi
         </p>
-        <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">
+        <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+          <p className="text-sm text-secondary">
             Belum ada transaksi di grup ini.
           </p>
         </div>
@@ -34,7 +37,10 @@ function TabTransaksi({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+      <p
+        className="text-xs font-semibold uppercase tracking-wide"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         {expenses.length} transaksi
       </p>
 
@@ -49,16 +55,24 @@ function TabTransaksi({
         return (
           <div
             key={e._id}
-            className="bg-white rounded-2xl overflow-hidden shadow-sm transition-all"
+            className="bg-primary rounded-2xl overflow-hidden shadow-sm transition-all"
             style={{
-              border: `1.5px solid ${isOpen ? payer.color : "#E5E7EB"}`,
+              border: `1.5px solid ${isOpen ? payer.color : "var(--color-border)"}`,
               opacity: isDeleting ? 0.6 : 1,
             }}
           >
             <button
               onClick={() => setSelected(isOpen ? null : e._id)}
               disabled={isDeleting}
-              className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition disabled:cursor-wait"
+              className="w-full flex items-center gap-3 px-4 py-4 text-left transition disabled:cursor-wait"
+              style={{ ["--tw-hover-bg"]: "var(--color-bg-secondary)" }}
+              onMouseEnter={(ev) =>
+                (ev.currentTarget.style.background =
+                  "var(--color-bg-secondary)")
+              }
+              onMouseLeave={(ev) =>
+                (ev.currentTarget.style.background = "transparent")
+              }
             >
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -67,10 +81,13 @@ function TabTransaksi({
                 {EXPENSE_EMOJI(e.name)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-gray-900 truncate">
+                <div className="font-bold text-sm text-primary truncate">
                   {e.name}
                 </div>
-                <div className="text-xs text-gray-400 mt-0.5">
+                <div
+                  className="text-xs mt-0.5"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Dibayar{" "}
                   <span
                     className="font-semibold"
@@ -88,13 +105,19 @@ function TabTransaksi({
               </div>
               <div className="text-right shrink-0">
                 {isDeleting ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
+                  <Loader2
+                    className="w-5 h-5 animate-spin mx-auto"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  />
                 ) : (
                   <>
-                    <div className="font-extrabold text-sm text-gray-900">
+                    <div className="font-extrabold text-sm text-primary">
                       {fmt(e.total_amount)}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">
+                    <div
+                      className="text-[10px] mt-0.5"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       {isOpen ? "▲ tutup" : "▼ detail"}
                     </div>
                   </>
@@ -103,8 +126,14 @@ function TabTransaksi({
             </button>
 
             {isOpen && !isDeleting && (
-              <div className="border-t border-gray-50 px-4 pt-3 pb-4">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">
+              <div
+                className="px-4 pt-3 pb-4"
+                style={{ borderTop: "1px solid var(--color-bg-tertiary)" }}
+              >
+                <p
+                  className="text-[11px] font-bold uppercase tracking-wide mb-3"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Pembagian
                 </p>
                 {e.participants.map((p) => {
@@ -119,7 +148,10 @@ function TabTransaksi({
                     >
                       <Avatar members={members} uid={p.user_id} size={32} />
                       <div className="flex-1 min-w-0 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-semibold text-gray-700">
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: "var(--color-text-primary)" }}
+                        >
                           {m.name}
                         </span>
                         {isOwner && <OwnerBadge />}
@@ -143,9 +175,16 @@ function TabTransaksi({
                   );
                 })}
 
-                <div className="mt-3 pt-3 border-t border-dashed border-gray-200 flex justify-between text-sm">
-                  <span className="text-gray-400">Total</span>
-                  <span className="font-extrabold text-gray-900">
+                <div
+                  className="mt-3 pt-3 flex justify-between text-sm"
+                  style={{
+                    borderTop: "1px dashed var(--color-border)",
+                  }}
+                >
+                  <span style={{ color: "var(--color-text-secondary)" }}>
+                    Total
+                  </span>
+                  <span className="font-extrabold text-primary">
                     {fmt(e.total_amount)}
                   </span>
                 </div>
@@ -167,7 +206,12 @@ function TabTransaksi({
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
-                      className="text-xs font-bold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 bg-white transition"
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
+                      style={{
+                        color: "var(--color-text-secondary)",
+                        border: "1px solid var(--color-border)",
+                        background: "var(--color-bg-primary)",
+                      }}
                     >
                       Batal
                     </button>

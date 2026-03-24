@@ -25,7 +25,10 @@ function GroupInfoStep({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           Nama Grup
         </label>
         <input
@@ -36,14 +39,22 @@ function GroupInfoStep({
             setGroupName(e.target.value);
             setError("");
           }}
-          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          style={{
+            backgroundColor: "var(--color-bg-primary)",
+            color: "var(--color-text-primary)",
+            borderColor: "var(--color-border)",
+          }}
+          className="w-full rounded-xl px-4 py-2.5 text-sm border placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
           autoFocus
         />
         {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           Ikon
         </label>
         <div className="grid grid-cols-6 gap-2">
@@ -55,10 +66,18 @@ function GroupInfoStep({
                 title={label}
                 aria-label={label}
                 onClick={() => setGroupIconId(id)}
+                style={
+                  active
+                    ? {}
+                    : {
+                        borderColor: "var(--color-border)",
+                        color: "var(--color-text-secondary)",
+                      }
+                }
                 className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all ${
                   active
                     ? `${selectedColor.bg} ${selectedColor.text} border-current`
-                    : "border-gray-100 hover:border-gray-300 text-gray-400"
+                    : "hover:border-[var(--color-text-secondary)]"
                 }`}
               >
                 <Icon className="w-5 h-5 stroke-2" />
@@ -69,7 +88,10 @@ function GroupInfoStep({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <label
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           Warna
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -78,9 +100,14 @@ function GroupInfoStep({
               key={c.id}
               aria-label={c.text}
               onClick={() => setSelectedColor(c)}
+              style={
+                selectedColor.id === c.id
+                  ? { borderColor: "var(--color-text-primary)" }
+                  : {}
+              }
               className={`w-8 h-8 rounded-full border-2 transition-all ${c.bg} ${
                 selectedColor.id === c.id
-                  ? "border-gray-500 scale-110 shadow-md"
+                  ? "scale-110 shadow-md"
                   : "border-transparent hover:scale-105"
               }`}
             />

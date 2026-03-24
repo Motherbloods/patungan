@@ -19,6 +19,7 @@ function GroupPagination({ groups, pagination }) {
       return next;
     });
   }
+
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
@@ -32,7 +33,7 @@ function GroupPagination({ groups, pagination }) {
           <button
             onClick={() => goTo(Math.max(1, page - 1))}
             disabled={page === 1}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-xl border border-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 active:scale-95"
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-xl border border-custom text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-tertiary active:scale-95"
           >
             <ChevronLeft className="w-3.5 h-3.5" /> Prev
           </button>
@@ -48,7 +49,7 @@ function GroupPagination({ groups, pagination }) {
                   width: n === page ? 20 : 8,
                   height: 8,
                   borderRadius: 99,
-                  background: n === page ? "#3B82F6" : "#D1D5DB",
+                  background: n === page ? "#3B82F6" : "var(--color-border)",
                 }}
               />
             ))}
@@ -62,7 +63,7 @@ function GroupPagination({ groups, pagination }) {
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                   page === i + 1
                     ? "bg-blue-500 text-white"
-                    : "text-gray-500 hover:bg-gray-200"
+                    : "text-secondary hover:bg-tertiary"
                 }`}
               >
                 {i + 1}
@@ -73,13 +74,14 @@ function GroupPagination({ groups, pagination }) {
           <button
             onClick={() => goTo(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-xl border border-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 active:scale-95"
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-xl border border-custom text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-tertiary active:scale-95"
           >
             Next <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
-      <p className="text-center text-[11px] text-gray-400">
+
+      <p className="text-center text-[11px] text-secondary">
         {start + 1}–{Math.min(start + PAGE_SIZE, totalItems)} dari {totalItems}{" "}
         grup
       </p>

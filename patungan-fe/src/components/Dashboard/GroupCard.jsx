@@ -16,7 +16,7 @@ function GroupCard({ group }) {
     <NavLink
       to={`/groups/${group._id}`}
       state={{ autoScrollSidebar: true }}
-      className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3"
+      className="bg-primary rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3 border border-custom"
     >
       <div className="flex items-start justify-between">
         <div
@@ -36,17 +36,17 @@ function GroupCard({ group }) {
             {isZero ? "Lunas" : (isPos ? "+" : "-") + fmt(Math.abs(myBalance))}
           </span>
         ) : (
-          <span className="text-xs font-medium px-2 py-1 rounded-lg bg-gray-50 text-gray-300">
+          <span className="text-xs font-medium px-2 py-1 rounded-lg bg-tertiary text-secondary">
             —
           </span>
         )}
       </div>
 
       <div>
-        <p className="font-bold text-sm text-gray-900 leading-tight">
+        <p className="font-bold text-sm text-primary leading-tight">
           {group.name}
         </p>
-        <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+        <p className="text-xs text-secondary mt-1 flex items-center gap-2">
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
             {group.member_count}
@@ -58,9 +58,9 @@ function GroupCard({ group }) {
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-        <span className="text-[11px] text-gray-400">Total pengeluaran</span>
-        <span className="text-xs font-bold text-gray-600">
+      <div className="flex items-center justify-between pt-2 border-t border-custom">
+        <span className="text-[11px] text-secondary">Total pengeluaran</span>
+        <span className="text-xs font-bold text-primary">
           {fmt(group.total_expenses)}
         </span>
       </div>

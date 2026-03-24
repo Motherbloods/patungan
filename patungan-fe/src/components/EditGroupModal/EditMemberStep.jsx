@@ -23,34 +23,61 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
     setShowEmoji(false);
   };
 
+  // Inactive member row
   if (!member?.isActive) {
     return (
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-100 opacity-50">
+      <div
+        style={{
+          backgroundColor: "var(--color-bg-secondary)",
+          borderColor: "var(--color-border)",
+        }}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl border opacity-50"
+      >
         <span className="text-xl">{member?.emoji || "👤"}</span>
-        <span className="flex-1 text-sm font-medium text-gray-400 line-through">
+        <span
+          className="flex-1 text-sm font-medium line-through"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           {member?.name}
         </span>
-        <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+        <span
+          style={{
+            color: "var(--color-text-secondary)",
+            backgroundColor: "var(--color-bg-tertiary)",
+          }}
+          className="text-[10px] px-2 py-0.5 rounded-full"
+        >
           Nonaktif
         </span>
       </div>
     );
   }
 
+  // Editing row
   if (editing) {
     return (
-      <div className="flex flex-col gap-2 px-4 py-3 bg-blue-50 rounded-xl border border-blue-200">
+      <div className="flex flex-col gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-2">
           <div className="relative shrink-0">
             <button
               onClick={() => setShowEmoji((v) => !v)}
               aria-label={`Emoji ${emoji}`}
-              className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-xl hover:border-blue-300 transition"
+              style={{
+                backgroundColor: "var(--color-bg-primary)",
+                borderColor: "var(--color-border)",
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border-blue-300 transition"
             >
               {emoji}
             </button>
             {showEmoji && (
-              <div className="absolute top-12 left-0 z-20 bg-white border border-gray-200 rounded-2xl p-2 shadow-lg grid grid-cols-6 gap-1 w-44">
+              <div
+                style={{
+                  backgroundColor: "var(--color-bg-primary)",
+                  borderColor: "var(--color-border)",
+                }}
+                className="absolute top-12 left-0 z-20 border rounded-2xl p-2 shadow-lg grid grid-cols-6 gap-1 w-44"
+              >
                 {MEMBER_EMOJIS.map((em) => (
                   <button
                     key={em}
@@ -59,7 +86,12 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
                       setEmoji(em);
                       setShowEmoji(false);
                     }}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-gray-100 transition ${emoji === em ? "bg-blue-50" : ""}`}
+                    style={
+                      emoji === em
+                        ? { backgroundColor: "var(--color-bg-tertiary)" }
+                        : {}
+                    }
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-[var(--color-bg-tertiary)] transition"
                   >
                     {em}
                   </button>
@@ -76,7 +108,12 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
               if (e.key === "Enter") handleSave();
               if (e.key === "Escape") handleCancel();
             }}
-            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition bg-white"
+            style={{
+              backgroundColor: "var(--color-bg-primary)",
+              color: "var(--color-text-primary)",
+              borderColor: "var(--color-border)",
+            }}
+            className="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
           />
 
           <button
@@ -89,7 +126,8 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
           <button
             onClick={handleCancel}
             aria-label="Close"
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400 transition shrink-0"
+            style={{ color: "var(--color-text-secondary)" }}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--color-bg-tertiary)] transition shrink-0"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -98,14 +136,28 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
     );
   }
 
+  // Normal row
   return (
     <div
+      style={
+        isOwner
+          ? {}
+          : {
+              backgroundColor: "var(--color-bg-secondary)",
+              borderColor: "var(--color-border)",
+            }
+      }
       className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border group transition-all ${
-        isOwner ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"
+        isOwner
+          ? "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800"
+          : ""
       }`}
     >
       <span className="text-xl">{member?.emoji || "👤"}</span>
-      <span className="flex-1 text-sm font-medium text-gray-700">
+      <span
+        className="flex-1 text-sm font-medium"
+        style={{ color: "var(--color-text-primary)" }}
+      >
         {member?.name}
       </span>
 
@@ -116,10 +168,11 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
           onClick={() => onTagOwner(member?._id)}
           aria-label="Tandai"
           title={isOwner ? "Batalkan tandai" : "Tandai sebagai kamu"}
+          style={isOwner ? {} : { color: "var(--color-text-secondary)" }}
           className={`w-7 h-7 flex items-center justify-center rounded-full transition ${
             isOwner
-              ? "bg-blue-100 text-blue-500 hover:bg-blue-200"
-              : "text-gray-400 hover:bg-blue-50 hover:text-blue-400"
+              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-500 hover:bg-blue-200 dark:hover:bg-blue-900"
+              : "hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-400"
           }`}
         >
           <UserCheck className="w-3.5 h-3.5" />
@@ -128,15 +181,18 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
         <button
           onClick={() => setEditing(true)}
           aria-label="Edit Member"
-          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 text-gray-400 hover:text-blue-500 transition"
+          style={{ color: "var(--color-text-secondary)" }}
+          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 dark:hover:bg-blue-950/30 hover:text-blue-500 transition"
           title="Edit member"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
+
         <button
           onClick={() => onDeactivate(member)}
           aria-label="Nonaktifkan Member"
-          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-400 hover:text-red-400 transition"
+          style={{ color: "var(--color-text-secondary)" }}
+          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-400 transition"
           title="Nonaktifkan member"
         >
           <UserX className="w-3.5 h-3.5" />
@@ -148,14 +204,20 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
 
 function DeactivateConfirm({ member, onConfirm, onCancel }) {
   return (
-    <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex flex-col gap-3">
+    <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3">
         <span className="text-2xl">{member?.emoji || "👤"}</span>
         <div>
-          <p className="text-sm font-semibold text-gray-800">
+          <p
+            className="text-sm font-semibold"
+            style={{ color: "var(--color-text-primary)" }}
+          >
             Nonaktifkan {member?.name}?
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p
+            className="text-xs mt-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Member tidak akan bisa dipilih di transaksi baru. Riwayat transaksi
             sebelumnya tetap tersimpan dan tidak terpengaruh.
           </p>
@@ -164,7 +226,11 @@ function DeactivateConfirm({ member, onConfirm, onCancel }) {
       <div className="flex gap-2">
         <button
           onClick={onCancel}
-          className="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-white transition"
+          style={{
+            borderColor: "var(--color-border)",
+            color: "var(--color-text-secondary)",
+          }}
+          className="flex-1 py-2 rounded-xl border text-sm font-semibold hover:bg-[var(--color-bg-tertiary)] transition"
         >
           Batal
         </button>
@@ -231,12 +297,22 @@ function EditMemberStep({
           <button
             onClick={() => setShowEmojiPicker((v) => !v)}
             aria-label="Input Emoji"
-            className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-xl hover:border-gray-300 hover:bg-gray-50 transition"
+            style={{
+              borderColor: "var(--color-border)",
+              backgroundColor: "var(--color-bg-primary)",
+            }}
+            className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition"
           >
             {inputEmoji}
           </button>
           {showEmojiPicker && (
-            <div className="absolute top-12 left-0 z-10 bg-white border border-gray-200 rounded-2xl p-2 shadow-lg grid grid-cols-6 gap-1 w-44">
+            <div
+              style={{
+                backgroundColor: "var(--color-bg-primary)",
+                borderColor: "var(--color-border)",
+              }}
+              className="absolute top-12 left-0 z-10 border rounded-2xl p-2 shadow-lg grid grid-cols-6 gap-1 w-44"
+            >
               {MEMBER_EMOJIS.map((em) => (
                 <button
                   key={em}
@@ -245,7 +321,12 @@ function EditMemberStep({
                     setInputEmoji(em);
                     setShowEmojiPicker(false);
                   }}
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-gray-100 transition ${inputEmoji === em ? "bg-blue-50" : ""}`}
+                  style={
+                    inputEmoji === em
+                      ? { backgroundColor: "var(--color-bg-tertiary)" }
+                      : {}
+                  }
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-[var(--color-bg-tertiary)] transition"
                 >
                   {em}
                 </button>
@@ -263,12 +344,17 @@ function EditMemberStep({
             setAddError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          style={{
+            backgroundColor: "var(--color-bg-primary)",
+            color: "var(--color-text-primary)",
+            borderColor: "var(--color-border)",
+          }}
+          className="flex-1 border rounded-xl px-4 py-2.5 text-sm placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
         />
         <button
           onClick={handleAdd}
           aria-label="Tambah Member"
-          className="w-10 h-10 flex items-center justify-center bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl shadow-sm transition-all shrink-0"
+          className="w-10 h-10 flex items-center justify-center btn-primary active:scale-95 rounded-xl shadow-sm transition-all shrink-0"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -280,7 +366,10 @@ function EditMemberStep({
 
       <div className="flex flex-col gap-2">
         {activeMembers.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-gray-300">
+          <div
+            className="flex flex-col items-center gap-2 py-6"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             <span className="text-3xl">👥</span>
             <p className="text-xs font-medium">Tidak ada member aktif</p>
           </div>
@@ -309,7 +398,10 @@ function EditMemberStep({
 
       {inactiveMembers.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase">
+          <p
+            className="text-xs font-semibold uppercase"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Nonaktif ({inactiveMembers.length})
           </p>
           {inactiveMembers.map((m) => (
@@ -325,7 +417,10 @@ function EditMemberStep({
         </div>
       )}
 
-      <p className="text-center text-xs text-gray-400">
+      <p
+        className="text-center text-xs"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         {activeMembers.length} member aktif
       </p>
     </div>

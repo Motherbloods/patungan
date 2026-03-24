@@ -91,26 +91,41 @@ function NewGroupModal({ open, onClose, onSubmit }) {
   return (
     <div
       className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}
+      style={{ background: "rgba(0,0,0,0.45)" }}
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-6 pt-5 pb-4 border-b border-gray-100">
+      <div className="bg-primary w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div
+          className="px-6 pt-5 pb-4"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h2 className="text-base font-bold text-gray-900">
+              <h2 className="text-base font-bold text-primary">
                 {STEP_META[step]?.title}
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
                 {STEP_META[step]?.sub}
               </p>
             </div>
             <button
               onClick={handleClose}
               aria-label="Close"
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition mt-0.5"
+              className="w-8 h-8 flex items-center justify-center rounded-full transition mt-0.5"
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--color-bg-tertiary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
             >
-              <X className="w-4 h-4 text-gray-400" />
+              <X
+                className="w-4 h-4"
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </button>
           </div>
 
@@ -120,7 +135,8 @@ function NewGroupModal({ open, onClose, onSubmit }) {
                 key={s}
                 className="h-1 rounded-full flex-1 transition-all duration-300"
                 style={{
-                  background: s <= step ? "#3B82F6" : "#E5E7EB",
+                  background:
+                    s <= step ? "var(--color-blue)" : "var(--color-border)",
                 }}
               />
             ))}
@@ -160,12 +176,26 @@ function NewGroupModal({ open, onClose, onSubmit }) {
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+        <div
+          className="px-6 py-4 flex gap-3"
+          style={{ borderTop: "1px solid var(--color-border)" }}
+        >
           {step === 1 ? (
             <>
               <button
                 onClick={handleClose}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition"
+                style={{
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-secondary)",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background =
+                    "var(--color-bg-secondary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
               >
                 Batal
               </button>
@@ -184,7 +214,19 @@ function NewGroupModal({ open, onClose, onSubmit }) {
                   setError("");
                 }}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition flex items-center justify-center gap-1.5 disabled:opacity-40"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-1.5 disabled:opacity-40"
+                style={{
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-secondary)",
+                }}
+                onMouseEnter={(e) =>
+                  !isSubmitting &&
+                  (e.currentTarget.style.background =
+                    "var(--color-bg-secondary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
               >
                 <ChevronLeft className="w-4 h-4" /> Kembali
               </button>
