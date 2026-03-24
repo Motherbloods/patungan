@@ -19,6 +19,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/authContext";
 import { getGradient } from "../utils/getGradient";
 import LinkAccountModal from "./LinkAccountModal";
+import { useQueryClient } from "@tanstack/react-query";
+import expenseService from "../services/expenseService";
 
 function Sidebar() {
   const { user, setUser, isAuthenticated, logout, isLoggingOut } = useAuth();
@@ -41,6 +43,8 @@ function Sidebar() {
   const hasTelegram = user?.providers?.includes("telegram");
   const allLinked = hasGoogle && hasTelegram;
   const linkedCount = [hasGoogle, hasTelegram].filter(Boolean).length;
+
+  const queryClient = useQueryClient();
 
   const onSubmitModal = (groupData) => {
     return new Promise((resolve, reject) => {
@@ -271,6 +275,13 @@ function Sidebar() {
                       onClick={() => setOpen(false)}
                       to={`/groups/${group._id}`}
                       ref={(el) => (groupRefs.current[group._id] = el)}
+                      onMouseEnter={() => {
+                        queryClient.prefetchQuery({
+                          queryKey: ["groups", group._id],
+                          queryFn: () => expenseService.getSummary(group._id),
+                          staleTime: 30_000,
+                        });
+                      }}
                       className={({ isActive }) =>
                         `flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all pr-9 relative
                         ${
