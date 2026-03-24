@@ -12,10 +12,14 @@ function BalanceBar({ owe, owed }) {
           <p className="text-xs font-semibold text-secondary uppercase tracking-wide">
             Neraca Keuangan
           </p>
-          <p className="text-sm text-secondary mt-0.5">
+          <p
+            className="text-sm text-secondary mt-0.5"
+            style={{ fontSize: "clamp(12px, 2.5vw, 14px)" }}
+          >
             Bersih:{" "}
             <span
               className={`font-bold ${net >= 0 ? "text-emerald-500" : "text-rose-500"}`}
+              style={{ fontSize: "clamp(14px, 3vw, 18px)" }}
             >
               {net >= 0 ? "+" : "-"}
               {fmt(Math.abs(net))}
@@ -23,11 +27,17 @@ function BalanceBar({ owe, owed }) {
           </p>
         </div>
         <div className="text-right text-xs text-secondary">
-          <div className="flex items-center gap-1 justify-end mb-0.5">
+          <div
+            className="flex items-center gap-1 justify-end mb-0.5"
+            style={{ fontSize: "clamp(11px, 2.2vw, 13px)" }}
+          >
             <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
             Terima {fmt(owed)}
           </div>
-          <div className="flex items-center gap-1 justify-end">
+          <div
+            className="flex items-center gap-1 justify-end"
+            style={{ fontSize: "clamp(11px, 2.2vw, 13px)" }}
+          >
             <span className="w-2 h-2 rounded-full bg-rose-400 inline-block" />
             Bayar {fmt(owe)}
           </div>

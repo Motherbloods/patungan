@@ -21,10 +21,16 @@ function ActivityItem({ activity }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-primary truncate">
+        <p
+          className="text-sm font-medium text-primary truncate"
+          style={{ fontSize: "clamp(13px, 2.8vw, 15px)" }}
+        >
           {activity.expense ?? ACTIVITY_LABEL[activity.type] ?? activity.type}
         </p>
-        <p className="text-xs text-secondary mt-0.5">
+        <p
+          className="text-xs text-secondary mt-0.5"
+          style={{ fontSize: "clamp(10px, 2.2vw, 12px)" }}
+        >
           <span className="font-semibold" style={{ color: "#6366F1" }}>
             {activity.groupName}
           </span>{" "}
@@ -33,9 +39,10 @@ function ActivityItem({ activity }) {
       </div>
 
       <span
-        className="text-sm font-bold shrink-0"
+        className="font-bold shrink-0"
         style={{
           color: ACTIVITY_COLOR[activity.type] ?? "var(--color-text-primary)",
+          fontSize: "clamp(12px, 2.6vw, 14px)",
         }}
       >
         {isIncoming ? "+" : "-"}

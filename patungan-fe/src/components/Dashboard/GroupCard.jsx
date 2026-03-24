@@ -16,7 +16,7 @@ function GroupCard({ group }) {
     <NavLink
       to={`/groups/${group._id}`}
       state={{ autoScrollSidebar: true }}
-      className="bg-primary rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3 border border-custom"
+      className="bg-primary rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex flex-col gap-3 border border-custom w-full overflow-hidden"
     >
       <div className="flex items-start justify-between">
         <div
@@ -31,6 +31,7 @@ function GroupCard({ group }) {
             style={{
               background: isZero ? "#F3F4F6" : isPos ? "#DCFCE7" : "#FEE2E2",
               color: isZero ? "#9CA3AF" : isPos ? "#16A34A" : "#DC2626",
+              fontSize: "clamp(10px, 2.2vw, 12px)",
             }}
           >
             {isZero ? "Lunas" : (isPos ? "+" : "-") + fmt(Math.abs(myBalance))}
@@ -46,7 +47,10 @@ function GroupCard({ group }) {
         <p className="font-bold text-sm text-primary leading-tight">
           {group.name}
         </p>
-        <p className="text-xs text-secondary mt-1 flex items-center gap-2">
+        <p
+          className="text-xs text-secondary mt-1 flex items-center gap-2"
+          style={{ fontSize: "clamp(10px, 2.2vw, 12px)" }}
+        >
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
             {group.member_count}
@@ -60,7 +64,10 @@ function GroupCard({ group }) {
 
       <div className="flex items-center justify-between pt-2 border-t border-custom">
         <span className="text-[11px] text-secondary">Total pengeluaran</span>
-        <span className="text-xs font-bold text-primary">
+        <span
+          className="text-xs font-bold text-primary"
+          style={{ fontSize: "clamp(12px, 2.5vw, 14px)" }}
+        >
           {fmt(group.total_expenses)}
         </span>
       </div>

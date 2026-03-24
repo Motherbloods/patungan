@@ -180,7 +180,7 @@ function Dashboard() {
             </div>
           ) : (
             <>
-              <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom">
+              <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom w-full overflow-hidden">
                 {allActivities.map((ra) => (
                   <ActivityItem key={ra._id ?? ra.id} activity={ra} />
                 ))}
