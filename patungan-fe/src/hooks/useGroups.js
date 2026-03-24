@@ -7,6 +7,7 @@ export const useGroups = () => {
   return useQuery({
     queryKey: ["groups"],
     queryFn: groupService.getAll,
+    staleTime: 30_000,
   });
 };
 
