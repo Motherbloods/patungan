@@ -1,10 +1,15 @@
+import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import Dashboard from "../pages/Dashboard";
-import GroupDetail from "../pages/GroupDetail";
-import Login from "../pages/Login";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GOOGLE_CLIENT_ID } from "./env.js";
 import MainLayout from "../layout/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import PublicRoute from "../components/PublicRoute.jsx";
+import LayoutSkeleton from "../components/LayoutSkeleton.jsx";
+
+const Login = lazy(() => import("../pages/Login"));
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const GroupDetail = lazy(() => import("../pages/GroupDetail"));
 
 const routes = [
   {
@@ -16,16 +21,34 @@ const routes = [
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: "dashboard", element: <Dashboard /> }, // ← hapus "/"
-      { path: "groups/:id", element: <GroupDetail /> }, // ← hapus "/"
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<LayoutSkeleton />}>
+            <Dashboard />
+          </Suspense>
+        ),
+      },
+      {
+        path: "groups/:id",
+        element: (
+          <Suspense fallback={<LayoutSkeleton />}>
+            <GroupDetail />
+          </Suspense>
+        ),
+      },
     ],
   },
   {
     path: "/login",
     element: (
-      <PublicRoute>
-        <Login />
-      </PublicRoute>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <Suspense fallback={<LayoutSkeleton />}>
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        </Suspense>
+      </GoogleOAuthProvider>
     ),
   },
 ];
