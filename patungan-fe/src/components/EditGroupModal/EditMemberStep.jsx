@@ -91,7 +91,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
                         ? { backgroundColor: "var(--color-bg-tertiary)" }
                         : {}
                     }
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-[var(--color-bg-tertiary)] transition"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg(--color-bg-tertiary) transition"
                   >
                     {em}
                   </button>
@@ -127,7 +127,7 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
             onClick={handleCancel}
             aria-label="Close"
             style={{ color: "var(--color-text-secondary)" }}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--color-bg-tertiary)] transition shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg(--color-bg-tertiary) transition shrink-0"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -230,7 +230,7 @@ function DeactivateConfirm({ member, onConfirm, onCancel }) {
             borderColor: "var(--color-border)",
             color: "var(--color-text-secondary)",
           }}
-          className="flex-1 py-2 rounded-xl border text-sm font-semibold hover:bg-[var(--color-bg-tertiary)] transition"
+          className="flex-1 py-2 rounded-xl border text-sm font-semibold hover:bg(--color-bg-tertiary) transition"
         >
           Batal
         </button>
@@ -301,7 +301,7 @@ function EditMemberStep({
               borderColor: "var(--color-border)",
               backgroundColor: "var(--color-bg-primary)",
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition"
+            className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border(--color-text-secondary) hover:bg(--color-bg-tertiary) transition"
           >
             {inputEmoji}
           </button>
@@ -326,7 +326,7 @@ function EditMemberStep({
                       ? { backgroundColor: "var(--color-bg-tertiary)" }
                       : {}
                   }
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-[var(--color-bg-tertiary)] transition"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg(--color-bg-tertiary) transition"
                 >
                   {em}
                 </button>
@@ -349,7 +349,7 @@ function EditMemberStep({
             color: "var(--color-text-primary)",
             borderColor: "var(--color-border)",
           }}
-          className="flex-1 border rounded-xl px-4 py-2.5 text-sm placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          className="flex-1 border rounded-xl px-4 py-2.5 text-sm placeholder:text(--color-text-secondary) focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
         />
         <button
           onClick={handleAdd}

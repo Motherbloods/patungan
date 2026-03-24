@@ -71,7 +71,7 @@ function MemberStep({
               borderColor: "var(--color-border)",
               backgroundColor: "var(--color-bg-primary)",
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition"
+            className="w-10 h-10 flex items-center justify-center rounded-xl border text-xl hover:border-(--color-text-secondary) hover:bg-(--color-bg-tertiary) transition"
           >
             {inputEmoji}
           </button>
@@ -97,7 +97,7 @@ function MemberStep({
                       ? { backgroundColor: "var(--color-bg-tertiary)" }
                       : {}
                   }
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-[var(--color-bg-tertiary)] transition"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-(--color-bg-tertiary) transition"
                 >
                   {em}
                 </button>
@@ -120,7 +120,7 @@ function MemberStep({
             color: "var(--color-text-primary)",
             borderColor: "var(--color-border)",
           }}
-          className="flex-1 border rounded-xl px-4 py-2.5 text-sm placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          className="flex-1 border rounded-xl px-4 py-2.5 text-sm placeholder:text-(--color-text-secondary) focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
           autoFocus
         />
 

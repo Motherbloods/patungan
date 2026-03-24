@@ -44,7 +44,7 @@ function GroupInfoStep({
             color: "var(--color-text-primary)",
             borderColor: "var(--color-border)",
           }}
-          className="w-full rounded-xl px-4 py-2.5 text-sm border placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+          className="w-full rounded-xl px-4 py-2.5 text-sm border placeholder:text-(--color-text-secondary) focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
           autoFocus
         />
         {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
@@ -77,7 +77,7 @@ function GroupInfoStep({
                 className={`aspect-square flex items-center justify-center rounded-xl border-2 transition-all ${
                   active
                     ? `${selectedColor.bg} ${selectedColor.text} border-current`
-                    : "hover:border-[var(--color-text-secondary)]"
+                    : "hover:border-(--color-text-secondary)"
                 }`}
               >
                 <Icon className="w-5 h-5 stroke-2" />

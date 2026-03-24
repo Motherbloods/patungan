@@ -7,7 +7,7 @@ function SummaryCard({ icon: Icon, label, value, sub, color, bg }) {
         <Icon style={{ width: 18, height: 18 }} />
       </div>
       <div>
-        <p className="text-2xl font-extrabold text-gray-900 leading-none break-words">
+        <p className="text-2xl font-extrabold text-gray-900 leading-none wrap-break-words">
           {value}
         </p>
         <p className="text-xs font-semibold text-secondary mt-1">{label}</p>
