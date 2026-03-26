@@ -59,21 +59,40 @@ function GroupMenu({ onEdit, onDelete }) {
         ref={btnRef}
         onClick={handleToggle}
         aria-label="Menu"
-        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 transition"
+        className="w-7 h-7 flex items-center justify-center rounded-lg transition"
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.background = "var(--color-bg-tertiary)")
+        }
+        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
       >
-        <MoreHorizontal className="w-4 h-4 text-gray-400" />
+        <MoreHorizontal
+          className="w-4 h-4"
+          style={{ color: "var(--color-text-secondary)" }}
+        />
       </button>
 
       {open &&
         createPortal(
           <div
             ref={menuRef}
-            style={{ top: menuPos.top, left: menuPos.left }}
-            className="fixed z-9999 bg-white border border-gray-100 rounded-xl shadow-lg py-1 w-36 text-sm"
+            style={{
+              top: menuPos.top,
+              left: menuPos.left,
+              background: "var(--color-bg-primary)",
+              border: "1px solid var(--color-border)",
+            }}
+            className="fixed z-9999 rounded-xl shadow-lg py-1 w-36 text-sm"
           >
             <button
               onClick={handleEdit}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-gray-700 transition"
+              className="w-full flex items-center gap-2 px-3 py-2 transition"
+              style={{ color: "var(--color-text-primary)" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--color-bg-secondary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
             >
               <Pencil className="w-3.5 h-3.5 text-blue-500" />
               Edit Grup

@@ -137,9 +137,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     setTimeLeft(0);
     setLinkToken("");
 
-    toast("Silakan coba lagi", {
-      icon: "🔄",
-    });
+    toast("Silakan coba lagi", { icon: "🔄" });
   };
 
   const formatTime = (s) =>
@@ -191,11 +189,6 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
           from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pulse-ring {
-          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -214,7 +207,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
         .slide-up { animation: slideUp 0.3s ease forwards; }
         .check-enter { animation: checkIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         .shimmer-btn {
-          background: linear-gradient(90deg, #2563eb 0%, #3b82f6 40%, #60a5fa 50%, #3b82f6 60%, #2563eb 100%);
+          background: linear-gradient(90deg, #0369a1 0%, #0ea5e9 40%, #38bdf8 50%, #0ea5e9 60%, #0369a1 100%);
           background-size: 200% auto;
         }
         .shimmer-btn:hover { animation: shimmer 1.5s linear infinite; }
@@ -227,12 +220,15 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
           onClick={step !== "loading" ? onClose : undefined}
         />
 
-        <div className={`modal-enter relative w-full max-w-sm z-10`}>
+        <div className="modal-enter relative w-full max-w-sm z-10">
           <div
             className={`absolute -inset-px rounded-2xl blur-sm opacity-40 ${isGoogle ? "bg-linear-to-br from-blue-400 to-blue-600" : "bg-linear-to-br from-sky-400 to-cyan-500"}`}
           />
 
-          <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div
+            className="relative rounded-2xl shadow-2xl overflow-hidden"
+            style={{ background: "var(--color-bg-primary)" }}
+          >
             <div
               className={`h-1 w-full ${isGoogle ? "bg-linear-to-r from-blue-500 via-blue-400 to-indigo-500" : "bg-linear-to-r from-sky-400 via-cyan-400 to-sky-500"}`}
             />
@@ -241,15 +237,25 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
               <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-sm ${isGoogle ? "bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100" : "bg-linear-to-br from-sky-50 to-cyan-50 border border-sky-100"}`}
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm"
+                    style={{
+                      background: "var(--color-bg-secondary)",
+                      border: "1px solid var(--color-border)",
+                    }}
                   >
                     {isGoogle ? <GoogleIcon /> : <TelegramIcon />}
                   </div>
                   <div>
-                    <h2 className="text-gray-900 font-bold text-base leading-tight">
+                    <h2
+                      className="font-bold text-base leading-tight"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       Tautkan {providerLabel}
                     </h2>
-                    <p className="text-gray-400 text-xs mt-0.5 flex items-center gap-1">
+                    <p
+                      className="text-xs mt-0.5 flex items-center gap-1"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       <Shield size={10} />
                       Aman & terenkripsi
                     </p>
@@ -259,31 +265,54 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                   <button
                     onClick={onClose}
                     aria-label="Close"
-                    className="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 mt-0.5"
+                    className="p-1.5 rounded-lg transition mt-0.5"
+                    style={{ color: "var(--color-text-secondary)" }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background =
+                        "var(--color-bg-tertiary)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
                     <X size={15} />
                   </button>
                 )}
               </div>
 
-              <div className="h-px bg-linear-to-r from-transparent via-gray-100 to-transparent mb-5" />
+              <div
+                className="h-px mb-5"
+                style={{ background: "var(--color-border)" }}
+              />
 
               {step === "idle" && (
                 <div className="slide-up flex flex-col gap-4">
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {isGoogle
                       ? "Pilih akun Google yang ingin ditautkan. Pastikan akun ini belum digunakan di akun lain."
                       : "Klik tombol di bawah, lalu konfirmasi di Telegram Bot untuk menautkan akunmu."}
                   </p>
 
                   <div
-                    className={`rounded-xl p-3.5 flex items-start gap-3 ${isGoogle ? "bg-blue-50/70 border border-blue-100" : "bg-sky-50/70 border border-sky-100"}`}
+                    className="rounded-xl p-3.5 flex items-start gap-3"
+                    style={{
+                      background: isGoogle
+                        ? "rgba(59,130,246,0.08)"
+                        : "rgba(14,165,233,0.08)",
+                      border: `1px solid ${isGoogle ? "rgba(59,130,246,0.2)" : "rgba(14,165,233,0.2)"}`,
+                    }}
                   >
                     <Zap
                       size={15}
                       className={`mt-0.5 shrink-0 ${isGoogle ? "text-blue-500" : "text-sky-500"}`}
                     />
-                    <p className="text-xs text-gray-600 leading-relaxed">
+                    <p
+                      className="text-xs leading-relaxed"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       {isGoogle
                         ? "Setelah ditautkan, kamu bisa login menggunakan akun Google kapan saja."
                         : "Setelah ditautkan, kamu bisa menerima notifikasi & login via Telegram."}
@@ -317,7 +346,8 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                 <div className="slide-up flex flex-col items-center gap-4 py-6">
                   <div className="relative">
                     <div
-                      className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isGoogle ? "bg-blue-50" : "bg-sky-50"}`}
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                      style={{ background: "var(--color-bg-secondary)" }}
                     >
                       {isGoogle ? <GoogleIcon /> : <TelegramIcon />}
                     </div>
@@ -328,7 +358,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                           cy="36"
                           r="34"
                           fill="none"
-                          stroke={isGoogle ? "#dbeafe" : "#e0f2fe"}
+                          stroke="var(--color-border)"
                           strokeWidth="2.5"
                         />
                         <circle
@@ -349,10 +379,16 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-gray-800 font-semibold text-sm">
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       Memproses...
                     </p>
-                    <p className="text-gray-400 text-xs mt-1">
+                    <p
+                      className="text-xs mt-1"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       Mohon tunggu sebentar
                     </p>
                   </div>
@@ -372,7 +408,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                           cy="48"
                           r="42"
                           fill="none"
-                          stroke="#e0f2fe"
+                          stroke="var(--color-border)"
                           strokeWidth="6"
                         />
                         <circle
@@ -389,21 +425,39 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-xl font-bold text-gray-800 font-mono leading-none">
+                        <span
+                          className="text-xl font-bold font-mono leading-none"
+                          style={{ color: "var(--color-text-primary)" }}
+                        >
                           {formatTime(timeLeft)}
                         </span>
-                        <span className="text-[10px] text-gray-400 mt-0.5">
+                        <span
+                          className="text-[10px] mt-0.5"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
                           tersisa
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 text-center">
-                    <p className="text-sm font-semibold text-gray-800 mb-1">
+                  <div
+                    className="rounded-xl p-4 text-center"
+                    style={{
+                      background: "rgba(14,165,233,0.08)",
+                      border: "1px solid rgba(14,165,233,0.2)",
+                    }}
+                  >
+                    <p
+                      className="text-sm font-semibold mb-1"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       ⏳ Menunggu konfirmasi
                     </p>
-                    <p className="text-xs text-gray-500 leading-relaxed">
+                    <p
+                      className="text-xs leading-relaxed"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       Buka Telegram dan konfirmasi permintaan tautan dari bot
                       kami
                     </p>
@@ -421,7 +475,18 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                   </a>
                   <button
                     onClick={onClose}
-                    className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl font-medium text-sm transition-all"
+                    className="w-full py-2.5 rounded-xl font-medium text-sm transition-all"
+                    style={{
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background =
+                        "var(--color-bg-secondary)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
                     Batal
                   </button>
@@ -441,10 +506,16 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                     <div className="absolute -inset-2 rounded-3xl bg-green-400/20 blur-md -z-10" />
                   </div>
                   <div className="text-center">
-                    <p className="text-gray-900 font-bold text-base">
+                    <p
+                      className="font-bold text-base"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       Berhasil Ditautkan!
                     </p>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p
+                      className="text-sm mt-1"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       Akun {providerLabel} kamu sudah terhubung
                     </p>
                   </div>
@@ -478,7 +549,18 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
                   </button>
                   <button
                     onClick={onClose}
-                    className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl font-medium text-sm transition-all"
+                    className="w-full py-2.5 rounded-xl font-medium text-sm transition-all"
+                    style={{
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background =
+                        "var(--color-bg-secondary)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
                     Batal
                   </button>

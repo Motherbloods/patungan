@@ -61,13 +61,13 @@ function Dashboard() {
   const { groups = [], pagination = {}, myBalance = 0 } = groupsData || {};
 
   return (
-    <div className="min-h-full bg-gray-50">
-      <div className="border-b border-gray-100 px-4 pt-16 pb-5 sm:px-6 sm:pt-8 md:pt-6">
+    <div className="min-h-full bg-secondary">
+      <div className="border-b border-custom px-4 pt-16 pb-5 sm:px-6 sm:pt-8 md:pt-6">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-primary tracking-tight">
             Dashboard
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-secondary mt-1">
             Ringkasan semua grup patunganmu
           </p>
         </div>
@@ -127,10 +127,10 @@ function Dashboard() {
 
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+            <h2 className="text-xs font-bold text-secondary uppercase tracking-wider">
               Grup Kamu
             </h2>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-secondary">
               {isGroupsLoading ? "..." : `${pagination.totalItems ?? 0} grup`}
             </span>
           </div>
@@ -141,11 +141,11 @@ function Dashboard() {
             </div>
           ) : isGroupsLoading ? (
             <div className="flex justify-center items-center py-10">
-              <p className="text-sm text-gray-400">Memuat grup...</p>
+              <p className="text-sm text-secondary">Memuat grup...</p>
             </div>
           ) : groups.length === 0 ? (
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-500">Belum ada grup.</p>
+            <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+              <p className="text-sm text-secondary">Belum ada grup.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -160,8 +160,8 @@ function Dashboard() {
 
         <section>
           <div className="flex items-center gap-1.5 mb-3">
-            <Clock className="w-3.5 h-3.5 text-gray-400" />
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+            <Clock className="w-3.5 h-3.5 text-secondary" />
+            <h2 className="text-xs font-bold text-secondary uppercase tracking-wider">
               Aktivitas Terbaru
             </h2>
           </div>
@@ -170,17 +170,17 @@ function Dashboard() {
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
               <p className="text-sm text-red-500">Gagal memuat aktivitas.</p>
             </div>
-          ) : isActivityLoading ? (
+          ) : isActivityLoading && allActivities.length === 0 ? (
             <div className="flex justify-center items-center py-6">
-              <p className="text-sm text-gray-400">Memuat aktivitas...</p>
+              <p className="text-sm text-secondary">Memuat aktivitas...</p>
             </div>
           ) : allActivities.length === 0 ? (
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-500">Belum ada aktivitas.</p>
+            <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+              <p className="text-sm text-secondary">Belum ada aktivitas.</p>
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
+              <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom w-full overflow-hidden">
                 {allActivities.map((ra) => (
                   <ActivityItem key={ra._id ?? ra.id} activity={ra} />
                 ))}
@@ -197,7 +197,7 @@ function Dashboard() {
               )}
 
               {!hasMore && allActivities.length > 0 && (
-                <p className="text-center text-xs text-gray-300 mt-3">
+                <p className="text-center text-xs text-secondary mt-3">
                   Semua aktivitas sudah ditampilkan
                 </p>
               )}

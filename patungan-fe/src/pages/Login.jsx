@@ -223,19 +223,34 @@ function Login() {
                         <GoogleLogin
                           width="100%"
                           onSuccess={async (credentialResponse) => {
+                            const toastId = toast.loading("Memproses login...");
+                            setIsLoading((p) => ({ ...p, google: true }));
+
+                            const timeout = new Promise((_, reject) =>
+                              setTimeout(
+                                () => reject(new Error("Request timeout")),
+                                10000,
+                              ),
+                            );
+
                             try {
                               const idToken = credentialResponse.credential;
-                              setIsLoading((p) => ({ ...p, google: true }));
-                              const toastId =
-                                toast.loading("Memproses login...");
-                              const res = await loginGoogle(idToken);
+
+                              const res = await Promise.race([
+                                loginGoogle(idToken),
+                                timeout,
+                              ]);
+
                               setUser(res.user);
                               toast.success("Login berhasil!", { id: toastId });
                               navigate("/dashboard");
                             } catch (err) {
-                              toast.error(
-                                err?.response?.data?.error || "Login gagal",
-                              );
+                              const msg =
+                                err.message === "Request timeout"
+                                  ? "Koneksi timeout, coba lagi"
+                                  : err?.response?.data?.error || "Login gagal";
+
+                              toast.error(msg, { id: toastId });
                             } finally {
                               setIsLoading((p) => ({ ...p, google: false }));
                             }

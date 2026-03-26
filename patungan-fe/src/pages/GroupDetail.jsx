@@ -150,7 +150,7 @@ function GroupDetail() {
     (activeTab === "riwayat" && historyError);
 
   return (
-    <div className="min-h-full bg-gray-50 flex flex-col">
+    <div className="min-h-full bg-secondary flex flex-col">
       <GroupHeader groupConfig={group} />
       <div className="flex-1 px-4 py-5 sm:px-6 max-w-2xl mx-auto w-full space-y-4">
         <div ref={formRef}>
@@ -169,7 +169,7 @@ function GroupDetail() {
                 setSelectedExpense(null);
                 setShowForm(true);
               }}
-              className="w-full flex items-center justify-center gap-2 bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
+              className="w-full flex items-center justify-center gap-2 bg-primary border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
             >
               <span className="text-lg">＋</span>
               Tambah Pengeluaran
@@ -177,7 +177,7 @@ function GroupDetail() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-1 flex gap-1">
+        <div className="bg-primary rounded-2xl shadow-sm p-1 flex gap-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -185,7 +185,10 @@ function GroupDetail() {
               className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-[11px] font-bold transition-all duration-150"
               style={{
                 background: activeTab === tab.id ? "#EEF2FF" : "transparent",
-                color: activeTab === tab.id ? "#4F46E5" : "#9CA3AF",
+                color:
+                  activeTab === tab.id
+                    ? "#4F46E5"
+                    : "var(--color-text-secondary)",
               }}
             >
               <span className="text-base">{tab.emoji}</span>
@@ -196,7 +199,7 @@ function GroupDetail() {
 
         {tabIsLoading ? (
           <div className="flex justify-center items-center py-12">
-            <p className="text-sm text-gray-400">Memuat data...</p>
+            <p className="text-sm text-secondary">Memuat data...</p>
           </div>
         ) : tabError ? (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">

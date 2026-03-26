@@ -136,28 +136,46 @@ function EditGroupModal({ open, onClose, group }) {
   return (
     <div
       className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}
+      style={{ background: "rgba(0,0,0,0.45)" }}
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-6 pt-5 pb-4 border-b border-gray-100">
+      <div className="bg-primary w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div
+          className="px-6 pt-5 pb-4"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-base font-bold text-gray-900">Edit Grup</h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <h2 className="text-base font-bold text-primary">Edit Grup</h2>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
                 Ubah info grup atau kelola member
               </p>
             </div>
             <button
               onClick={handleClose}
               aria-label="Close"
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition mt-0.5"
+              className="w-8 h-8 flex items-center justify-center rounded-full transition mt-0.5"
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--color-bg-tertiary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
             >
-              <X className="w-4 h-4 text-gray-400" />
+              <X
+                className="w-4 h-4"
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </button>
           </div>
 
-          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+          <div
+            className="flex gap-1 p-1 rounded-xl"
+            style={{ background: "var(--color-bg-tertiary)" }}
+          >
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -165,11 +183,16 @@ function EditGroupModal({ open, onClose, group }) {
                   setActiveTab(tab.id);
                   setError("");
                 }}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={
                   activeTab === tab.id
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                    ? {
+                        background: "var(--color-bg-primary)",
+                        color: "var(--color-blue)",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      }
+                    : { color: "var(--color-text-secondary)" }
+                }
               >
                 {tab.label}
               </button>
@@ -205,11 +228,25 @@ function EditGroupModal({ open, onClose, group }) {
         </div>
 
         {activeTab === "info" && (
-          <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+          <div
+            className="px-6 py-4 flex gap-3"
+            style={{ borderTop: "1px solid var(--color-border)" }}
+          >
             <button
               onClick={handleClose}
               disabled={isSavingGroup}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition disabled:opacity-40"
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-40"
+              style={{
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-secondary)",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--color-bg-secondary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
             >
               Batal
             </button>
@@ -231,8 +268,14 @@ function EditGroupModal({ open, onClose, group }) {
         )}
 
         {activeTab === "members" && (
-          <div className="px-6 py-3 border-t border-gray-100">
-            <p className="text-center text-xs text-gray-400">
+          <div
+            className="px-6 py-3"
+            style={{ borderTop: "1px solid var(--color-border)" }}
+          >
+            <p
+              className="text-center text-xs"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               Perubahan member tersimpan otomatis
             </p>
           </div>
