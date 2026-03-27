@@ -24,7 +24,7 @@ const LinkAccountModal = lazy(() => import("./LinkAccountModal"));
 import { useQueryClient } from "@tanstack/react-query";
 import expenseService from "../services/expenseService";
 import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../context/themeContext";
+import { useTheme } from "../context/ThemeContext";
 
 function Sidebar() {
   const { user, setUser, isAuthenticated, logout, isLoggingOut } = useAuth();
