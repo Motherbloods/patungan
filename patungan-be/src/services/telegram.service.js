@@ -10,22 +10,22 @@ const confirmLoginService = async ({
   lastName,
 }) => {
   if (!loginToken || !telegramId) {
-    throw { status: 400, message: "Login token and Telegram ID required" };
+    throw new AppError("Login token and Telegram ID required", 400);
   }
 
   const tokenDoc = await LoginToken.findOne({ token: loginToken });
   if (!tokenDoc) {
-    throw { status: 404, message: "Invalid token" };
+    throw new AppError("Invalid token", 404);
   }
 
   if (tokenDoc.status !== "pending") {
-    throw { status: 400, message: "Token already used" };
+    throw new AppError("Token already used", 400);
   }
 
   if (tokenDoc.expiresAt < new Date()) {
     tokenDoc.status = "expired";
     await tokenDoc.save();
-    throw { status: 401, message: "Token expired" };
+    throw new AppError("Token expired", 401);
   }
 
   let user = await User.findOne({ "providers.telegram.id": telegramId });
@@ -63,17 +63,19 @@ const confirmLinkTelegramService = async ({
   firstName,
   lastName,
 }) => {
-  if (!linkToken || !telegramId)
-    throw { status: 400, message: "Link token and Telegram ID required" };
+  if (!linkToken || !telegramId) {
+    throw new AppError("Link token and Telegram ID required", 400);
+  }
 
   const tokenDoc = await LinkToken.findOne({ token: linkToken });
-  if (!tokenDoc) throw { status: 404, message: "Invalid token" };
-  if (tokenDoc.status !== "pending")
-    throw { status: 400, message: "Token already used" };
+  if (!tokenDoc) throw new AppError("Invalid token", 404);
+  if (tokenDoc.status !== "pending") {
+    throw new AppError("Token already used", 400);
+  }
   if (tokenDoc.expiresAt < new Date()) {
     tokenDoc.status = "expired";
     await tokenDoc.save();
-    throw { status: 401, message: "Token expired" };
+    throw new AppError("Token expired", 401);
   }
 
   const existingUser = await User.findOne({
@@ -86,23 +88,17 @@ const confirmLinkTelegramService = async ({
     tokenDoc.status = "failed";
     tokenDoc.failReason = "Akun Telegram ini sudah terhubung ke akun lain.";
     await tokenDoc.save();
-    throw {
-      status: 409,
-      message: "Akun Telegram ini sudah terhubung ke akun lain.",
-    };
+    throw new AppError("Akun Telegram ini sudah terhubung ke akun lain.", 409);
   }
 
   const user = await User.findById(tokenDoc.userId);
-  if (!user) throw { status: 404, message: "User not found" };
+  if (!user) throw new AppError("User not found", 404);
 
   if (user.providers?.telegram?.id) {
     tokenDoc.status = "failed";
     tokenDoc.failReason = "Akun Telegram sudah terhubung ke akun ini.";
     await tokenDoc.save();
-    throw {
-      status: 400,
-      message: "Akun Telegram sudah terhubung ke akun ini.",
-    };
+    throw new AppError("Akun Telegram sudah terhubung ke akun ini.", 400);
   }
 
   user.providers.telegram = { id: telegramId, username: username || null };
