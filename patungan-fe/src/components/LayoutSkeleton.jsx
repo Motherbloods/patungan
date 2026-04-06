@@ -1,7 +1,8 @@
-function Bone({ className = "" }) {
+function Bone({ className = "", style = {} }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-lg bg-gray-100 ${className}`}
+      className={`relative overflow-hidden rounded-lg bg-tertiary ${className}`}
+      style={style}
     >
       <div className="skeleton-shimmer absolute inset-0" />
     </div>
@@ -10,7 +11,7 @@ function Bone({ className = "" }) {
 
 function SidebarSkeleton() {
   return (
-    <div className="fixed md:static top-0 left-0 h-screen w-64 shrink-0 flex flex-col py-4 px-3 bg-white border-r border-gray-100 overflow-hidden">
+    <div className="fixed md:static top-0 left-0 h-screen w-64 shrink-0 flex flex-col py-4 px-3 bg-primary border-r border-custom overflow-hidden">
       <div className="absolute left-0 top-0 bottom-0 w-0.75 bg-linear-to-b from-blue-200 via-blue-300 to-indigo-200 rounded-full" />
 
       <div className="flex items-center gap-2.5 px-2 mb-6">
@@ -49,7 +50,7 @@ function SidebarSkeleton() {
         ))}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-gray-100">
+      <div className="mt-3 pt-3 border-t border-custom">
         <div className="flex items-center gap-2.5 px-2.5 py-2">
           <Bone className="w-9 h-9 rounded-xl shrink-0" />
           <div className="flex flex-col gap-1.5 flex-1">
@@ -65,7 +66,7 @@ function SidebarSkeleton() {
 
 function SummaryCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3">
+    <div className="bg-primary rounded-2xl p-4 border border-custom shadow-sm flex flex-col gap-3">
       <div className="flex items-start justify-between">
         <Bone className="w-8 h-8 rounded-xl" />
         <Bone className="w-12 h-3 rounded" />
@@ -80,7 +81,7 @@ function SummaryCardSkeleton() {
 
 function BalanceBarSkeleton() {
   return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3">
+    <div className="bg-primary rounded-2xl p-4 border border-custom shadow-sm flex flex-col gap-3">
       <div className="flex justify-between">
         <Bone className="w-20 h-3" />
         <Bone className="w-20 h-3" />
@@ -97,7 +98,7 @@ function BalanceBarSkeleton() {
 function GroupCardSkeleton({ opacity = 1 }) {
   return (
     <div
-      className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3"
+      className="bg-primary rounded-2xl p-4 border border-custom shadow-sm flex items-center gap-3"
       style={{ opacity }}
     >
       <Bone className="w-11 h-11 rounded-xl shrink-0" />
@@ -116,7 +117,7 @@ function GroupCardSkeleton({ opacity = 1 }) {
 function ActivityItemSkeleton({ opacity = 1 }) {
   return (
     <div
-      className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0"
+      className="flex items-center gap-3 py-3 border-b border-custom last:border-0"
       style={{ opacity }}
     >
       <Bone className="w-8 h-8 rounded-xl shrink-0" />
@@ -131,8 +132,8 @@ function ActivityItemSkeleton({ opacity = 1 }) {
 
 function DashboardSkeleton() {
   return (
-    <div className="min-h-full bg-gray-50">
-      <div className="border-b border-gray-100 px-4 pt-16 pb-5 sm:px-6 sm:pt-8 md:pt-6">
+    <div className="min-h-full bg-secondary">
+      <div className="border-b border-custom px-4 pt-16 pb-5 sm:px-6 sm:pt-8 md:pt-6">
         <div className="max-w-2xl mx-auto flex flex-col gap-2">
           <Bone className="w-36 h-7 rounded-xl" />
           <Bone className="w-52 h-3.5 rounded" />
@@ -166,7 +167,7 @@ function DashboardSkeleton() {
             <Bone className="w-3.5 h-3.5 rounded" />
             <Bone className="w-28 h-3 rounded" />
           </div>
-          <div className="bg-white rounded-2xl px-4 shadow-sm border border-gray-100">
+          <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom">
             <ActivityItemSkeleton />
             <ActivityItemSkeleton opacity={0.8} />
             <ActivityItemSkeleton opacity={0.6} />

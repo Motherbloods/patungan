@@ -122,13 +122,32 @@ function Login() {
 
   return (
     <>
-      <div
-        className="login-root min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(145deg, #f0f4ff 0%, #fafbff 50%, #eef2ff 100%)",
-        }}
-      >
+      <style>{`
+        .login-bg {
+          background: linear-gradient(145deg, #f0f4ff 0%, #fafbff 50%, #eef2ff 100%);
+        }
+        .dark .login-bg {
+          background: linear-gradient(145deg, #0f172a 0%, #111827 50%, #1a1f35 100%);
+        }
+        .login-card {
+          background: rgba(255, 255, 255, 0.8);
+          border-color: rgba(255, 255, 255, 0.9);
+        }
+        .dark .login-card {
+          background: rgba(31, 41, 55, 0.85);
+          border-color: rgba(55, 65, 81, 0.9);
+        }
+        .login-waiting-box {
+          background: linear-gradient(135deg, #eff6ff, #eef2ff);
+          border-color: #bfdbfe;
+        }
+        .dark .login-waiting-box {
+          background: linear-gradient(135deg, #1e3a5f, #1e1b4b);
+          border-color: #1e40af;
+        }
+      `}</style>
+
+      <div className="login-root login-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
         <FloatingDots />
 
         <div
@@ -147,23 +166,23 @@ function Login() {
             <div className="logo-mark w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg mb-3">
               <span className="text-white font-black text-xl">P</span>
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            <h1 className="text-2xl font-black text-primary tracking-tight">
               Patungan
             </h1>
-            <p className="text-sm text-gray-500 mt-1 font-light">
+            <p className="text-sm text-secondary mt-1 font-light">
               Kelola grup patungan bersama
             </p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-blue-100/50 border border-white/90 overflow-hidden">
+          <div className="login-card backdrop-blur-xl rounded-3xl shadow-xl shadow-blue-100/50 border overflow-hidden">
             <div className="p-8">
               {!loginToken ? (
                 <div>
                   <div className="mb-7 fade-up-1">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-primary">
                       Selamat datang
                     </h2>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-secondary mt-1">
                       Pilih metode login untuk melanjutkan
                     </p>
                   </div>
@@ -209,7 +228,7 @@ function Login() {
 
                     <div className="fade-up-2 flex items-center gap-3 py-1">
                       <div className="divider-line flex-1" />
-                      <span className="text-xs text-gray-400 font-medium">
+                      <span className="text-xs text-secondary font-medium">
                         atau
                       </span>
                       <div className="divider-line flex-1" />
@@ -225,22 +244,18 @@ function Login() {
                           onSuccess={async (credentialResponse) => {
                             const toastId = toast.loading("Memproses login...");
                             setIsLoading((p) => ({ ...p, google: true }));
-
                             const timeout = new Promise((_, reject) =>
                               setTimeout(
                                 () => reject(new Error("Request timeout")),
                                 10000,
                               ),
                             );
-
                             try {
                               const idToken = credentialResponse.credential;
-
                               const res = await Promise.race([
                                 loginGoogle(idToken),
                                 timeout,
                               ]);
-
                               setUser(res.user);
                               toast.success("Login berhasil!", { id: toastId });
                               navigate("/dashboard");
@@ -249,7 +264,6 @@ function Login() {
                                 err.message === "Request timeout"
                                   ? "Koneksi timeout, coba lagi"
                                   : err?.response?.data?.error || "Login gagal";
-
                               toast.error(msg, { id: toastId });
                             } finally {
                               setIsLoading((p) => ({ ...p, google: false }));
@@ -261,7 +275,7 @@ function Login() {
                     </div>
                   </div>
 
-                  <p className="text-center text-xs text-gray-400 mt-6 fade-up-3">
+                  <p className="text-center text-xs text-secondary mt-6 fade-up-3">
                     Dengan masuk, kamu menyetujui{" "}
                     <span className="text-blue-500 cursor-pointer hover:underline">
                       kebijakan privasi
@@ -273,7 +287,7 @@ function Login() {
                 <div className="fade-up">
                   <button
                     onClick={handleCancel}
-                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors mb-6 -ml-1"
+                    className="flex items-center gap-1.5 text-xs text-secondary hover:text-primary transition-colors mb-6 -ml-1"
                   >
                     <ArrowLeft size={14} />
                     Kembali
@@ -282,7 +296,6 @@ function Login() {
                   <div className="flex flex-col items-center mb-6">
                     <div className="relative w-28 h-28">
                       <div className="absolute inset-0 rounded-full bg-blue-100 blur-md opacity-60" />
-
                       <svg
                         className="w-full h-full -rotate-90 relative z-10"
                         viewBox="0 0 72 72"
@@ -322,19 +335,18 @@ function Login() {
                           </linearGradient>
                         </defs>
                       </svg>
-
                       <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                        <span className="text-2xl font-black text-gray-800 font-mono leading-none tabular-nums">
+                        <span className="text-2xl font-black text-primary font-mono leading-none tabular-nums">
                           {formatTime(timeLeft)}
                         </span>
-                        <span className="text-[10px] text-gray-400 mt-1 font-medium">
+                        <span className="text-[10px] text-secondary mt-1 font-medium">
                           tersisa
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 text-center mb-4">
+                  <div className="login-waiting-box border rounded-2xl p-5 text-center mb-4">
                     <div className="flex items-center justify-center gap-1.5 mb-3">
                       {[0, 1, 2].map((i) => (
                         <div
@@ -347,10 +359,10 @@ function Login() {
                         />
                       ))}
                     </div>
-                    <p className="font-bold text-gray-800 text-sm mb-1">
+                    <p className="font-bold text-primary text-sm mb-1">
                       Menunggu konfirmasi Telegram
                     </p>
-                    <p className="text-xs text-gray-500 leading-relaxed">
+                    <p className="text-xs text-secondary leading-relaxed">
                       Buka Telegram dan ketuk tombol konfirmasi dari bot kami
                     </p>
                   </div>
@@ -367,7 +379,7 @@ function Login() {
                   </a>
                   <button
                     onClick={handleCancel}
-                    className="btn-cancel w-full py-3 border border-gray-200 text-gray-500 rounded-2xl font-medium text-sm"
+                    className="btn-cancel w-full py-3 border border-custom text-secondary rounded-2xl font-medium text-sm"
                   >
                     Batalkan
                   </button>
@@ -377,7 +389,7 @@ function Login() {
           </div>
 
           {!loginToken && (
-            <p className="text-center text-xs text-gray-400 mt-4 fade-up-3">
+            <p className="text-center text-xs text-secondary mt-4 fade-up-3">
               Patungan &copy; {new Date().getFullYear()} &mdash; Kelola grup
               patungan bersama
             </p>
