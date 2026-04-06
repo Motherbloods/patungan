@@ -61,3 +61,8 @@ export const activityShape = PropTypes.shape({
   created_at: PropTypes.string,
   amount: PropTypes.number,
 });
+
+export const balanceShape = PropTypes.shape({
+  user_id: PropTypes.string,
+  amount: PropTypes.number,
+});
