@@ -86,3 +86,14 @@ export const transferShape = PropTypes.shape({
   to: PropTypes.string,
   amount: PropTypes.number,
 });
+
+export const groupConfigShape = PropTypes.shape({
+  _id: PropTypes.string,
+  name: PropTypes.string,
+  icon: PropTypes.string,
+  color: PropTypes.string,
+  expense_count: PropTypes.number,
+  member_count: PropTypes.number,
+  total_expenses: PropTypes.number,
+  myBalance: PropTypes.number,
+});

@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function SummaryCard({ icon: Icon, label, value, sub, color, bg }) {
   return (
     <div className={`rounded-2xl p-4 flex flex-col gap-3 ${bg}`}>
@@ -21,5 +23,18 @@ function SummaryCard({ icon: Icon, label, value, sub, color, bg }) {
     </div>
   );
 }
+
+SummaryCard.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  sub: PropTypes.string,
+  color: PropTypes.string.isRequired,
+  bg: PropTypes.string.isRequired,
+};
+
+SummaryCard.defaultProps = {
+  sub: null,
+};
 
 export default SummaryCard;
