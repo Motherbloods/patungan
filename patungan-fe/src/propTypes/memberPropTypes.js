@@ -79,3 +79,10 @@ export const expenseShape = PropTypes.shape({
     }),
   ),
 });
+
+export const transferShape = PropTypes.shape({
+  _id: PropTypes.string,
+  from: PropTypes.string,
+  to: PropTypes.string,
+  amount: PropTypes.number,
+});
