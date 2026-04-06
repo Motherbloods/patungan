@@ -21,9 +21,115 @@ import { useEffect, useState } from "react";
 const PAGE_SIZE = 4;
 const ACTIVITY_PAGE_SIZE = 10;
 
+// --- Sub-components to reduce cognitive complexity ---
+
+function SummarySection({ summary, isLoading }) {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <SummaryCard
+        icon={ArrowUpRight}
+        label="Harus Kamu Bayar"
+        value={isLoading ? "..." : fmt(summary?.totalOwe ?? 0)}
+        sub="dari semua grup"
+        color="text-rose-500"
+        bg="bg-rose-50"
+      />
+      <SummaryCard
+        icon={ArrowDownLeft}
+        label="Akan Kamu Terima"
+        value={isLoading ? "..." : fmt(summary?.totalOwed ?? 0)}
+        sub="dari semua grup"
+        color="text-emerald-500"
+        bg="bg-emerald-50"
+      />
+      <SummaryCard
+        icon={Users}
+        label="Grup Aktif"
+        value={isLoading ? "..." : String(summary?.activeGroups ?? 0)}
+        color="text-blue-500"
+        bg="bg-blue-50"
+      />
+      <SummaryCard
+        icon={Receipt}
+        label="Total Pengeluaran"
+        value={isLoading ? "..." : fmt(summary?.totalExpenses ?? 0)}
+        sub="semua grup"
+        color="text-violet-500"
+        bg="bg-violet-50"
+      />
+    </div>
+  );
+}
+
+function GroupsContent({ isLoading, groups, pagination, myBalance }) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <p className="text-sm text-secondary">Memuat grup...</p>
+      </div>
+    );
+  }
+  if (groups.length === 0) {
+    return (
+      <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+        <p className="text-sm text-secondary">Belum ada grup.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      <GroupPagination
+        groups={groups}
+        pagination={pagination}
+        myBalance={myBalance}
+      />
+    </div>
+  );
+}
+
+function ActivityContent({ isLoading, allActivities, hasMore, onLoadMore }) {
+  if (isLoading && allActivities.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-6">
+        <p className="text-sm text-secondary">Memuat aktivitas...</p>
+      </div>
+    );
+  }
+  if (allActivities.length === 0) {
+    return (
+      <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
+        <p className="text-sm text-secondary">Belum ada aktivitas.</p>
+      </div>
+    );
+  }
+  return (
+    <>
+      <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom w-full overflow-hidden">
+        {allActivities.map((ra) => (
+          <ActivityItem key={ra._id ?? ra.id} activity={ra} />
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          onClick={onLoadMore}
+          disabled={isLoading}
+          className="w-full mt-3 py-2.5 text-xs font-medium text-blue-500 border border-blue-100 rounded-xl hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          {isLoading ? "Memuat..." : "Muat lebih banyak"}
+        </button>
+      )}
+      {!hasMore && allActivities.length > 0 && (
+        <p className="text-center text-xs text-secondary mt-3">
+          Semua aktivitas sudah ditampilkan
+        </p>
+      )}
+    </>
+  );
+}
+
 function Dashboard() {
   const [searchParams] = useSearchParams();
-  const page = parseInt(searchParams.get("page")) || 1;
+  const page = Number.parseInt(searchParams.get("page"), 10) || 1;
 
   const [activityPage, setActivityPage] = useState(1);
   const [allActivities, setAllActivities] = useState([]);
@@ -46,7 +152,6 @@ function Dashboard() {
     error: activityError,
   } = useDashboardActivity(activityPage, ACTIVITY_PAGE_SIZE);
 
-  // Accumulate activities on each new page load
   useEffect(() => {
     if (!activityData?.activities) return;
     if (activityPage === 1) {
@@ -57,7 +162,6 @@ function Dashboard() {
   }, [activityData, activityPage]);
 
   const hasMore = activityData?.pagination?.hasMore ?? false;
-
   const { groups = [], pagination = {}, myBalance = 0 } = groupsData || {};
 
   return (
@@ -80,44 +184,7 @@ function Dashboard() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3">
-              <SummaryCard
-                icon={ArrowUpRight}
-                label="Harus Kamu Bayar"
-                value={isSummaryLoading ? "..." : fmt(summary?.totalOwe ?? 0)}
-                sub="dari semua grup"
-                color="text-rose-500"
-                bg="bg-rose-50"
-              />
-              <SummaryCard
-                icon={ArrowDownLeft}
-                label="Akan Kamu Terima"
-                value={isSummaryLoading ? "..." : fmt(summary?.totalOwed ?? 0)}
-                sub="dari semua grup"
-                color="text-emerald-500"
-                bg="bg-emerald-50"
-              />
-              <SummaryCard
-                icon={Users}
-                label="Grup Aktif"
-                value={
-                  isSummaryLoading ? "..." : String(summary?.activeGroups ?? 0)
-                }
-                color="text-blue-500"
-                bg="bg-blue-50"
-              />
-              <SummaryCard
-                icon={Receipt}
-                label="Total Pengeluaran"
-                value={
-                  isSummaryLoading ? "..." : fmt(summary?.totalExpenses ?? 0)
-                }
-                sub="semua grup"
-                color="text-violet-500"
-                bg="bg-violet-50"
-              />
-            </div>
-
+            <SummarySection summary={summary} isLoading={isSummaryLoading} />
             <BalanceBar
               owe={summary?.totalOwe ?? 0}
               owed={summary?.totalOwed ?? 0}
@@ -139,22 +206,13 @@ function Dashboard() {
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
               <p className="text-sm text-red-500">Gagal memuat grup.</p>
             </div>
-          ) : isGroupsLoading ? (
-            <div className="flex justify-center items-center py-10">
-              <p className="text-sm text-secondary">Memuat grup...</p>
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
-              <p className="text-sm text-secondary">Belum ada grup.</p>
-            </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              <GroupPagination
-                groups={groups}
-                pagination={pagination}
-                myBalance={myBalance}
-              />
-            </div>
+            <GroupsContent
+              isLoading={isGroupsLoading}
+              groups={groups}
+              pagination={pagination}
+              myBalance={myBalance}
+            />
           )}
         </section>
 
@@ -170,38 +228,13 @@ function Dashboard() {
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
               <p className="text-sm text-red-500">Gagal memuat aktivitas.</p>
             </div>
-          ) : isActivityLoading && allActivities.length === 0 ? (
-            <div className="flex justify-center items-center py-6">
-              <p className="text-sm text-secondary">Memuat aktivitas...</p>
-            </div>
-          ) : allActivities.length === 0 ? (
-            <div className="bg-primary rounded-2xl p-6 text-center shadow-sm border border-custom">
-              <p className="text-sm text-secondary">Belum ada aktivitas.</p>
-            </div>
           ) : (
-            <>
-              <div className="bg-primary rounded-2xl px-4 shadow-sm border border-custom w-full overflow-hidden">
-                {allActivities.map((ra) => (
-                  <ActivityItem key={ra._id ?? ra.id} activity={ra} />
-                ))}
-              </div>
-
-              {hasMore && (
-                <button
-                  onClick={() => setActivityPage((p) => p + 1)}
-                  disabled={isActivityLoading}
-                  className="w-full mt-3 py-2.5 text-xs font-medium text-blue-500 border border-blue-100 rounded-xl hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {isActivityLoading ? "Memuat..." : "Muat lebih banyak"}
-                </button>
-              )}
-
-              {!hasMore && allActivities.length > 0 && (
-                <p className="text-center text-xs text-secondary mt-3">
-                  Semua aktivitas sudah ditampilkan
-                </p>
-              )}
-            </>
+            <ActivityContent
+              isLoading={isActivityLoading}
+              allActivities={allActivities}
+              hasMore={hasMore}
+              onLoadMore={() => setActivityPage((p) => p + 1)}
+            />
           )}
         </section>
       </div>
