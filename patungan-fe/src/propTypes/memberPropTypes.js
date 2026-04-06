@@ -42,3 +42,14 @@ export const groupShape = PropTypes.shape({
   ownerMemberId: PropTypes.string,
   members: PropTypes.arrayOf(memberShape),
 });
+
+export const groupCardShape = PropTypes.shape({
+  _id: PropTypes.string,
+  name: PropTypes.string,
+  icon: PropTypes.string,
+  color: PropTypes.string,
+  myBalance: PropTypes.number,
+  member_count: PropTypes.number,
+  expense_count: PropTypes.number,
+  total_expenses: PropTypes.number,
+});
