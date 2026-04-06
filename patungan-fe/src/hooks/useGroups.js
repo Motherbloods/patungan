@@ -90,6 +90,19 @@ export const useDeactivateMember = (groupId) => {
     },
   });
 };
+
+export const useReactivateMember = (groupId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId) => groupService.reactivateMember(groupId, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["groups"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+};
+
 export const useUpdateOwnerMember = (groupId) => {
   const queryClient = useQueryClient();
   return useMutation({

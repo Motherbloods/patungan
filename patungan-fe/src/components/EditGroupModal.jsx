@@ -10,6 +10,7 @@ import {
   useDeactivateMember,
   useAddMember,
   useUpdateOwnerMember,
+  useReactivateMember,
 } from "../hooks/useGroups";
 import toast from "react-hot-toast";
 
@@ -40,6 +41,7 @@ function EditGroupModal({ open, onClose, group }) {
   const { mutate: editGroup, isPending: isSavingGroup } = useEditGroup();
   const { mutate: editMember } = useEditMember(group?._id);
   const { mutate: deactivateMember } = useDeactivateMember(group?._id);
+  const { mutate: reactivateMember } = useReactivateMember(group?._id);
   const { mutate: addMember } = useAddMember(group?._id);
   const { mutate: updateOwnerMember } = useUpdateOwnerMember(group?._id);
 
@@ -105,6 +107,21 @@ function EditGroupModal({ open, onClose, group }) {
           prev.map((m) => (m._id === memberId ? { ...m, isActive: true } : m)),
         );
         toast.error("Gagal menonaktifkan member");
+      },
+    });
+  };
+
+  const handleReactivateMember = (memberId) => {
+    setLocalMembers((prev) =>
+      prev.map((m) => (m._id === memberId ? { ...m, isActive: true } : m)),
+    );
+    reactivateMember(memberId, {
+      onSuccess: () => toast.success("Member diaktifkan"),
+      onError: () => {
+        setLocalMembers((prev) =>
+          prev.map((m) => (m._id === memberId ? { ...m, isActive: false } : m)),
+        );
+        toast.error("Gagal mengaktifkan member");
       },
     });
   };
@@ -221,6 +238,7 @@ function EditGroupModal({ open, onClose, group }) {
               ownerMemberId={ownerMemberId}
               onEditMember={handleEditMember}
               onDeactivateMember={handleDeactivateMember}
+              onReactivateMember={handleReactivateMember}
               onAddMember={handleAddMember}
               onTagOwner={handleTagOwner}
             />
