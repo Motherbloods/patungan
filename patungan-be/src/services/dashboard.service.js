@@ -126,7 +126,7 @@ const getDashboardActivityService = async (page, limit, user_id) => {
     }
   }
 
-  const sorted = allItems.sort(
+  const sorted = allItems.toSorted(
     (a, b) => new Date(b.created_at) - new Date(a.created_at),
   );
 

@@ -165,7 +165,7 @@ const getGroupOrThrow = async (group_id, user_id) => {
   return group;
 };
 
-const getGroupDataService = async (group_id, options = {}, user_id) => {
+const getGroupDataService = async (group_id, user_id, options = {}) => {
   validateObjectIds(group_id);
   const group = await getGroupOrThrow(group_id, user_id);
   const result = {
@@ -675,7 +675,7 @@ const updateOwnerMemberService = async (group_id, memberId, user_id) => {
   } else {
     validateObjectIds(memberId);
     const member = group.members.id(memberId);
-    if (!member || !member.isActive) throw new Error("Member tidak ditemukan");
+    if (!member?.isActive) throw new Error("Member tidak ditemukan");
     group.ownerMemberId = member._id;
   }
 
