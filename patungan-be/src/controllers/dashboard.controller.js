@@ -11,8 +11,8 @@ const getDashboardSummary = asyncHandler(async (req, res) => {
 });
 
 const getDashboardGroupsPagination = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 4;
+  const page = Number.parseInt(req.query.page) || 1;
+  const limit = Number.parseInt(req.query.limit) || 4;
   const result = await getDashboardGroupsPaginationService(
     page,
     limit,
@@ -22,8 +22,8 @@ const getDashboardGroupsPagination = asyncHandler(async (req, res) => {
 });
 
 const getDashboardActivity = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const page = Number.parseInt(req.query.page) || 1;
+  const limit = Number.parseInt(req.query.limit) || 10;
   const result = await getDashboardActivityService(page, limit, req.userId);
   res.json(result);
 });

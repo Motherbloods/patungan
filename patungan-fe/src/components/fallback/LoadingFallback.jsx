@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function LoadingFallback({ message = "Loading..." }) {
   return (
     <div
@@ -8,4 +10,9 @@ function LoadingFallback({ message = "Loading..." }) {
     </div>
   );
 }
+
+LoadingFallback.propTypes = {
+  message: PropTypes.string,
+};
+
 export default LoadingFallback;

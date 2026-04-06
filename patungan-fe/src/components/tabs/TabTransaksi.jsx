@@ -1,4 +1,6 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
+import { memberShape, expenseShape } from "../../propTypes/memberPropTypes";
 import Avatar from "../Avatar";
 import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
@@ -267,5 +269,20 @@ function TabTransaksi({
     </div>
   );
 }
+
+TabTransaksi.propTypes = {
+  members: PropTypes.arrayOf(memberShape).isRequired,
+  expenses: PropTypes.arrayOf(expenseShape),
+  ownerMemberId: PropTypes.string,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  deletingId: PropTypes.string,
+};
+
+TabTransaksi.defaultProps = {
+  expenses: [],
+  ownerMemberId: null,
+  deletingId: null,
+};
 
 export default TabTransaksi;

@@ -1,5 +1,5 @@
 const winston = require("winston");
-const fs = require("fs");
+const fs = require("node:fs");
 
 if (!fs.existsSync("logs")) {
   fs.mkdirSync("logs");

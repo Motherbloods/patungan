@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
-import LayoutSkeleton from "../components/LayoutSkeleton.jsx";
 const LoginRoute = lazy(() => import("./LoginRoute.jsx"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const GroupDetail = lazy(() => import("../pages/GroupDetail"));

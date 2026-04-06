@@ -165,7 +165,7 @@ const getGroupOrThrow = async (group_id, user_id) => {
   return group;
 };
 
-const getGroupDataService = async (group_id, options = {}, user_id) => {
+const getGroupDataService = async (group_id, user_id, options = {}) => {
   validateObjectIds(group_id);
   const group = await getGroupOrThrow(group_id, user_id);
   const result = {
@@ -283,6 +283,36 @@ const deactivateMemberService = async (group_id, member_id, user_id) => {
   };
 };
 
+const reactivateMemberService = async (group_id, member_id, user_id) => {
+  validateObjectIds(group_id, member_id);
+
+  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
+  if (!group) throw new Error("Group tidak ditemukan");
+
+  const member = group.members.id(member_id);
+  if (!member) throw new Error("Member tidak ditemukan");
+  if (member.isActive) throw new Error("Member sudah aktif");
+
+  const isDuplicate = group.members.some(
+    (m) =>
+      m.isActive &&
+      m._id.toString() !== member_id.toString() &&
+      m.name.toLowerCase() === member.name.toLowerCase(),
+  );
+  if (isDuplicate) {
+    throw new Error(
+      `Nama "${member.name}" sudah dipakai member aktif lain. Ganti nama member tersebut terlebih dahulu.`,
+    );
+  }
+
+  member.isActive = true;
+  group.member_count += 1;
+  await group.save();
+
+  logger.info(`Member reactivated: ${member_id} in group: ${group_id}`);
+  return { member };
+};
+
 const addMemberService = async (group_id, data, user_id) => {
   validateObjectIds(group_id);
 
@@ -296,6 +326,15 @@ const addMemberService = async (group_id, data, user_id) => {
     (m) => m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
   );
   if (isDuplicate) throw new Error("Nama member sudah ada di grup ini");
+
+  const matchInactive = group.members.find(
+    (m) => !m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
+  );
+  if (matchInactive) {
+    throw new Error(
+      `Member dengan nama "${name.trim()}" sudah ada tapi nonaktif. Aktifkan kembali daripada membuat baru.`,
+    );
+  }
 
   const activeCount = group.members.filter((m) => m.isActive).length;
   const palette = MEMBER_COLORS[activeCount % MEMBER_COLORS.length];
@@ -636,7 +675,7 @@ const updateOwnerMemberService = async (group_id, memberId, user_id) => {
   } else {
     validateObjectIds(memberId);
     const member = group.members.id(memberId);
-    if (!member || !member.isActive) throw new Error("Member tidak ditemukan");
+    if (!member?.isActive) throw new Error("Member tidak ditemukan");
     group.ownerMemberId = member._id;
   }
 
@@ -653,6 +692,7 @@ module.exports = {
   editGroupService,
   editMemberService,
   deactivateMemberService,
+  reactivateMemberService,
   addMemberService,
   editExpenseService,
   deleteGroupService,

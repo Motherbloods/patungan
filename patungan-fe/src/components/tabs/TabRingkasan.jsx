@@ -1,9 +1,16 @@
+import PropTypes from "prop-types";
+import { memberShape, balanceShape } from "../../propTypes/memberPropTypes";
 import Avatar from "../Avatar";
-import Pill from "../Pill";
 import InfoBox from "../InfoBox";
 import OwnerBadge from "../OwnerBadge";
 import { getMemberUtil } from "../../utils/member";
-import { fmt } from "../../utils/format";
+import {
+  getAmountColor,
+  getAmountDisplay,
+  getAmountLabel,
+  getBorderColor,
+} from "../../utils/balance";
+import StatusPill from "../StatusPill";
 
 function TabRingkasan({ members, balances, ownerMemberId }) {
   if (!balances || balances.length === 0) {
@@ -36,16 +43,14 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
         const isOwner = b.user_id?.toString() === ownerMemberId?.toString();
         const m = getMemberUtil(members, b.user_id);
 
-        const borderColor = isOwner
-          ? "rgba(96, 165, 250, 0.5)"
-          : isZero
-            ? "var(--color-border)"
-            : isPos
-              ? "rgba(74, 222, 128, 0.5)"
-              : "rgba(248, 113, 113, 0.5)";
+        const borderColor = getBorderColor(isOwner, isZero, isPos);
+        const amountColor = getAmountColor(isZero, isPos);
+        const amountLabel = getAmountLabel(isZero, isPos);
+        const amountDisplay = getAmountDisplay(isZero, isPos, b.amount);
 
         return (
           <div
+            key={b.user_id}
             className="bg-primary rounded-2xl p-4 flex items-center gap-4 shadow-sm w-full overflow-hidden"
             style={{
               border: `1.5px solid ${borderColor}`,
@@ -64,22 +69,7 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
               </div>
               <div className="mt-1">
                 <div style={{ fontSize: "clamp(10px, 2.2vw, 12px)" }}>
-                  {isZero ? (
-                    <Pill
-                      bg="var(--color-bg-tertiary)"
-                      color="var(--color-text-secondary)"
-                    >
-                      ✅ Sudah lunas
-                    </Pill>
-                  ) : isPos ? (
-                    <Pill bg="rgba(74, 222, 128, 0.15)" color="#16A34A">
-                      💰 Berhak terima
-                    </Pill>
-                  ) : (
-                    <Pill bg="rgba(248, 113, 113, 0.15)" color="#DC2626">
-                      ⚠️ Perlu transfer
-                    </Pill>
-                  )}
+                  <StatusPill isZero={isZero} isPos={isPos} />
                 </div>
               </div>
             </div>
@@ -88,14 +78,10 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
                 className="text-right font-extrabold"
                 style={{
                   fontSize: "clamp(16px, 3.5vw, 20px)",
-                  color: isZero
-                    ? "var(--color-text-secondary)"
-                    : isPos
-                      ? "#16A34A"
-                      : "#DC2626",
+                  color: amountColor,
                 }}
               >
-                {isZero ? "—" : (isPos ? "+" : "-") + fmt(b.amount)}
+                {amountDisplay}
               </div>
               <div
                 className="mt-0.5"
@@ -104,11 +90,7 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
                   color: "var(--color-text-secondary)",
                 }}
               >
-                {isZero
-                  ? "selesai"
-                  : isPos
-                    ? "akan diterima"
-                    : "harus ditransfer"}
+                {amountLabel}
               </div>
             </div>
           </div>
@@ -118,5 +100,16 @@ function TabRingkasan({ members, balances, ownerMemberId }) {
     </div>
   );
 }
+
+TabRingkasan.propTypes = {
+  members: PropTypes.arrayOf(memberShape).isRequired,
+  balances: PropTypes.arrayOf(balanceShape),
+  ownerMemberId: PropTypes.string,
+};
+
+TabRingkasan.defaultProps = {
+  balances: [],
+  ownerMemberId: null,
+};
 
 export default TabRingkasan;

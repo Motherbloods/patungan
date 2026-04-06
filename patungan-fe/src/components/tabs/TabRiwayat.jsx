@@ -1,4 +1,9 @@
 import { useState, useMemo } from "react";
+import PropTypes from "prop-types";
+import {
+  expenseMemberShape,
+  balanceShape,
+} from "../../propTypes/memberPropTypes";
 import Avatar from "../Avatar";
 import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
@@ -195,5 +200,15 @@ function TabRiwayat({
     </div>
   );
 }
+
+TabRiwayat.propTypes = {
+  members: PropTypes.arrayOf(expenseMemberShape),
+  balances: PropTypes.arrayOf(balanceShape),
+  history: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.object),
+    PropTypes.object,
+  ]),
+  ownerMemberId: PropTypes.string,
+};
 
 export default TabRiwayat;

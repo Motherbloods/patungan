@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+import { groupConfigShape } from "../propTypes/memberPropTypes";
 import { getGroupStats } from "../config/group_stats";
 import ICON_OPTIONS from "../config/icons";
 
@@ -65,3 +67,7 @@ export function GroupHeader({ groupConfig }) {
     </div>
   );
 }
+
+GroupHeader.propTypes = {
+  groupConfig: groupConfigShape.isRequired,
+};

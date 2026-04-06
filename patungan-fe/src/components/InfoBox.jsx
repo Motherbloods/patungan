@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function InfoBox({ title = "💡 Gimana cara hitung ini?", children }) {
   return (
     <div
@@ -29,5 +31,10 @@ function InfoBox({ title = "💡 Gimana cara hitung ini?", children }) {
     </div>
   );
 }
+
+InfoBox.propTypes = {
+  title: PropTypes.string,
+  children: PropTypes.node,
+};
 
 export default InfoBox;

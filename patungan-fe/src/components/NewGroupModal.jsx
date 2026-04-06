@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import ICON_OPTIONS from "../config/icons";
 import COLOR_OPTIONS from "../config/colors";
@@ -18,7 +19,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputName, setInputName] = useState("");
   const [inputEmoji, setInputEmoji] = useState(MEMBER_EMOJIS[0]);
-  const [showEmojiPicker, setShowEmoji] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [error, setError] = useState("");
 
   const GroupIcon = ICON_OPTIONS.find((o) => o.id === groupIconId)?.id;
@@ -35,7 +36,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     setError("");
     setInputName("");
     setInputEmoji(MEMBER_EMOJIS[0]);
-    setShowEmoji(false);
+    setShowEmojiPicker(false);
     onClose?.();
   };
 
@@ -92,7 +93,10 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     <div
       className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.45)" }}
+      role="dialog"
+      aria-modal="true"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
+      onKeyDown={(e) => e.key === "Escape" && handleClose()}
     >
       <div className="bg-primary w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div
@@ -169,7 +173,7 @@ function NewGroupModal({ open, onClose, onSubmit }) {
               inputEmoji={inputEmoji}
               setInputEmoji={setInputEmoji}
               showEmojiPicker={showEmojiPicker}
-              setShowEmoji={setShowEmoji}
+              setShowEmoji={setShowEmojiPicker}
               error={error}
               setError={setError}
             />
@@ -251,5 +255,11 @@ function NewGroupModal({ open, onClose, onSubmit }) {
     </div>
   );
 }
+
+NewGroupModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};
 
 export default NewGroupModal;

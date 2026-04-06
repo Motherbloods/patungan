@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+import { expenseMemberShape } from "../propTypes/memberPropTypes";
 import { getMemberUtil } from "../utils/member";
 
 function Avatar({ members, uid, size = 36 }) {
@@ -24,5 +26,11 @@ function Avatar({ members, uid, size = 36 }) {
     </div>
   );
 }
+
+Avatar.propTypes = {
+  members: PropTypes.arrayOf(expenseMemberShape).isRequired,
+  uid: PropTypes.string.isRequired,
+  size: PropTypes.number,
+};
 
 export default Avatar;

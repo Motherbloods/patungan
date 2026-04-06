@@ -1,7 +1,17 @@
 import { useState } from "react";
-import { Pencil, Plus, UserX, Check, X, UserCheck } from "lucide-react";
+import PropTypes from "prop-types";
+import {
+  Pencil,
+  Plus,
+  UserX,
+  Check,
+  X,
+  UserCheck,
+  UserPlus,
+} from "lucide-react";
 import MEMBER_EMOJIS from "../../config/emoji";
 import OwnerBadge from "../OwnerBadge";
+import { memberShape } from "../../propTypes/memberPropTypes";
 
 function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
   const [editing, setEditing] = useState(false);
@@ -22,36 +32,6 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
     setEditing(false);
     setShowEmoji(false);
   };
-
-  // Inactive member row
-  if (!member?.isActive) {
-    return (
-      <div
-        style={{
-          backgroundColor: "var(--color-bg-secondary)",
-          borderColor: "var(--color-border)",
-        }}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-xl border opacity-50"
-      >
-        <span className="text-xl">{member?.emoji || "👤"}</span>
-        <span
-          className="flex-1 text-sm font-medium line-through"
-          style={{ color: "var(--color-text-secondary)" }}
-        >
-          {member?.name}
-        </span>
-        <span
-          style={{
-            color: "var(--color-text-secondary)",
-            backgroundColor: "var(--color-bg-tertiary)",
-          }}
-          className="text-[10px] px-2 py-0.5 rounded-full"
-        >
-          Nonaktif
-        </span>
-      </div>
-    );
-  }
 
   // Editing row
   if (editing) {
@@ -202,6 +182,91 @@ function MemberRow({ member, isOwner, onEdit, onDeactivate, onTagOwner }) {
   );
 }
 
+MemberRow.propTypes = {
+  member: memberShape.isRequired,
+  isOwner: PropTypes.bool.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDeactivate: PropTypes.func.isRequired,
+  onTagOwner: PropTypes.func.isRequired,
+};
+
+function InactiveMemberRow({ member, onReactivate }) {
+  const [confirmReactivate, setConfirmReactivate] = useState(false);
+
+  if (confirmReactivate) {
+    return (
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3 flex items-center gap-3">
+        <span className="text-xl">{member?.emoji || "👤"}</span>
+        <span
+          className="flex-1 text-sm font-medium"
+          style={{ color: "var(--color-text-primary)" }}
+        >
+          Aktifkan kembali <span className="font-semibold">{member?.name}</span>
+          ?
+        </span>
+        <button
+          onClick={() => {
+            onReactivate(member._id);
+            setConfirmReactivate(false);
+          }}
+          className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold transition"
+        >
+          Aktifkan
+        </button>
+        <button
+          onClick={() => setConfirmReactivate(false)}
+          style={{ color: "var(--color-text-secondary)" }}
+          className="w-7 h-7 flex items-center justify-center rounded-full transition"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        backgroundColor: "var(--color-bg-secondary)",
+        borderColor: "var(--color-border)",
+      }}
+      className="flex items-center gap-3 px-4 py-2.5 rounded-xl border opacity-55 group transition-all hover:opacity-80"
+    >
+      <span className="text-xl">{member?.emoji || "👤"}</span>
+      <span
+        className="flex-1 text-sm font-medium line-through"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        {member?.name}
+      </span>
+      <span
+        style={{
+          color: "var(--color-text-secondary)",
+          backgroundColor: "var(--color-bg-tertiary)",
+        }}
+        className="text-[10px] px-2 py-0.5 rounded-full"
+      >
+        Nonaktif
+      </span>
+
+      <button
+        onClick={() => setConfirmReactivate(true)}
+        aria-label="Aktifkan kembali"
+        title="Aktifkan kembali"
+        className="w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 hover:text-emerald-500 transition"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        <UserPlus className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+InactiveMemberRow.propTypes = {
+  member: memberShape.isRequired,
+  onReactivate: PropTypes.func.isRequired,
+};
+
 function DeactivateConfirm({ member, onConfirm, onCancel }) {
   return (
     <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 flex flex-col gap-3">
@@ -245,11 +310,18 @@ function DeactivateConfirm({ member, onConfirm, onCancel }) {
   );
 }
 
+DeactivateConfirm.propTypes = {
+  member: memberShape.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+};
+
 function EditMemberStep({
   members = [],
   ownerMemberId,
   onEditMember,
   onDeactivateMember,
+  onReactivateMember,
   onAddMember,
   onTagOwner,
 }) {
@@ -259,19 +331,31 @@ function EditMemberStep({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [addError, setAddError] = useState("");
 
-  const activeMembers = members.filter((m) => m?.isActive);
-  const inactiveMembers = members.filter((m) => !m?.isActive);
+  const activeMembers = members.filter((m) => m?.isActive !== false);
+  const inactiveMembers = members.filter((m) => m?.isActive === false);
 
   const handleAdd = () => {
     const trimmed = inputName.trim();
     if (!trimmed) return;
-    const isDuplicate = activeMembers.some(
+
+    const isDuplicateActive = activeMembers.some(
       (m) => m.name.toLowerCase() === trimmed.toLowerCase(),
     );
-    if (isDuplicate) {
-      setAddError("Nama member sudah ada");
+    if (isDuplicateActive) {
+      setAddError("Nama member sudah ada di grup ini.");
       return;
     }
+
+    const matchInactive = inactiveMembers.find(
+      (m) => m.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (matchInactive) {
+      setAddError(
+        `"${matchInactive.name}" sudah ada tapi nonaktif. Aktifkan kembali dari daftar nonaktif di bawah.`,
+      );
+      return;
+    }
+
     onAddMember({ name: trimmed, emoji: inputEmoji });
     setInputName("");
     setAddError("");
@@ -361,7 +445,7 @@ function EditMemberStep({
       </div>
 
       {addError && (
-        <p className="text-xs text-red-500 font-medium -mt-2">{addError}</p>
+        <p className="text-xs text-red-500 font-medium -mt-2">⚠️ {addError}</p>
       )}
 
       <div className="flex flex-col gap-2">
@@ -405,13 +489,10 @@ function EditMemberStep({
             Nonaktif ({inactiveMembers.length})
           </p>
           {inactiveMembers.map((m) => (
-            <MemberRow
+            <InactiveMemberRow
               key={m?._id}
               member={m}
-              isOwner={false}
-              onEdit={() => {}}
-              onDeactivate={() => {}}
-              onTagOwner={() => {}}
+              onReactivate={onReactivateMember}
             />
           ))}
         </div>
@@ -426,5 +507,20 @@ function EditMemberStep({
     </div>
   );
 }
+
+EditMemberStep.propTypes = {
+  members: PropTypes.arrayOf(memberShape),
+  ownerMemberId: PropTypes.string,
+  onEditMember: PropTypes.func.isRequired,
+  onDeactivateMember: PropTypes.func.isRequired,
+  onReactivateMember: PropTypes.func.isRequired,
+  onAddMember: PropTypes.func.isRequired,
+  onTagOwner: PropTypes.func.isRequired,
+};
+
+EditMemberStep.defaultProps = {
+  members: [],
+  ownerMemberId: null,
+};
 
 export default EditMemberStep;

@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { fmt } from "../../utils/format";
 
 function BalanceBar({ owe, owed }) {
@@ -56,5 +57,10 @@ function BalanceBar({ owe, owed }) {
     </div>
   );
 }
+
+BalanceBar.propTypes = {
+  owe: PropTypes.number.isRequired,
+  owed: PropTypes.number.isRequired,
+};
 
 export default BalanceBar;

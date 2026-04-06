@@ -7,6 +7,7 @@ const {
   editGroupService,
   editMemberService,
   deactivateMemberService,
+  reactivateMemberService,
   addMemberService,
   editExpenseService,
   deleteGroupService,
@@ -104,6 +105,12 @@ const deactivateMember = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+const reactivateMember = asyncHandler(async (req, res) => {
+  const { id, member_id } = req.params;
+  const result = await reactivateMemberService(id, member_id, req.userId);
+  res.json(result);
+});
+
 const createSettlement = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await createSettlementService(id, req.body);
@@ -136,6 +143,7 @@ module.exports = {
   addMember,
   editMember,
   deactivateMember,
+  reactivateMember,
   createSettlement,
   updateOwnerMember,
 };

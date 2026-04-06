@@ -14,6 +14,7 @@ const {
   addMember,
   editMember,
   deactivateMember,
+  reactivateMember,
   createSettlement,
   updateOwnerMember,
 } = require("../controllers/group.controller");
@@ -42,6 +43,11 @@ router.patch(
   "/group/:id/members/:member_id/deactivate",
   authMiddleware,
   deactivateMember,
+);
+router.patch(
+  "/group/:id/members/:member_id/reactivate",
+  authMiddleware,
+  reactivateMember,
 );
 router.patch("/group/:id/owner-member", authMiddleware, updateOwnerMember);
 

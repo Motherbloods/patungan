@@ -1,10 +1,18 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
+import { memberShape, transferShape } from "../../propTypes/memberPropTypes";
 import Avatar from "../Avatar";
 import InfoBox from "../InfoBox";
 import OwnerBadge from "../OwnerBadge";
 import { fmt } from "../../utils/format";
 import { getNameUtil } from "../../utils/member";
 import { CheckCircle2 } from "lucide-react";
+
+function getSuggestionBorderColor(fromIsOwner, toIsOwner, isConfirming) {
+  if (fromIsOwner || toIsOwner) return "rgba(96, 165, 250, 0.5)";
+  if (isConfirming) return "rgba(248, 113, 113, 0.5)";
+  return "var(--color-border)";
+}
 
 function TabTransfer({
   members,
@@ -52,35 +60,23 @@ function TabTransfer({
             {suggestions.length} transfer perlu diselesaikan
           </p>
 
-          {suggestions.map((s, i) => {
-            const isConfirming = confirming === i;
+          {suggestions.map((s) => {
+            const isConfirming = confirming === s.from + s.to;
             const fromIsOwner = isOwner(s.from);
             const toIsOwner = isOwner(s.to);
+            const borderColor = getSuggestionBorderColor(
+              fromIsOwner,
+              toIsOwner,
+              isConfirming,
+            );
 
             return (
               <div
-                key={i}
+                key={`${s.from}-${s.to}`}
                 className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm transition-all w-full overflow-hidden"
-                style={{
-                  border: `1.5px solid ${
-                    fromIsOwner || toIsOwner
-                      ? "rgba(96, 165, 250, 0.5)"
-                      : isConfirming
-                        ? "rgba(248, 113, 113, 0.5)"
-                        : "var(--color-border)"
-                  }`,
-                }}
+                style={{ border: `1.5px solid ${borderColor}` }}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{
-                      background: "var(--color-bg-tertiary)",
-                      color: "var(--color-text-secondary)",
-                    }}
-                  >
-                    {i + 1}
-                  </div>
                   <Avatar members={members} uid={s.from} size={38} />
                   <div className="flex-1 min-w-0">
                     <div
@@ -107,9 +103,7 @@ function TabTransfer({
                     </div>
                     <div
                       className="font-extrabold mt-0.5"
-                      style={{
-                        fontSize: "clamp(15px, 3.2vw, 18px)",
-                      }}
+                      style={{ fontSize: "clamp(15px, 3.2vw, 18px)" }}
                     >
                       {fmt(s.amount)}
                     </div>
@@ -144,10 +138,8 @@ function TabTransfer({
                       onClick={() => setConfirming(null)}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
                       style={{
-                        fontSize: "clamp(11px, 2.3vw, 13px)",
-                      }}
-                      style={{
                         color: "var(--color-text-secondary)",
+                        fontSize: "clamp(11px, 2.3vw, 13px)",
                         border: "1px solid var(--color-border)",
                         background: "var(--color-bg-primary)",
                       }}
@@ -157,11 +149,9 @@ function TabTransfer({
                   </div>
                 ) : (
                   <button
-                    onClick={() => setConfirming(i)}
+                    onClick={() => setConfirming(s.from + s.to)}
                     className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 text-green-600 text-xs font-bold transition"
-                    style={{
-                      fontSize: "clamp(11px, 2.4vw, 13px)",
-                    }}
+                    style={{ fontSize: "clamp(11px, 2.4vw, 13px)" }}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Tandai Sudah Transfer
@@ -188,7 +178,7 @@ function TabTransfer({
 
             return (
               <div
-                key={s._id ?? i}
+                key={s._id ?? `settled-${s.from}-${s.to}-${i}`}
                 className="bg-primary rounded-2xl px-4 py-3.5 shadow-sm opacity-70"
                 style={{ border: "1.5px solid rgba(74, 222, 128, 0.4)" }}
               >
@@ -224,9 +214,7 @@ function TabTransfer({
                     </div>
                     <div
                       className="font-extrabold mt-0.5"
-                      style={{
-                        fontSize: "clamp(15px, 3.2vw, 18px)",
-                      }}
+                      style={{ fontSize: "clamp(15px, 3.2vw, 18px)" }}
                     >
                       {fmt(s.amount)}
                     </div>
@@ -252,5 +240,19 @@ function TabTransfer({
     </div>
   );
 }
+
+TabTransfer.propTypes = {
+  members: PropTypes.arrayOf(memberShape).isRequired,
+  suggestions: PropTypes.arrayOf(transferShape),
+  settlements: PropTypes.arrayOf(transferShape),
+  ownerMemberId: PropTypes.string,
+  onSettle: PropTypes.func.isRequired,
+};
+
+TabTransfer.defaultProps = {
+  suggestions: [],
+  settlements: [],
+  ownerMemberId: null,
+};
 
 export default TabTransfer;

@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+import { groupCardShape } from "../../propTypes/memberPropTypes";
 import { useSearchParams } from "react-router-dom";
 import GroupCard from "./GroupCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -9,7 +11,7 @@ function GroupPagination({ groups, pagination }) {
 
   const totalPages = pagination.totalPages ?? 1;
   const totalItems = pagination.totalItems ?? groups.length;
-  const page = parseInt(searchParams.get("page")) || 1;
+  const page = Number.parseInt(searchParams.get("page"), 10) || 1;
   const start = (page - 1) * PAGE_SIZE;
 
   function goTo(n) {
@@ -58,7 +60,7 @@ function GroupPagination({ groups, pagination }) {
           <div className="hidden sm:flex items-center gap-1.5">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
-                key={i}
+                key={i + 1}
                 onClick={() => goTo(i + 1)}
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                   page === i + 1
@@ -88,5 +90,13 @@ function GroupPagination({ groups, pagination }) {
     </>
   );
 }
+
+GroupPagination.propTypes = {
+  groups: PropTypes.arrayOf(groupCardShape).isRequired,
+  pagination: PropTypes.shape({
+    totalPages: PropTypes.number,
+    totalItems: PropTypes.number,
+  }).isRequired,
+};
 
 export default GroupPagination;
