@@ -1,79 +1,93 @@
 name: Deploy Patungan Production
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-    deploys:
-        runs-on: self-hosted
+  deploys:
+    runs-on: self-hosted
 
-        steps:
-            - name: Checkout main branch
-              uses: actions/checkout@v4
-              with:
-                  ref: main
-                  fetch-depth: 0
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
-            - name: Create Backend Env
-              run: |
-                  printf "%s" "${{ secrets.PATUNGAN_BE_ENV }}" > $GITHUB_WORKSPACE/patungan-be/.env
+      - name: Create Backend Env
+        run: |
+          printf "%s" "${{ secrets.PATUNGAN_BE_ENV }}" > $GITHUB_WORKSPACE/patungan-be/.env
 
-            - name: Create Frontend Env
-              run: |
-                  printf "%s" "${{ secrets.PATUNGAN_FE_ENV }}" > $GITHUB_WORKSPACE/patungan-fe/.env
+      - name: Create Frontend Env
+        run: |
+          printf "%s" "${{ secrets.PATUNGAN_FE_ENV }}" > $GITHUB_WORKSPACE/patungan-fe/.env
 
-            - name: Ensure network exists
-              run: |
-                  docker network inspect n8n-network >/dev/null 2>&1 || docker network create n8n-network
+      - name: Ensure network exists
+        run: |
+          docker network inspect n8n-network >/dev/null 2>&1 || docker network create n8n-network
 
-            - name: Build Backend
-              run: |
-                  docker build \
-                    -t patungan-api-image \
-                    $GITHUB_WORKSPACE/patungan-be
+      - name: Build Backend
+        run: |
+          docker build \
+            -t patungan-api-image:${{ github.sha }} \
+            -t patungan-api-image:latest \
+            $GITHUB_WORKSPACE/patungan-be
 
-            - name: Restart Backend
-              run: |
-                  docker rm -f patungan-api || true
-                  docker run -d \
-                    --name patungan-api \
-                    -p 3001:3000 \
-                    --network n8n-network \
-                    --restart unless-stopped \
-                    --read-only \
-                    -v patungan-logs:/app/logs \
-                    --env-file $GITHUB_WORKSPACE/patungan-be/.env \
-                    --cap-drop ALL \
-                    patungan-api-image
+      - name: Restart Backend
+        run: |
+          docker rm -f patungan-api || true
+          docker run -d \
+            --name patungan-api \
+            -p 3001:3000 \
+            --network n8n-network \
+            --restart unless-stopped \
+            --read-only \
+            -v patungan-logs:/app/logs \
+            --env-file $GITHUB_WORKSPACE/patungan-be/.env \
+            --cap-drop ALL \
+            patungan-api-image:${{ github.sha }}
 
-            - name: Build Frontend
-              run: |
-                  set -a
-                  . $GITHUB_WORKSPACE/patungan-fe/.env
-                  set +a
+      - name: Build Frontend
+        run: |
+          set -a
+          . $GITHUB_WORKSPACE/patungan-fe/.env
+          set +a
 
-                  docker build \
-                    --build-arg VITE_API_BASE_URL=$VITE_API_BASE_URL \
-                    --build-arg VITE_CREDENTIALS=$VITE_CREDENTIALS \
-                    --build-arg VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID \
-                    -t patungan-fe-image \
-                    $GITHUB_WORKSPACE/patungan-fe
+          docker build \
+            --build-arg VITE_API_BASE_URL=$VITE_API_BASE_URL \
+            --build-arg VITE_CREDENTIALS=$VITE_CREDENTIALS \
+            --build-arg VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID \
+            -t patungan-fe-image:${{ github.sha }} \
+            -t patungan-fe-image:latest \
+            $GITHUB_WORKSPACE/patungan-fe
 
-            - name: Restart Frontend
-              run: |
-                  docker rm -f patungan || true
-                  docker run -d \
-                    --name patungan \
-                    -p 5176:5176 \
-                    --network n8n-network \
-                    --cap-drop ALL \
-                    --cap-add SETGID \
-                    --cap-add SETUID \
-                    --cap-add NET_BIND_SERVICE \
-                    patungan-fe-image
+      - name: Restart Frontend
+        run: |
+          docker rm -f patungan || true
+          docker run -d \
+            --name patungan \
+            -p 5176:5176 \
+            --network n8n-network \
+            --restart unless-stopped \
+            --cap-drop ALL \
+            --cap-add SETGID \
+            --cap-add SETUID \
+            --cap-add NET_BIND_SERVICE \
+            patungan-fe-image:${{ github.sha }}
 
-            - name: Cleanup Env Files
-              if: always()
-              run: |
-                  rm -f $GITHUB_WORKSPACE/patungan-be/.env
-                  rm -f $GITHUB_WORKSPACE/patungan-fe/.env
+      - name: Cleanup Old Images
+        if: always()
+        run: |
+          docker images patungan-fe-image --format "{{.Tag}}" | \
+            grep -v latest | sort | head -n -3 | \
+            xargs -I {} docker rmi patungan-fe-image:{} || true
+
+          docker images patungan-api-image --format "{{.Tag}}" | \
+            grep -v latest | sort | head -n -3 | \
+            xargs -I {} docker rmi patungan-api-image:{} || true
+
+      - name: Cleanup Env Files
+        if: always()
+        run: |
+          rm -f $GITHUB_WORKSPACE/patungan-be/.env
+          rm -f $GITHUB_WORKSPACE/patungan-fe/.env
