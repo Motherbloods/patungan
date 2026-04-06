@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function NotFoundFallback({ message = "Not found." }) {
   return (
     <div
@@ -8,4 +10,9 @@ function NotFoundFallback({ message = "Not found." }) {
     </div>
   );
 }
+
+NotFoundFallback.propTypes = {
+  message: PropTypes.string,
+};
+
 export default NotFoundFallback;

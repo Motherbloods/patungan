@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function ErrorFallback({ message = "Something went wrong." }) {
   return (
     <div
@@ -8,4 +10,9 @@ function ErrorFallback({ message = "Something went wrong." }) {
     </div>
   );
 }
+
+ErrorFallback.propTypes = {
+  message: PropTypes.string,
+};
+
 export default ErrorFallback;

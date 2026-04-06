@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import LayoutSkeleton from "./LayoutSkeleton";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 import expenseService from "../services/expenseService";
 import groupService from "../services/groupService";
 import dashboardService from "../services/dashboardService";
@@ -54,5 +55,9 @@ function ProtectedRoute({ children }) {
 
   return children;
 }
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default ProtectedRoute;

@@ -1,6 +1,8 @@
 import { useAuth } from "../context/authContext";
 import { Navigate } from "react-router-dom";
 import LayoutSkeleton from "./LayoutSkeleton";
+import PropTypes from "prop-types";
+
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
 
@@ -14,5 +16,9 @@ function PublicRoute({ children }) {
 
   return children;
 }
+
+PublicRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default PublicRoute;
