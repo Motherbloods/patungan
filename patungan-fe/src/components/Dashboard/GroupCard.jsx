@@ -4,49 +4,7 @@ import { fmt } from "../../utils/format";
 import { Receipt, Users } from "lucide-react";
 import ICON_OPTIONS from "../../config/icons";
 import { groupCardShape } from "../../propTypes/memberPropTypes";
-
-function getBalanceState(myBalance) {
-  const hasTag = myBalance !== null;
-  const isPos = hasTag && myBalance > 0;
-  const isZero = hasTag && myBalance === 0;
-  return { hasTag, isPos, isZero };
-}
-
-function getBalanceStyle(isZero, isPos) {
-  if (isZero) return { background: "#F3F4F6", color: "#9CA3AF" };
-  if (isPos) return { background: "#DCFCE7", color: "#16A34A" };
-  return { background: "#FEE2E2", color: "#DC2626" };
-}
-
-function getBalanceText(myBalance, isZero, isPos) {
-  if (isZero) return "Lunas";
-  const sign = isPos ? "+" : "-";
-  return sign + fmt(Math.abs(myBalance));
-}
-
-function BalanceBadge({ myBalance }) {
-  const { hasTag, isPos, isZero } = getBalanceState(myBalance);
-
-  if (!hasTag) {
-    return (
-      <span className="text-xs font-medium px-2 py-1 rounded-lg bg-tertiary text-secondary">
-        —
-      </span>
-    );
-  }
-
-  return (
-    <span
-      className="text-xs font-bold px-2 py-1 rounded-lg"
-      style={{
-        ...getBalanceStyle(isZero, isPos),
-        fontSize: "clamp(10px, 2.2vw, 12px)",
-      }}
-    >
-      {getBalanceText(myBalance, isZero, isPos)}
-    </span>
-  );
-}
+import BalanceBadge from "./BalanceBadge";
 
 BalanceBadge.propTypes = {
   myBalance: PropTypes.number,
