@@ -66,3 +66,16 @@ export const balanceShape = PropTypes.shape({
   user_id: PropTypes.string,
   amount: PropTypes.number,
 });
+
+export const expenseShape = PropTypes.shape({
+  _id: PropTypes.string,
+  name: PropTypes.string,
+  total_amount: PropTypes.number,
+  paid_by: PropTypes.string,
+  participants: PropTypes.arrayOf(
+    PropTypes.shape({
+      user_id: PropTypes.string,
+      share_amount: PropTypes.number,
+    }),
+  ),
+});
