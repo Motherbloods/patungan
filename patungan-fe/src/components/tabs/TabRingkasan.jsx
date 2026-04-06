@@ -1,63 +1,16 @@
 import PropTypes from "prop-types";
 import { memberShape, balanceShape } from "../../propTypes/memberPropTypes";
 import Avatar from "../Avatar";
-import Pill from "../Pill";
 import InfoBox from "../InfoBox";
 import OwnerBadge from "../OwnerBadge";
 import { getMemberUtil } from "../../utils/member";
-import { fmt } from "../../utils/format";
-
-function getBorderColor(isOwner, isZero, isPos) {
-  if (isOwner) return "rgba(96, 165, 250, 0.5)";
-  if (isZero) return "var(--color-border)";
-  if (isPos) return "rgba(74, 222, 128, 0.5)";
-  return "rgba(248, 113, 113, 0.5)";
-}
-
-function getAmountColor(isZero, isPos) {
-  if (isZero) return "var(--color-text-secondary)";
-  if (isPos) return "#16A34A";
-  return "#DC2626";
-}
-
-function getAmountLabel(isZero, isPos) {
-  if (isZero) return "selesai";
-  if (isPos) return "akan diterima";
-  return "harus ditransfer";
-}
-
-function getAmountDisplay(isZero, isPos, amount) {
-  if (isZero) return "—";
-  if (isPos) return `+${fmt(amount)}`;
-  return `-${fmt(amount)}`;
-}
-
-function StatusPill({ isZero, isPos }) {
-  if (isZero) {
-    return (
-      <Pill bg="var(--color-bg-tertiary)" color="var(--color-text-secondary)">
-        ✅ Sudah lunas
-      </Pill>
-    );
-  }
-  if (isPos) {
-    return (
-      <Pill bg="rgba(74, 222, 128, 0.15)" color="#16A34A">
-        💰 Berhak terima
-      </Pill>
-    );
-  }
-  return (
-    <Pill bg="rgba(248, 113, 113, 0.15)" color="#DC2626">
-      ⚠️ Perlu transfer
-    </Pill>
-  );
-}
-
-StatusPill.propTypes = {
-  isZero: PropTypes.bool.isRequired,
-  isPos: PropTypes.bool.isRequired,
-};
+import {
+  getAmountColor,
+  getAmountDisplay,
+  getAmountLabel,
+  getBorderColor,
+} from "../../utils/balance";
+import StatusPill from "../StatusPill";
 
 function TabRingkasan({ members, balances, ownerMemberId }) {
   if (!balances || balances.length === 0) {
