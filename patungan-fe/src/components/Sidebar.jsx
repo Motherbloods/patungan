@@ -57,38 +57,37 @@ function Sidebar() {
     });
   };
 
+  const confirmDeleteGroup = (groupId, toastId) => {
+    toast.dismiss(toastId);
+    deleteGroup(groupId, {
+      onSuccess: () => toast.success("Grup berhasil dihapus"),
+      onError: () => toast.error("Gagal menghapus grup"),
+    });
+  };
+
+  const renderDeleteToast = (t, groupId) => (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium text-primary">Hapus grup ini?</p>
+      <p className="text-xs text-secondary">Semua data akan hilang permanen.</p>
+      <div className="flex gap-2 mt-1">
+        <button
+          onClick={() => confirmDeleteGroup(groupId, t.id)}
+          className="flex-1 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition"
+        >
+          Hapus
+        </button>
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="flex-1 py-1.5 rounded-lg border border-custom text-secondary text-xs font-semibold hover:bg-tertiary transition"
+        >
+          Batal
+        </button>
+      </div>
+    </div>
+  );
+
   const handleDelete = (groupId) => {
-    toast(
-      (t) => (
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-primary">Hapus grup ini?</p>
-          <p className="text-xs text-secondary">
-            Semua data akan hilang permanen.
-          </p>
-          <div className="flex gap-2 mt-1">
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                deleteGroup(groupId, {
-                  onSuccess: () => toast.success("Grup berhasil dihapus"),
-                  onError: () => toast.error("Gagal menghapus grup"),
-                });
-              }}
-              className="flex-1 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition"
-            >
-              Hapus
-            </button>
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="flex-1 py-1.5 rounded-lg border border-custom text-secondary text-xs font-semibold hover:bg-tertiary transition"
-            >
-              Batal
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity },
-    );
+    toast((t) => renderDeleteToast(t, groupId), { duration: Infinity });
   };
 
   const handleLogout = () => {
@@ -152,8 +151,11 @@ function Sidebar() {
       </button>
 
       {open && (
-        <div
+        <button
+          type="button"
+          aria-label="Tutup sidebar"
           onClick={() => setOpen(false)}
+          onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
           className="fixed inset-0 bg-black/30 z-40 md:hidden"
         />
       )}
@@ -246,9 +248,9 @@ function Sidebar() {
           >
             {isLoading && (
               <div className="flex flex-col gap-1.5 px-2 py-1">
-                {[...Array(3)].map((_, i) => (
+                {[...new Array(3)].map((_, i) => (
                   <div
-                    key={i}
+                    key={`skeleton-${i}`}
                     className="h-10 bg-tertiary rounded-xl animate-pulse"
                     style={{ opacity: 1 - i * 0.25 }}
                   />
@@ -349,9 +351,12 @@ function Sidebar() {
                 </button>
               )}
 
-              <div
-                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all cursor-pointer ${menuOpen ? "bg-tertiary" : "hover:bg-secondary"}`}
+              <button
+                type="button"
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all text-left ${menuOpen ? "bg-tertiary" : "hover:bg-secondary"}`}
                 onClick={() => setMenuOpen((prev) => !prev)}
+                aria-expanded={menuOpen}
+                aria-haspopup="true"
               >
                 <div className="relative shrink-0">
                   {user?.avatar ? (
@@ -394,7 +399,7 @@ function Sidebar() {
                   size={15}
                   className={`shrink-0 transition-colors ${menuOpen ? "text-primary" : "text-secondary"}`}
                 />
-              </div>
+              </button>
 
               {menuOpen && (
                 <div className="menu-enter absolute bottom-full left-0 right-0 mb-2 bg-primary border border-custom rounded-2xl shadow-2xl overflow-hidden">
