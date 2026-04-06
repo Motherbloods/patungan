@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function Pill({ children, color = "#6B7280", bg = "#F3F4F6" }) {
   return (
     <span
@@ -14,3 +16,9 @@ export default function Pill({ children, color = "#6B7280", bg = "#F3F4F6" }) {
     </span>
   );
 }
+
+Pill.propTypes = {
+  children: PropTypes.node.isRequired,
+  color: PropTypes.string,
+  bg: PropTypes.string,
+};

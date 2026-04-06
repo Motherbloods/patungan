@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function Bone({ className = "", style = {} }) {
   return (
     <div
@@ -8,6 +10,11 @@ function Bone({ className = "", style = {} }) {
     </div>
   );
 }
+
+Bone.propTypes = {
+  className: PropTypes.string,
+  style: PropTypes.object,
+};
 
 function SidebarSkeleton() {
   return (
@@ -114,6 +121,10 @@ function GroupCardSkeleton({ opacity = 1 }) {
   );
 }
 
+GroupCardSkeleton.propTypes = {
+  opacity: PropTypes.number,
+};
+
 function ActivityItemSkeleton({ opacity = 1 }) {
   return (
     <div
@@ -129,6 +140,10 @@ function ActivityItemSkeleton({ opacity = 1 }) {
     </div>
   );
 }
+
+ActivityItemSkeleton.propTypes = {
+  opacity: PropTypes.number,
+};
 
 function DashboardSkeleton() {
   return (
