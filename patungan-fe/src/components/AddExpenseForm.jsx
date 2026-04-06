@@ -23,11 +23,18 @@ function AddExpenseForm({
     initialData?.total_amount?.toString() ?? "",
   );
   const [paidBy, setPaidBy] = useState(initialData?.paid_by ?? "");
-  const [participants, setParticipants] = useState(() =>
-    initialData
-      ? initialData?.participants?.map((p) => p.user_id)
-      : members.map((m) => m._id),
-  );
+
+  const activeMembers = members.filter((m) => m.isActive !== false);
+
+  const visibleMembers = isEditing ? members : activeMembers;
+
+  const [participants, setParticipants] = useState(() => {
+    if (initialData) {
+      return initialData?.participants?.map((p) => p.user_id);
+    }
+    return activeMembers.map((m) => m._id);
+  });
+
   const [splitMethod, setSplitMethod] = useState(
     initialData?.split_method ?? "bagi-rata",
   );
@@ -46,9 +53,13 @@ function AddExpenseForm({
   const perPerson =
     participants.length > 0 ? Math.floor(totalAmount / participants.length) : 0;
 
-  const toggleParticipant = (id) => {
+  const toggleParticipant = (memberId, isActive) => {
+    if (!isActive) return;
+
     setParticipants((prev) =>
-      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id],
+      prev.includes(memberId)
+        ? prev.filter((pid) => pid !== memberId)
+        : [...prev, memberId],
     );
   };
 
@@ -110,8 +121,8 @@ function AddExpenseForm({
     if (!isEditing) {
       setName("");
       setAmount("");
-      setPaidBy(members[0]?._id ?? "");
-      setParticipants(members.map((m) => m._id));
+      setPaidBy(activeMembers[0]?._id ?? "");
+      setParticipants(activeMembers.map((m) => m._id));
       setCustomShares({});
     }
   };
@@ -222,7 +233,7 @@ function AddExpenseForm({
             Dibayar oleh
           </label>
           <div className="flex gap-2 flex-wrap">
-            {members.map((m) => (
+            {activeMembers.map((m) => (
               <button
                 key={m._id}
                 onClick={() => setPaidBy(m._id)}
@@ -267,8 +278,10 @@ function AddExpenseForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          {members.map((m) => {
+          {visibleMembers.map((m) => {
             const active = participants.includes(m._id);
+            const memberIsActive = m.isActive !== false;
+
             return (
               <div
                 key={m._id}
@@ -278,12 +291,13 @@ function AddExpenseForm({
                   background: active
                     ? m.light + "44"
                     : "var(--color-bg-secondary)",
+                  opacity: memberIsActive ? 1 : 0.55,
                 }}
               >
                 <button
-                  onClick={() => toggleParticipant(m._id)}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 flex-1 text-left disabled:opacity-50"
+                  onClick={() => toggleParticipant(m._id, memberIsActive)}
+                  disabled={!memberIsActive || isSubmitting}
+                  className="flex items-center gap-2 flex-1 text-left disabled:cursor-not-allowed"
                 >
                   <div
                     className="w-5 h-5 rounded-md border-2 flex items-center justify-center text-white text-xs transition-all"
@@ -301,6 +315,14 @@ function AddExpenseForm({
                     }}
                   >
                     {m.emoji} {m.name}
+                    {isEditing && !memberIsActive && (
+                      <span
+                        className="ml-1.5 text-xs font-normal"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        (nonaktif)
+                      </span>
+                    )}
                   </span>
                 </button>
                 <span
@@ -314,7 +336,7 @@ function AddExpenseForm({
                       <input
                         type="text"
                         inputMode="numeric"
-                        disabled={isSubmitting}
+                        disabled={!memberIsActive || isSubmitting}
                         value={
                           customShares[m._id]
                             ? Number(customShares[m._id]).toLocaleString(
@@ -329,7 +351,7 @@ function AddExpenseForm({
                             [m._id]: numeric,
                           }));
                         }}
-                        className="w-24 rounded-lg px-2 py-1 text-sm text-right disabled:opacity-60"
+                        className="w-24 rounded-lg px-2 py-1 text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
                         style={{
                           border: "1px solid var(--color-border)",
                           background: "var(--color-bg-primary)",
