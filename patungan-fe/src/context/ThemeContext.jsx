@@ -1,11 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 
 const ThemeContext = createContext();
 
 // Calculate the max radius needed to cover the entire screen from a corner
 function getMaxRadius(x, y) {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const w = globalThis.innerWidth;
+  const h = globalThis.innerHeight;
   return Math.hypot(Math.max(x, w - x), Math.max(y, h - y));
 }
 
@@ -24,41 +25,30 @@ async function animateThemeTransition(isDarkNext, applyTheme) {
     return;
   }
 
-  // Inject keyframe style once
-  if (!document.getElementById("theme-transition-style")) {
+  const keyframes = `
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+      mix-blend-mode: normal;
+    }
+    ::view-transition-new(root) {
+      animation: theme-clip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes theme-clip-in {
+      from { clip-path: ${clipStart}; }
+      to   { clip-path: ${clipEnd}; }
+    }
+  `;
+
+  // Inject or update keyframe style
+  const existingStyle = document.getElementById("theme-transition-style");
+  if (existingStyle) {
+    existingStyle.textContent = keyframes;
+  } else {
     const style = document.createElement("style");
     style.id = "theme-transition-style";
-    style.textContent = `
-      ::view-transition-old(root),
-      ::view-transition-new(root) {
-        animation: none;
-        mix-blend-mode: normal;
-      }
-      ::view-transition-new(root) {
-        animation: theme-clip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      }
-      @keyframes theme-clip-in {
-        from { clip-path: ${clipStart}; }
-        to   { clip-path: ${clipEnd}; }
-      }
-    `;
+    style.textContent = keyframes;
     document.head.appendChild(style);
-  } else {
-    // Update keyframe with current clip values (in case window resized)
-    document.getElementById("theme-transition-style").textContent = `
-      ::view-transition-old(root),
-      ::view-transition-new(root) {
-        animation: none;
-        mix-blend-mode: normal;
-      }
-      ::view-transition-new(root) {
-        animation: theme-clip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      }
-      @keyframes theme-clip-in {
-        from { clip-path: ${clipStart}; }
-        to   { clip-path: ${clipEnd}; }
-      }
-    `;
   }
 
   const transition = document.startViewTransition(() => {
@@ -72,7 +62,7 @@ export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
   // Apply theme class to <html> without animation (used on init & inside transition)
@@ -94,12 +84,16 @@ export function ThemeProvider({ children }) {
     setIsDark(next);
   };
 
+  const value = useMemo(() => ({ isDark, toggleTheme }), [isDark]);
+
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
+
+ThemeProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);

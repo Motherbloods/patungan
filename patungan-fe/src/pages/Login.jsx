@@ -17,20 +17,26 @@ const TelegramIcon = () => (
   </svg>
 );
 
+const FLOAT_DOTS = [
+  { size: 180, top: 10, left: 70, duration: 8, delay: 0 },
+  { size: 120, top: 60, left: 10, duration: 10, delay: 1.5 },
+  { size: 90, top: 30, left: 85, duration: 7, delay: 3 },
+];
+
 const FloatingDots = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {[...Array(3)].map((_, i) => (
+    {new Array(3).fill(null).map((_, i) => (
       <div
-        key={i}
+        key={FLOAT_DOTS[i].size}
         className="absolute rounded-full opacity-[0.07]"
         style={{
-          width: `${[180, 120, 90, 200, 140, 100][i]}px`,
-          height: `${[180, 120, 90, 200, 140, 100][i]}px`,
+          width: `${FLOAT_DOTS[i].size}px`,
+          height: `${FLOAT_DOTS[i].size}px`,
           background: "linear-gradient(135deg, #3b82f6, #6366f1)",
-          top: `${[10, 60, 30, 75, 5, 50][i]}%`,
-          left: `${[70, 10, 85, 55, 30, 45][i]}%`,
-          animation: `floatDot ${[8, 10, 7, 12, 9, 11][i]}s ease-in-out infinite`,
-          animationDelay: `${[0, 1.5, 3, 0.5, 2, 4][i]}s`,
+          top: `${FLOAT_DOTS[i].top}%`,
+          left: `${FLOAT_DOTS[i].left}%`,
+          animation: `floatDot ${FLOAT_DOTS[i].duration}s ease-in-out infinite`,
+          animationDelay: `${FLOAT_DOTS[i].delay}s`,
         }}
       />
     ))}
@@ -176,114 +182,7 @@ function Login() {
 
           <div className="login-card backdrop-blur-xl rounded-3xl shadow-xl shadow-blue-100/50 border overflow-hidden">
             <div className="p-8">
-              {!loginToken ? (
-                <div>
-                  <div className="mb-7 fade-up-1">
-                    <h2 className="text-xl font-bold text-primary">
-                      Selamat datang
-                    </h2>
-                    <p className="text-sm text-secondary mt-1">
-                      Pilih metode login untuk melanjutkan
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="fade-up-2">
-                      <button
-                        onClick={handleTelegramLogin}
-                        disabled={isLoading.telegram || isLoading.google}
-                        className="btn-telegram w-full px-5 py-3.5 text-white rounded-2xl font-semibold text-sm flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {isLoading.telegram ? (
-                          <>
-                            <svg
-                              className="w-4 h-4 animate-spin"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
-                            <span>Menghubungkan...</span>
-                          </>
-                        ) : (
-                          <>
-                            <TelegramIcon />
-                            <span>Masuk dengan Telegram</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="fade-up-2 flex items-center gap-3 py-1">
-                      <div className="divider-line flex-1" />
-                      <span className="text-xs text-secondary font-medium">
-                        atau
-                      </span>
-                      <div className="divider-line flex-1" />
-                    </div>
-
-                    <div className="fade-up-3">
-                      <div
-                        className="google-wrapper w-full rounded-2xl overflow-hidden"
-                        style={{ minHeight: 44 }}
-                      >
-                        <GoogleLogin
-                          width="100%"
-                          onSuccess={async (credentialResponse) => {
-                            const toastId = toast.loading("Memproses login...");
-                            setIsLoading((p) => ({ ...p, google: true }));
-                            const timeout = new Promise((_, reject) =>
-                              setTimeout(
-                                () => reject(new Error("Request timeout")),
-                                10000,
-                              ),
-                            );
-                            try {
-                              const idToken = credentialResponse.credential;
-                              const res = await Promise.race([
-                                loginGoogle(idToken),
-                                timeout,
-                              ]);
-                              setUser(res.user);
-                              toast.success("Login berhasil!", { id: toastId });
-                              navigate("/dashboard");
-                            } catch (err) {
-                              const msg =
-                                err.message === "Request timeout"
-                                  ? "Koneksi timeout, coba lagi"
-                                  : err?.response?.data?.error || "Login gagal";
-                              toast.error(msg, { id: toastId });
-                            } finally {
-                              setIsLoading((p) => ({ ...p, google: false }));
-                            }
-                          }}
-                          onError={() => toast.error("Login Google gagal")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-center text-xs text-secondary mt-6 fade-up-3">
-                    Dengan masuk, kamu menyetujui{" "}
-                    <span className="text-blue-500 cursor-pointer hover:underline">
-                      kebijakan privasi
-                    </span>{" "}
-                    kami
-                  </p>
-                </div>
-              ) : (
+              {loginToken ? (
                 <div className="fade-up">
                   <button
                     onClick={handleCancel}
@@ -383,6 +282,113 @@ function Login() {
                   >
                     Batalkan
                   </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-7 fade-up-1">
+                    <h2 className="text-xl font-bold text-primary">
+                      Selamat datang
+                    </h2>
+                    <p className="text-sm text-secondary mt-1">
+                      Pilih metode login untuk melanjutkan
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="fade-up-2">
+                      <button
+                        onClick={handleTelegramLogin}
+                        disabled={isLoading.telegram || isLoading.google}
+                        className="btn-telegram w-full px-5 py-3.5 text-white rounded-2xl font-semibold text-sm flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {isLoading.telegram ? (
+                          <>
+                            <svg
+                              className="animate-spin w-5 h-5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              />
+                            </svg>
+                            <span>Menghubungkan...</span>
+                          </>
+                        ) : (
+                          <>
+                            <TelegramIcon />
+                            <span>Masuk dengan Telegram</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="fade-up-2 flex items-center gap-3 py-1">
+                      <div className="divider-line flex-1" />
+                      <span className="text-xs text-secondary font-medium">
+                        atau
+                      </span>
+                      <div className="divider-line flex-1" />
+                    </div>
+
+                    <div className="fade-up-3">
+                      <div
+                        className="google-wrapper w-full rounded-2xl overflow-hidden"
+                        style={{ minHeight: 44 }}
+                      >
+                        <GoogleLogin
+                          width="100%"
+                          onSuccess={async (credentialResponse) => {
+                            const toastId = toast.loading("Memproses login...");
+                            setIsLoading((p) => ({ ...p, google: true }));
+                            const timeout = new Promise((_, reject) =>
+                              setTimeout(
+                                () => reject(new Error("Request timeout")),
+                                10000,
+                              ),
+                            );
+                            try {
+                              const idToken = credentialResponse.credential;
+                              const res = await Promise.race([
+                                loginGoogle(idToken),
+                                timeout,
+                              ]);
+                              setUser(res.user);
+                              toast.success("Login berhasil!", { id: toastId });
+                              navigate("/dashboard");
+                            } catch (err) {
+                              const msg =
+                                err.message === "Request timeout"
+                                  ? "Koneksi timeout, coba lagi"
+                                  : err?.response?.data?.error || "Login gagal";
+                              toast.error(msg, { id: toastId });
+                            } finally {
+                              setIsLoading((p) => ({ ...p, google: false }));
+                            }
+                          }}
+                          onError={() => toast.error("Login Google gagal")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-center text-xs text-secondary mt-6 fade-up-3">
+                    Dengan masuk, kamu menyetujui{" "}
+                    <span className="text-blue-500 cursor-pointer hover:underline">
+                      kebijakan privasi
+                    </span>{" "}
+                    kami
+                  </p>
                 </div>
               )}
             </div>

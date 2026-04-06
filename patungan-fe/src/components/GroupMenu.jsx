@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 function GroupMenu({ onEdit, onDelete }) {
@@ -110,5 +111,10 @@ function GroupMenu({ onEdit, onDelete }) {
     </div>
   );
 }
+
+GroupMenu.propTypes = {
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+};
 
 export default GroupMenu;

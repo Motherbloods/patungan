@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
+import PropTypes from "prop-types";
 import { useLogout } from "../hooks/useAuth";
 import authService from "../services/authService";
 import LayoutSkeleton from "../components/LayoutSkeleton";
@@ -42,25 +50,28 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const value = useMemo(
+    () => ({
+      user,
+      setUser,
+      loading,
+      setLoading,
+      logout,
+      isAuthenticated,
+      isLoggingOut: logoutApi.isPending,
+    }),
+    [user, loading, isAuthenticated, logoutApi.isPending],
+  );
+
   if (loading) {
     return <LayoutSkeleton />;
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        loading,
-        setLoading,
-        logout,
-        isAuthenticated,
-        isLoggingOut: logoutApi.isPending,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -149,6 +149,77 @@ function GroupDetail() {
     (activeTab === "transfer" && settlementError) ||
     (activeTab === "riwayat" && historyError);
 
+  const renderTabContent = () => {
+    if (tabIsLoading) {
+      return (
+        <div className="flex justify-center items-center py-12">
+          <p className="text-sm text-secondary">Memuat data...</p>
+        </div>
+      );
+    }
+
+    if (tabError) {
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+          <p className="text-sm text-red-500">Gagal memuat data. Coba lagi.</p>
+        </div>
+      );
+    }
+
+    if (activeTab === "ringkasan") {
+      return (
+        <TabRingkasan
+          members={group.members}
+          balances={group.balances}
+          ownerMemberId={ownerMemberId}
+        />
+      );
+    }
+
+    if (activeTab === "transaksi") {
+      return (
+        <TabTransaksi
+          members={group.members}
+          expenses={transactions.expenses}
+          ownerMemberId={ownerMemberId}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          deletingId={deletingId}
+        />
+      );
+    }
+
+    if (activeTab === "transfer") {
+      return (
+        <TabTransfer
+          members={group.members}
+          settlements={settlement.settlements}
+          suggestions={settlement.suggestions}
+          ownerMemberId={ownerMemberId}
+          onSettle={(s) => {
+            createSettlement(s, {
+              onSuccess: () => toast.success("Transfer berhasil dicatat"),
+              onError: () => toast.error("Gagal mencatat transfer"),
+            });
+          }}
+        />
+      );
+    }
+
+    if (activeTab === "riwayat") {
+      return (
+        <TabRiwayat
+          members={group.members}
+          balances={group.balances}
+          history={history.history}
+          ownerMemberId={ownerMemberId}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="min-h-full bg-secondary flex flex-col">
       <GroupHeader groupConfig={group} />
@@ -171,8 +242,7 @@ function GroupDetail() {
               }}
               className="w-full flex items-center justify-center gap-2 bg-primary border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-500 font-semibold text-sm py-3 rounded-2xl transition-all duration-150"
             >
-              <span className="text-lg">＋</span>
-              Tambah Pengeluaran
+              <span className="text-lg">＋</span> Tambah Pengeluaran
             </button>
           )}
         </div>
@@ -197,59 +267,7 @@ function GroupDetail() {
           ))}
         </div>
 
-        {tabIsLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <p className="text-sm text-secondary">Memuat data...</p>
-          </div>
-        ) : tabError ? (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-            <p className="text-sm text-red-500">
-              Gagal memuat data. Coba lagi.
-            </p>
-          </div>
-        ) : (
-          <>
-            {activeTab === "ringkasan" && (
-              <TabRingkasan
-                members={group.members}
-                balances={group.balances}
-                ownerMemberId={ownerMemberId}
-              />
-            )}
-            {activeTab === "transaksi" && (
-              <TabTransaksi
-                members={group.members}
-                expenses={transactions.expenses}
-                ownerMemberId={ownerMemberId}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                deletingId={deletingId}
-              />
-            )}
-            {activeTab === "transfer" && (
-              <TabTransfer
-                members={group.members}
-                settlements={settlement.settlements}
-                suggestions={settlement.suggestions}
-                ownerMemberId={ownerMemberId}
-                onSettle={(s) => {
-                  createSettlement(s, {
-                    onSuccess: () => toast.success("Transfer berhasil dicatat"),
-                    onError: () => toast.error("Gagal mencatat transfer"),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "riwayat" && (
-              <TabRiwayat
-                members={group.members}
-                balances={group.balances}
-                history={history.history}
-                ownerMemberId={ownerMemberId}
-              />
-            )}
-          </>
-        )}
+        {renderTabContent()}
       </div>
     </div>
   );
