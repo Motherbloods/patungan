@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Pencil,
   PlusCircle,
@@ -8,6 +9,10 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { fmt } from "../utils/format";
+import {
+  expenseMemberShape,
+  initialExpenseShape,
+} from "../propTypes/memberPropTypes";
 
 function AddExpenseForm({
   members = [],
@@ -64,7 +69,7 @@ function AddExpenseForm({
   };
 
   const handleAmountInput = (value) => {
-    const numericValue = value.replace(/\D/g, "");
+    const numericValue = value.replaceAll(/\D/g, "");
     setAmount(numericValue);
   };
 
@@ -103,7 +108,7 @@ function AddExpenseForm({
       share_amount:
         splitMethod === "bagi-rata"
           ? perPerson
-          : parseFloat(customShares[uid] || 0),
+          : Number.parseFloat(customShares[uid] || 0),
     }));
 
     const expenseData = {
@@ -125,6 +130,42 @@ function AddExpenseForm({
       setParticipants(activeMembers.map((m) => m._id));
       setCustomShares({});
     }
+  };
+
+  const getSubmitLabel = () => {
+    if (isSubmitting) return isEditing ? "Menyimpan..." : "Menambahkan...";
+    return isEditing ? "Simpan Perubahan" : "Simpan Pengeluaran";
+  };
+
+  const getShareDisplay = (m, active) => {
+    if (!active) return "—";
+    if (splitMethod === "bagi-rata") return fmt(perPerson);
+    return (
+      <input
+        type="text"
+        inputMode="numeric"
+        disabled={m.isActive === false || isSubmitting}
+        value={
+          customShares[m._id]
+            ? Number(customShares[m._id]).toLocaleString("id-ID")
+            : ""
+        }
+        onChange={(e) => {
+          const numeric = e.target.value.replaceAll(/\D/g, "");
+          setCustomShares((prev) => ({
+            ...prev,
+            [m._id]: numeric,
+          }));
+        }}
+        className="w-24 rounded-lg px-2 py-1 text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
+        style={{
+          border: "1px solid var(--color-border)",
+          background: "var(--color-bg-primary)",
+          color: "var(--color-text-primary)",
+        }}
+        placeholder="0"
+      />
+    );
   };
 
   return (
@@ -174,12 +215,14 @@ function AddExpenseForm({
       <div className="px-5 py-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label
+            htmlFor="expense-name-input"
             className="text-xs font-semibold uppercase tracking-wide"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Nama Pengeluaran
           </label>
           <input
+            id="expense-name-input"
             type="text"
             placeholder="cth. Makan Malam, Bensin..."
             value={name}
@@ -196,6 +239,7 @@ function AddExpenseForm({
 
         <div className="flex flex-col gap-1.5">
           <label
+            htmlFor="expense-amount-input"
             className="text-xs font-semibold uppercase tracking-wide"
             style={{ color: "var(--color-text-secondary)" }}
           >
@@ -209,6 +253,7 @@ function AddExpenseForm({
               Rp
             </span>
             <input
+              id="expense-amount-input"
               type="text"
               inputMode="numeric"
               placeholder="0"
@@ -226,18 +271,24 @@ function AddExpenseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label
+          <p
+            id="paid-by-label"
             className="text-xs font-semibold uppercase tracking-wide"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Dibayar oleh
-          </label>
-          <div className="flex gap-2 flex-wrap">
+          </p>
+          <div
+            role="group"
+            aria-labelledby="paid-by-label"
+            className="flex gap-2 flex-wrap"
+          >
             {activeMembers.map((m) => (
               <button
                 key={m._id}
                 onClick={() => setPaidBy(m._id)}
                 disabled={isSubmitting}
+                aria-pressed={paidBy === m._id}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 text-xs font-semibold transition-all disabled:opacity-50"
                 style={{
                   borderColor:
@@ -256,12 +307,13 @@ function AddExpenseForm({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label
+            <p
+              id="dibagi-ke-label"
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--color-text-secondary)" }}
             >
               Dibagi ke
-            </label>
+            </p>
             <button
               onClick={() =>
                 setSplitMethod((sm) =>
@@ -277,7 +329,11 @@ function AddExpenseForm({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div
+          role="group"
+          aria-labelledby="dibagi-ke-label"
+          className="flex flex-col gap-2"
+        >
           {visibleMembers.map((m) => {
             const active = participants.includes(m._id);
             const memberIsActive = m.isActive !== false;
@@ -329,40 +385,7 @@ function AddExpenseForm({
                   className="text-sm font-bold"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
-                  {active ? (
-                    splitMethod === "bagi-rata" ? (
-                      fmt(perPerson)
-                    ) : (
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        disabled={!memberIsActive || isSubmitting}
-                        value={
-                          customShares[m._id]
-                            ? Number(customShares[m._id]).toLocaleString(
-                                "id-ID",
-                              )
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const numeric = e.target.value.replace(/\D/g, "");
-                          setCustomShares((prev) => ({
-                            ...prev,
-                            [m._id]: numeric,
-                          }));
-                        }}
-                        className="w-24 rounded-lg px-2 py-1 text-sm text-right disabled:opacity-60 disabled:cursor-not-allowed"
-                        style={{
-                          border: "1px solid var(--color-border)",
-                          background: "var(--color-bg-primary)",
-                          color: "var(--color-text-primary)",
-                        }}
-                        placeholder="0"
-                      />
-                    )
-                  ) : (
-                    "—"
-                  )}
+                  {getShareDisplay(m, active)}
                 </span>
               </div>
             );
@@ -392,20 +415,29 @@ function AddExpenseForm({
           disabled={isSubmitting}
           className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl text-sm transition-all duration-150 shadow-sm mt-1"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {isEditing ? "Menyimpan..." : "Menambahkan..."}
-            </>
-          ) : isEditing ? (
-            "Simpan Perubahan"
-          ) : (
-            "Simpan Pengeluaran"
-          )}
+          {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          {getSubmitLabel()}
         </button>
       </div>
     </div>
   );
 }
+
+AddExpenseForm.propTypes = {
+  members: PropTypes.arrayOf(expenseMemberShape),
+  onCancel: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
+  isEditing: PropTypes.bool,
+  initialData: initialExpenseShape,
+  isSubmitting: PropTypes.bool,
+};
+
+AddExpenseForm.defaultProps = {
+  members: [],
+  onCancel: null,
+  isEditing: false,
+  initialData: null,
+  isSubmitting: false,
+};
 
 export default AddExpenseForm;
