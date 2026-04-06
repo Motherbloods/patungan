@@ -1,5 +1,7 @@
+import PropTypes from "prop-types";
 import ICON_OPTIONS from "../../config/icons";
 import COLOR_OPTIONS from "../../config/colors";
+import { colorShape } from "../../propTypes/memberPropTypes";
 
 function GroupInfoStep({
   GroupIcon,
@@ -26,12 +28,14 @@ function GroupInfoStep({
 
       <div className="flex flex-col gap-1.5">
         <label
+          htmlFor="group-name-input"
           className="text-xs font-semibold uppercase tracking-wide"
           style={{ color: "var(--color-text-secondary)" }}
         >
           Nama Grup
         </label>
         <input
+          id="group-name-input"
           type="text"
           placeholder="cth. Liburan Bandung, Kos Bareng..."
           value={groupName}
@@ -52,12 +56,13 @@ function GroupInfoStep({
 
       <div className="flex flex-col gap-2">
         <label
+          htmlFor="group-icon-grid"
           className="text-xs font-semibold uppercase tracking-wide"
           style={{ color: "var(--color-text-secondary)" }}
         >
           Ikon
         </label>
-        <div className="grid grid-cols-6 gap-2">
+        <div id="group-icon-grid" className="grid grid-cols-6 gap-2">
           {ICON_OPTIONS.map(({ id, icon: Icon, label }) => {
             const active = groupIconId === id;
             return (
@@ -89,12 +94,13 @@ function GroupInfoStep({
 
       <div className="flex flex-col gap-2">
         <label
+          htmlFor="group-color-picker"
           className="text-xs font-semibold uppercase tracking-wide"
           style={{ color: "var(--color-text-secondary)" }}
         >
           Warna
         </label>
-        <div className="flex gap-2 flex-wrap">
+        <div id="group-color-picker" className="flex gap-2 flex-wrap">
           {COLOR_OPTIONS.map((c) => (
             <button
               key={c.id}
@@ -117,5 +123,21 @@ function GroupInfoStep({
     </div>
   );
 }
+
+GroupInfoStep.propTypes = {
+  GroupIcon: PropTypes.string.isRequired,
+  groupName: PropTypes.string.isRequired,
+  setGroupName: PropTypes.func.isRequired,
+  groupIconId: PropTypes.string.isRequired,
+  setGroupIconId: PropTypes.func.isRequired,
+  selectedColor: colorShape.isRequired,
+  setSelectedColor: PropTypes.func.isRequired,
+  error: PropTypes.string,
+  setError: PropTypes.func.isRequired,
+};
+
+GroupInfoStep.defaultProps = {
+  error: "",
+};
 
 export default GroupInfoStep;

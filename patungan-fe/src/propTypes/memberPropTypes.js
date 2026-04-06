@@ -7,6 +7,12 @@ export const memberShape = PropTypes.shape({
   isActive: PropTypes.bool,
 });
 
+export const colorShape = PropTypes.shape({
+  id: PropTypes.string,
+  bg: PropTypes.string,
+  text: PropTypes.string,
+});
+
 export const groupShape = PropTypes.shape({
   _id: PropTypes.string,
   name: PropTypes.string,
