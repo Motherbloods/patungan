@@ -45,12 +45,14 @@ const requestLoginService = async () => {
     expiresIn: 300,
   };
 };
+
 const verifyLoginTokenService = async (loginToken) => {
   if (!loginToken) {
     throw { status: 400, message: "Login token required" };
   }
 
-  const tokenDoc = await LoginToken.findOne({ token: loginToken });
+  const sanitizedToken = String(loginToken).trim();
+  const tokenDoc = await LoginToken.findOne({ token: sanitizedToken }).lean();
 
   if (!tokenDoc) {
     throw { status: 404, message: "Invalid token" };
@@ -70,7 +72,7 @@ const verifyLoginTokenService = async (loginToken) => {
 
   if (tokenDoc.status === "used" && tokenDoc.telegramId) {
     const user = await User.findOne({
-      "providers.telegram.id": tokenDoc.telegramId,
+      "providers.telegram.id": String(tokenDoc.telegramId),
     }).select("-__v");
 
     if (!user) {
@@ -230,7 +232,13 @@ const requestLinkTelegramService = async (userId) => {
 };
 
 const verifyLinkTokenService = async (linkToken, userId) => {
-  const tokenDoc = await LinkToken.findOne({ token: linkToken, userId });
+  const sanitizedToken = String(linkToken).trim();
+  const sanitizedUserId = String(userId).trim();
+
+  const tokenDoc = await LinkToken.findOne({
+    token: sanitizedToken,
+    userId: sanitizedUserId,
+  });
 
   if (!tokenDoc) throw { status: 404, message: "Invalid token" };
   if (tokenDoc.status === "expired" || tokenDoc.expiresAt < new Date())
@@ -259,6 +267,7 @@ const verifyLinkTokenService = async (linkToken, userId) => {
 
   throw { status: 400, message: "Invalid token status" };
 };
+
 module.exports = {
   requestLoginService,
   verifyLoginTokenService,
