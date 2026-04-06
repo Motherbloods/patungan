@@ -4,6 +4,7 @@ import ICON_OPTIONS from "../config/icons";
 import COLOR_OPTIONS from "../config/colors";
 import GroupInfoStep from "./NewGroupModal/GroupInfoStep";
 import EditMemberStep from "./EditGroupModal/EditMemberStep";
+import { groupShape } from "../propTypes/memberPropTypes";
 import {
   useEditGroup,
   useEditMember,
@@ -13,6 +14,7 @@ import {
   useReactivateMember,
 } from "../hooks/useGroups";
 import toast from "react-hot-toast";
+import PropTypes from "prop-types";
 
 const TABS = [
   { id: "info", label: "Info Grup" },
@@ -302,5 +304,11 @@ function EditGroupModal({ open, onClose, group }) {
     </div>
   );
 }
+
+EditGroupModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  group: groupShape.isRequired,
+};
 
 export default EditGroupModal;
