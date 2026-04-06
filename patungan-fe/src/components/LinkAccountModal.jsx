@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   X,
   ExternalLink,
-  Loader2,
   CheckCircle2,
   AlertCircle,
   Shield,
@@ -16,17 +16,39 @@ import {
 } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 
+const GoogleIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+);
+
+const TelegramIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#0088cc">
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.488c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 14.71l-2.95-.924c-.642-.202-.654-.642.136-.95l11.532-4.448c.534-.194 1.002.13.674.86z" />
+  </svg>
+);
+
 function LinkAccountModal({ provider, onClose, onSuccess }) {
   const [step, setStep] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [telegramUrl, setTelegramUrl] = useState("");
   const [linkToken, setLinkToken] = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    requestAnimationFrame(() => setMounted(true));
-  }, []);
 
   const { mutate: linkGoogle } = useLinkGoogle();
   const { mutate: requestLinkTelegram } = useLinkTelegram();
@@ -44,6 +66,18 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     }
   }, [linkData, onSuccess]);
 
+  const handleExpiredError = () => {
+    setStep("error");
+    setErrorMsg("Link kedaluwarsa. Silakan coba lagi.");
+    toast.error("Link kedaluwarsa");
+  };
+
+  const handleLinkError = (msg) => {
+    setStep("error");
+    setErrorMsg(msg || "Gagal menautkan akun.");
+    toast.error(msg || "Gagal menautkan akun");
+  };
+
   useEffect(() => {
     if (!linkError) return;
 
@@ -51,13 +85,9 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     const msg = linkError.response?.data?.error;
 
     if (status === 401) {
-      setStep("error");
-      setErrorMsg("Link kedaluwarsa. Silakan coba lagi.");
-      toast.error("Link kedaluwarsa");
+      handleExpiredError();
     } else if (status === 409 || status === 400) {
-      setStep("error");
-      setErrorMsg(msg || "Gagal menautkan akun.");
-      toast.error(msg || "Gagal menautkan akun");
+      handleLinkError(msg);
     }
   }, [linkError]);
 
@@ -67,9 +97,7 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          setStep("error");
-          setErrorMsg("Link kedaluwarsa. Silakan coba lagi.");
-          toast.error("Link kedaluwarsa");
+          handleExpiredError();
           return 0;
         }
         return prev - 1;
@@ -147,33 +175,6 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
   const isGoogle = provider === "google";
   const providerLabel = isGoogle ? "Google" : "Telegram";
 
-  const GoogleIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      />
-    </svg>
-  );
-
-  const TelegramIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#0088cc">
-      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.488c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 14.71l-2.95-.924c-.642-.202-.654-.642.136-.95l11.532-4.448c.534-.194 1.002.13.674.86z" />
-    </svg>
-  );
-
   return (
     <>
       <style>{`
@@ -215,9 +216,14 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
       `}</style>
 
       <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-        <div
+        <button
+          type="button"
           className="backdrop-enter absolute inset-0 bg-black/40 backdrop-blur-md"
-          onClick={step !== "loading" ? onClose : undefined}
+          aria-label="Tutup modal"
+          onClick={step === "loading" ? undefined : onClose}
+          onKeyDown={(e) =>
+            e.key === "Escape" && step !== "loading" && onClose()
+          }
         />
 
         <div className="modal-enter relative w-full max-w-sm z-10">
@@ -573,5 +579,11 @@ function LinkAccountModal({ provider, onClose, onSuccess }) {
     </>
   );
 }
+
+LinkAccountModal.propTypes = {
+  provider: PropTypes.oneOf(["google", "telegram"]).isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+};
 
 export default LinkAccountModal;
