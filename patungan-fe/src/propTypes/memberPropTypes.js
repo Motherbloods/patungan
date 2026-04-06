@@ -53,3 +53,11 @@ export const groupCardShape = PropTypes.shape({
   expense_count: PropTypes.number,
   total_expenses: PropTypes.number,
 });
+
+export const activityShape = PropTypes.shape({
+  type: PropTypes.string,
+  expense: PropTypes.string,
+  groupName: PropTypes.string,
+  created_at: PropTypes.string,
+  amount: PropTypes.number,
+});

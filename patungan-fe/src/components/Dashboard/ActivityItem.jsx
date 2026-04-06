@@ -6,6 +6,7 @@ import {
   formatTime,
 } from "../../utils/activity";
 import { fmt } from "../../utils/format";
+import { activityShape } from "../../propTypes/memberPropTypes";
 
 function ActivityItem({ activity }) {
   const isIncoming =
@@ -51,5 +52,9 @@ function ActivityItem({ activity }) {
     </div>
   );
 }
+
+ActivityItem.propTypes = {
+  activity: activityShape.isRequired,
+};
 
 export default ActivityItem;
