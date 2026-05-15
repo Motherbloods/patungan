@@ -134,7 +134,10 @@ function GroupDetail() {
   if (isGroupLoading)
     return <LoadingFallback message="Loading group details..." />;
 
-  if (groupError) return <ErrorFallback message={groupError} />;
+  if (groupError)
+    return (
+      <ErrorFallback message={groupError?.message ?? "Terjadi kesalahan"} />
+    );
   if (!group) return <NotFoundFallback message="Group not found." />;
 
   const ownerMemberId = group.ownerMemberId ?? null;
