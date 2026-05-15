@@ -165,7 +165,7 @@ const getGroupOrThrow = async (group_id, user_id) => {
   return group;
 };
 
-const getGroupDataService = async (group_id, user_id, options = {}) => {
+const getGroupDataService = async (group_id, options = {}, user_id) => {
   validateObjectIds(group_id);
   const group = await getGroupOrThrow(group_id, user_id);
   const result = {
