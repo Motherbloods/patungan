@@ -19,15 +19,33 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 
+const pollingPaths = new Set([
+  "/api/v1/auth/verify-login",
+  "/api/v1/auth/link/telegram/verify",
+]);
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 menit
-  max: 100, // max 100 request per IP
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) =>
+    req.path === "/health" ||
+    req.path === "/api/v1/webhook" ||
+    pollingPaths.has(req.path),
+});
+const pollingLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(limiter);
+app.use([...pollingPaths], pollingLimiter);
 
 app.use(
   cors({
-    origin: process.env.FRONTENDURL,
+    origin: process.env.FRONTENDURL || false,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: process.env.CORS_CREDENTIALS === "true",
   }),
@@ -35,8 +53,7 @@ app.use(
 
 app.use(requestLogger);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 
 app.get("/health", (req, res) => {
@@ -46,7 +63,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-// routes utama
 app.post("/api/v1/webhook", handleWebhook);
 app.use("/api/v1", authRoutes);
 app.use("/api/v1", groupRoutes);
