@@ -12,7 +12,10 @@ const { normalizeGuestId } = require("../utils/guest");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+    algorithm: "HS256",
+  });
 };
 
 const formatUser = (user) => {
@@ -111,18 +114,26 @@ const verifyAuthService = async (userId) => {
 
 const loginWithGoogleService = async (tokenId) => {
   if (!tokenId) {
-    throw new Error("Google tokenId is required");
+    throw new AppError("Google tokenId is required", 400);
   }
 
-  const ticket = await client.verifyIdToken({
-    idToken: tokenId,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
+  const ticket = await client
+    .verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    })
+    .catch(() => {
+      throw new AppError("Invalid Google token", 401);
+    });
 
   const payload = ticket.getPayload();
 
   if (!payload) {
-    throw new Error("Invalid Google token payload");
+    throw new AppError("Invalid Google token payload", 401);
+  }
+
+  if (!payload.email_verified) {
+    throw new AppError("Google email is not verified", 401);
   }
 
   const {
@@ -150,7 +161,7 @@ const loginWithGoogleService = async (tokenId) => {
         existingGoogle &&
         existingGoogle._id.toString() !== user._id.toString()
       ) {
-        throw new Error("Google account already linked to another user.");
+        throw new AppError("Google account already linked to another user.", 409);
       }
 
       user.providers.google = {
@@ -193,6 +204,8 @@ const linkGoogleService = async (userId, idToken) => {
   });
   const payload = ticket.getPayload();
   if (!payload) throw new AppError("Invalid Google token", 400);
+  if (!payload.email_verified)
+    throw new AppError("Google email is not verified", 400);
 
   const { sub: googleId, email, picture } = payload;
 

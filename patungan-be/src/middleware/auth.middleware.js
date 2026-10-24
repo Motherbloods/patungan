@@ -7,7 +7,9 @@ const attachActor = (req) => {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+        algorithms: ["HS256"],
+      });
       req.userId = decoded.userId;
       req.telegramId = decoded.telegramId;
       req.actor = {
@@ -50,7 +52,6 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
     return res
       .status(error.statusCode || 401)
       .json({ error: error.message || "Unauthorized - Invalid token" });
@@ -69,7 +70,6 @@ const actorMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Actor middleware error:", error);
     return res
       .status(error.statusCode || 401)
       .json({ error: error.message || "Unauthorized" });
