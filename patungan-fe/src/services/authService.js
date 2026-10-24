@@ -16,7 +16,7 @@ const authService = {
   logout: () => client.post("/auth/logout"),
   claimGuestData: () => client.post("/auth/claim-guest-data"),
 
-  linkGoogle: (idToken) => client.post("/auth//link/google", { idToken }),
+  linkGoogle: (idToken) => client.post("/auth/link/google", { idToken }),
   requestLinkTelegram: () => client.post("/auth/link/telegram/request"),
   verifyLinkToken: (linkToken) =>
     client.post("/auth/link/telegram/verify", { linkToken }),
