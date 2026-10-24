@@ -4,7 +4,13 @@ import tailwindcss from "@tailwindcss/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), visualizer({ open: true, gzipSize: true })],
+  plugins: [
+    react(),
+    tailwindcss(),
+    ...(process.env.ANALYZE === "true"
+      ? [visualizer({ open: true, gzipSize: true })]
+      : []),
+  ],
   build: {
     rollupOptions: {
       output: {
