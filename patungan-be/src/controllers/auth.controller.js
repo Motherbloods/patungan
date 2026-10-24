@@ -7,6 +7,7 @@ const {
   linkGoogleService,
   requestLinkTelegramService,
   verifyLinkTokenService,
+  claimGuestDataService,
 } = require("../services/auth.service");
 
 const cookieOptions = {
@@ -92,6 +93,18 @@ const verifyLinkToken = asyncHandler(async (req, res) => {
   if (result.status === "pending") return res.status(202).json(result);
   return res.status(200).json(result);
 });
+
+const claimGuestData = asyncHandler(async (req, res) => {
+  const result = await claimGuestDataService({
+    userId: req.userId,
+    guestId: req.header("x-guest-id") ?? req.body?.guestId,
+  });
+
+  return res.status(200).json({
+    success: true,
+    ...result,
+  });
+});
 module.exports = {
   verifyAuth,
   requestLogin,
@@ -101,4 +114,5 @@ module.exports = {
   logout,
   requestLinkTelegram,
   verifyLinkToken,
+  claimGuestData,
 };

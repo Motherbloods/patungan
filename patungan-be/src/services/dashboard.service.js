@@ -2,10 +2,12 @@ const Group = require("../models/group");
 const Expense = require("../models/expense");
 const Balance = require("../models/balance");
 const History = require("../models/history");
+const { getActorOwnershipFilter } = require("../utils/actor");
 
-const getDashboardSummaryService = async (user_id) => {
+const getDashboardSummaryService = async (actor) => {
+  const ownershipFilter = getActorOwnershipFilter(actor);
   const userGroups = await Group.find(
-    { createdBy: user_id },
+    ownershipFilter,
     "_id ownerMemberId",
   ).lean();
 
@@ -34,7 +36,7 @@ const getDashboardSummaryService = async (user_id) => {
   }
 
   const activeGroups = await Group.countDocuments({
-    createdBy: user_id,
+    ...ownershipFilter,
     expense_count: { $gt: 0 },
   });
 
@@ -47,19 +49,20 @@ const getDashboardSummaryService = async (user_id) => {
   return { totalOwe, totalOwed, activeGroups, totalExpenses };
 };
 
-const getDashboardGroupsPaginationService = async (page, limit, user_id) => {
+const getDashboardGroupsPaginationService = async (page, limit, actor) => {
   const skip = (page - 1) * limit;
+  const ownershipFilter = getActorOwnershipFilter(actor);
 
   const [groups, totalItems] = await Promise.all([
     Group.find(
-      { createdBy: user_id },
+      ownershipFilter,
       "_id name icon color expense_count total_expenses member_count ownerMemberId",
     )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(),
-    Group.countDocuments({ createdBy: user_id }),
+    Group.countDocuments(ownershipFilter),
   ]);
 
   const ownerEntries = groups.filter((g) => g.ownerMemberId);
@@ -94,8 +97,9 @@ const getDashboardGroupsPaginationService = async (page, limit, user_id) => {
   };
 };
 
-const getDashboardActivityService = async (page, limit, user_id) => {
-  const userGroups = await Group.find({ createdBy: user_id }, "_id").lean();
+const getDashboardActivityService = async (page, limit, actor) => {
+  const ownershipFilter = getActorOwnershipFilter(actor);
+  const userGroups = await Group.find(ownershipFilter, "_id").lean();
   const groupIds = userGroups.map((g) => g._id);
 
   const historyDocs = await History.find({ group_id: { $in: groupIds } })

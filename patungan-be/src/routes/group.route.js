@@ -18,37 +18,37 @@ const {
   createSettlement,
   updateOwnerMember,
 } = require("../controllers/group.controller");
-const { authMiddleware } = require("../middleware/auth.middleware");
+const { actorMiddleware } = require("../middleware/auth.middleware");
 const router = express.Router();
 
-router.get("/groups", authMiddleware, getAllGroup);
-router.get("/group/:id", authMiddleware, getSummaryGroup);
-router.get("/group/:id/transactions", authMiddleware, getGroupTransactions);
-router.get("/group/:id/settlements", authMiddleware, getGroupSettlements);
-router.get("/group/:id/history", authMiddleware, getGroupHistory);
-router.post("/group", authMiddleware, createGroup);
-router.post("/group/expense", authMiddleware, createExpense);
-router.post("/group/:id/settlement", authMiddleware, createSettlement);
-router.put("/group/:id", authMiddleware, editGroup);
-router.put("/group/:group_id/expense/:expense_id", authMiddleware, editExpense);
-router.delete("/group/:id", authMiddleware, deleteGroup);
+router.get("/groups", actorMiddleware, getAllGroup);
+router.get("/group/:id", actorMiddleware, getSummaryGroup);
+router.get("/group/:id/transactions", actorMiddleware, getGroupTransactions);
+router.get("/group/:id/settlements", actorMiddleware, getGroupSettlements);
+router.get("/group/:id/history", actorMiddleware, getGroupHistory);
+router.post("/group", actorMiddleware, createGroup);
+router.post("/group/expense", actorMiddleware, createExpense);
+router.post("/group/:id/settlement", actorMiddleware, createSettlement);
+router.put("/group/:id", actorMiddleware, editGroup);
+router.put("/group/:group_id/expense/:expense_id", actorMiddleware, editExpense);
+router.delete("/group/:id", actorMiddleware, deleteGroup);
 router.delete(
   "/group/:group_id/expense/:expense_id",
-  authMiddleware,
+  actorMiddleware,
   deleteExpense,
 );
-router.post("/group/:id/members", authMiddleware, addMember);
-router.patch("/group/:id/members/:member_id", authMiddleware, editMember);
+router.post("/group/:id/members", actorMiddleware, addMember);
+router.patch("/group/:id/members/:member_id", actorMiddleware, editMember);
 router.patch(
   "/group/:id/members/:member_id/deactivate",
-  authMiddleware,
+  actorMiddleware,
   deactivateMember,
 );
 router.patch(
   "/group/:id/members/:member_id/reactivate",
-  authMiddleware,
+  actorMiddleware,
   reactivateMember,
 );
-router.patch("/group/:id/owner-member", authMiddleware, updateOwnerMember);
+router.patch("/group/:id/owner-member", actorMiddleware, updateOwnerMember);
 
 module.exports = router;

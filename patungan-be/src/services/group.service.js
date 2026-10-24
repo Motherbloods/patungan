@@ -19,8 +19,10 @@ const {
 const MEMBER_COLORS = require("../utils/colors");
 const logger = require("../utils/logger");
 const { isValidObjectId, validateObjectIds } = require("../utils/objectId");
+const { getActorOwnershipFilter } = require("../utils/actor");
+const AppError = require("../errors/AppError");
 
-const createGroupService = async (data, user_id) => {
+const createGroupService = async (data, actor) => {
   const {
     groupName,
     groupIcon,
@@ -61,7 +63,8 @@ const createGroupService = async (data, user_id) => {
     total_expenses: 0,
     expense_count: 0,
     member_count: formattedMembers.length,
-    createdBy: user_id,
+    createdBy: actor.type === "user" ? actor.userId : null,
+    guestId: actor.type === "guest" ? actor.guestId : null,
     members: formattedMembers,
   });
 
@@ -75,11 +78,11 @@ const createGroupService = async (data, user_id) => {
     }
   }
 
-  logger.info(`Group created: ${group._id} by user: ${user_id}`);
+  logger.info(`Group created: ${group._id} by actor: ${actor.type}`);
   return group;
 };
 
-const createExpenseService = async (data) => {
+const createExpenseService = async (data, actor) => {
   const { group_id, name, total_amount, paid_by, participants, split_method } =
     data;
 
@@ -98,6 +101,8 @@ const createExpenseService = async (data) => {
     paid_by,
     total_amount,
   );
+
+  await getGroupOrThrow(group_id, actor);
 
   const session = await mongoose.startSession();
   let expense;
@@ -150,24 +155,26 @@ const createExpenseService = async (data) => {
   return expense;
 };
 
-const getAllGroupService = async (user_id) => {
-  const groups = await Group.find({ createdBy: user_id });
+const getAllGroupService = async (actor) => {
+  const groups = await Group.find(getActorOwnershipFilter(actor));
 
   return groups;
 };
 
-const getGroupOrThrow = async (group_id, user_id) => {
-  const query = { _id: group_id };
-  if (user_id) query.createdBy = user_id;
+const getGroupOrThrow = async (group_id, actor) => {
+  const query = {
+    _id: group_id,
+    ...getActorOwnershipFilter(actor),
+  };
 
   const group = await Group.findOne(query).lean();
-  if (!group) throw new Error("Group not found");
+  if (!group) throw new AppError("Group not found", 404);
   return group;
 };
 
-const getGroupDataService = async (group_id, options = {}, user_id) => {
+const getGroupDataService = async (group_id, options = {}, actor) => {
   validateObjectIds(group_id);
-  const group = await getGroupOrThrow(group_id, user_id);
+  const group = await getGroupOrThrow(group_id, actor);
   const result = {
     _id: group._id,
     name: group.name,
@@ -201,12 +208,12 @@ const getGroupDataService = async (group_id, options = {}, user_id) => {
   return result;
 };
 
-const editGroupService = async (group_id, data, user_id) => {
+const editGroupService = async (group_id, data, actor) => {
   validateObjectIds(group_id);
   const { groupName, groupIcon, groupColor } = data;
 
   const group = await Group.findOneAndUpdate(
-    { _id: group_id, createdBy: user_id },
+    { _id: group_id, ...getActorOwnershipFilter(actor) },
     {
       name: groupName,
       icon: groupIcon,
@@ -218,19 +225,19 @@ const editGroupService = async (group_id, data, user_id) => {
     },
   );
 
-  if (!group) throw new Error("Group not found");
-  logger.info(`Group updated: ${group_id} by user: ${user_id}`);
+  if (!group) throw new AppError("Group not found", 404);
+  logger.info(`Group updated: ${group_id} by actor: ${actor.type}`);
 
   return group;
 };
 
-const editMemberService = async (group_id, member_id, data, user_id) => {
+const editMemberService = async (group_id, member_id, data, actor) => {
   validateObjectIds(group_id, member_id);
 
   const { name, emoji } = data;
   if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
 
-  await getGroupOrThrow(group_id, user_id);
+  await getGroupOrThrow(group_id, actor);
 
   const group = await Group.findOneAndUpdate(
     {
@@ -246,16 +253,16 @@ const editMemberService = async (group_id, member_id, data, user_id) => {
     { new: true, runValidators: true },
   );
 
-  if (!group) throw new Error("Group atau member tidak ditemukan");
+  if (!group) throw new AppError("Group atau member tidak ditemukan", 404);
 
   logger.info(`Member updated: ${member_id} in group: ${group_id}`);
   return group.members.id(member_id);
 };
 
-const deactivateMemberService = async (group_id, member_id, user_id) => {
+const deactivateMemberService = async (group_id, member_id, actor) => {
   validateObjectIds(group_id, member_id);
 
-  await getGroupOrThrow(group_id, user_id);
+  await getGroupOrThrow(group_id, actor);
 
   const expenseCount = await Expense.countDocuments({
     group_id,
@@ -274,7 +281,7 @@ const deactivateMemberService = async (group_id, member_id, user_id) => {
     { new: true },
   );
 
-  if (!group) throw new Error("Group atau member tidak ditemukan");
+  if (!group) throw new AppError("Group atau member tidak ditemukan", 404);
 
   logger.info(`Member deactivated: ${member_id} in group: ${group_id}`);
   return {
@@ -283,14 +290,17 @@ const deactivateMemberService = async (group_id, member_id, user_id) => {
   };
 };
 
-const reactivateMemberService = async (group_id, member_id, user_id) => {
+const reactivateMemberService = async (group_id, member_id, actor) => {
   validateObjectIds(group_id, member_id);
 
-  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
-  if (!group) throw new Error("Group tidak ditemukan");
+  const group = await Group.findOne({
+    _id: group_id,
+    ...getActorOwnershipFilter(actor),
+  });
+  if (!group) throw new AppError("Group tidak ditemukan", 404);
 
   const member = group.members.id(member_id);
-  if (!member) throw new Error("Member tidak ditemukan");
+  if (!member) throw new AppError("Member tidak ditemukan", 404);
   if (member.isActive) throw new Error("Member sudah aktif");
 
   const isDuplicate = group.members.some(
@@ -313,14 +323,17 @@ const reactivateMemberService = async (group_id, member_id, user_id) => {
   return { member };
 };
 
-const addMemberService = async (group_id, data, user_id) => {
+const addMemberService = async (group_id, data, actor) => {
   validateObjectIds(group_id);
 
   const { name, emoji } = data;
   if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
 
-  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
-  if (!group) throw new Error("Group tidak ditemukan");
+  const group = await Group.findOne({
+    _id: group_id,
+    ...getActorOwnershipFilter(actor),
+  });
+  if (!group) throw new AppError("Group tidak ditemukan", 404);
 
   const isDuplicate = group.members.some(
     (m) => m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
@@ -350,11 +363,11 @@ const addMemberService = async (group_id, data, user_id) => {
 
   await group.save();
 
-  logger.info(`Member added to group: ${group_id} by user: ${user_id}`);
+  logger.info(`Member added to group: ${group_id} by actor: ${actor.type}`);
   return group.members[group.members.length - 1];
 };
 
-const editExpenseService = async (group_id, expense_id, data) => {
+const editExpenseService = async (group_id, expense_id, data, actor) => {
   validateObjectIds(group_id, expense_id);
   const { name, total_amount, paid_by, participants, split_method } = data;
 
@@ -369,11 +382,13 @@ const editExpenseService = async (group_id, expense_id, data) => {
     split_method,
   });
 
+  await getGroupOrThrow(group_id, actor);
+
   const oldExpense = await Expense.findById(expense_id);
-  if (!oldExpense) throw new Error("Expense Not Found");
+  if (!oldExpense) throw new AppError("Expense Not Found", 404);
 
   if (oldExpense.group_id.toString() !== group_id.toString()) {
-    throw new Error("Expense does not belong to this group");
+    throw new AppError("Expense does not belong to this group", 404);
   }
 
   const sortParticipants = (arr) =>
@@ -475,7 +490,7 @@ const editExpenseService = async (group_id, expense_id, data) => {
   return updatedExpense;
 };
 
-const deleteGroupService = async (group_id, user_id) => {
+const deleteGroupService = async (group_id, actor) => {
   validateObjectIds(group_id);
   const session = await mongoose.startSession();
 
@@ -483,10 +498,10 @@ const deleteGroupService = async (group_id, user_id) => {
     await session.withTransaction(async () => {
       const group = await Group.findOne({
         _id: group_id,
-        createdBy: user_id,
+        ...getActorOwnershipFilter(actor),
       }).session(session);
       if (!group) {
-        throw new Error("Group not found");
+        throw new AppError("Group not found", 404);
       }
 
       await Expense.deleteMany({ group_id }).session(session);
@@ -500,23 +515,24 @@ const deleteGroupService = async (group_id, user_id) => {
     session.endSession();
   }
 
-  logger.info(`Group deleted: ${group_id} by user: ${user_id}`);
+  logger.info(`Group deleted: ${group_id} by actor: ${actor.type}`);
   return { message: "Group and related data deleted successfully" };
 };
 
-const deleteExpenseService = async (group_id, expense_id) => {
+const deleteExpenseService = async (group_id, expense_id, actor) => {
   if (!group_id || !expense_id) {
     throw new Error(
       "All required fields must be provided: group_id, expense_id",
     );
   }
   validateObjectIds(group_id, expense_id);
+  await getGroupOrThrow(group_id, actor);
 
   const expense = await Expense.findById(expense_id);
-  if (!expense) throw new Error("Expense Not Found");
+  if (!expense) throw new AppError("Expense Not Found", 404);
 
   if (expense.group_id.toString() !== group_id.toString()) {
-    throw new Error("Expense does not belong to this group");
+    throw new AppError("Expense does not belong to this group", 404);
   }
   const session = await mongoose.startSession();
 
@@ -584,7 +600,7 @@ const calculateSuggestions = (group_id, balances) => {
   return suggestions;
 };
 
-const createSettlementService = async (group_id, data) => {
+const createSettlementService = async (group_id, data, actor) => {
   validateObjectIds(group_id);
   const { from, to, amount } = data;
 
@@ -595,6 +611,7 @@ const createSettlementService = async (group_id, data) => {
     throw new Error("amount must be a number greater than 0");
   }
   validateObjectIds(from, to);
+  await getGroupOrThrow(group_id, actor);
 
   const session = await mongoose.startSession();
   let settlement;
@@ -664,18 +681,21 @@ const createSettlementService = async (group_id, data) => {
   return settlement;
 };
 
-const updateOwnerMemberService = async (group_id, memberId, user_id) => {
+const updateOwnerMemberService = async (group_id, memberId, actor) => {
   validateObjectIds(group_id);
 
-  const group = await Group.findOne({ _id: group_id, createdBy: user_id });
-  if (!group) throw new Error("Group not found");
+  const group = await Group.findOne({
+    _id: group_id,
+    ...getActorOwnershipFilter(actor),
+  });
+  if (!group) throw new AppError("Group not found", 404);
 
   if (memberId === null) {
     group.ownerMemberId = null;
   } else {
     validateObjectIds(memberId);
     const member = group.members.id(memberId);
-    if (!member?.isActive) throw new Error("Member tidak ditemukan");
+    if (!member?.isActive) throw new AppError("Member tidak ditemukan", 404);
     group.ownerMemberId = member._id;
   }
 

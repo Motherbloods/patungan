@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TABS } from "../config/tabs";
 import { GroupHeader } from "../components/GroupHeader";
 import AddExpenseForm from "../components/AddExpenseForm";
@@ -21,9 +21,12 @@ import LoadingFallback from "../components/fallback/LoadingFallback";
 import ErrorFallback from "../components/fallback/ErrorFallback";
 import NotFoundFallback from "../components/fallback/NotFoundFallback";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/authContext";
 
 function GroupDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { loading: isAuthLoading, isActorReady } = useAuth();
 
   const [showForm, setShowForm] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
@@ -32,30 +35,33 @@ function GroupDetail() {
   const [deletingId, setDeletingId] = useState(null);
 
   const formRef = useRef(null);
+  const isQueryEnabled = !isAuthLoading && isActorReady;
 
   const {
     data: group = null,
     isLoading: isGroupLoading,
     error: groupError,
-  } = useGroupDetail(id);
+  } = useGroupDetail(id, isQueryEnabled);
+
+  const groupStatusCode = groupError?.response?.status;
 
   const {
-    data: transactions = [],
+    data: transactions = { expenses: [] },
     isLoading: isTransactionsLoading,
     error: transactionsError,
-  } = useGetTransactions(id, activeTab === "transaksi");
+  } = useGetTransactions(id, activeTab === "transaksi" && !!group);
 
   const {
-    data: settlement = [],
+    data: settlement = { settlements: [], suggestions: [] },
     isLoading: isSettlementLoading,
     error: settlementError,
-  } = useGetSettlements(id, activeTab === "transfer");
+  } = useGetSettlements(id, activeTab === "transfer" && !!group);
 
   const {
-    data: history = [],
+    data: history = { history: [] },
     isLoading: isHistoryLoading,
     error: historyError,
-  } = useGetHistory(id, activeTab === "riwayat");
+  } = useGetHistory(id, activeTab === "riwayat" && !!group);
 
   const { mutate: createExpense } = useCreateExpense();
   const { mutate: editExpense } = useEditExpense();
@@ -69,6 +75,17 @@ function GroupDetail() {
       }, 80);
     }
   }, [showForm]);
+
+  useEffect(() => {
+    if (!isAuthLoading && !isActorReady) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    if (groupStatusCode === 401 || groupStatusCode === 403) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [groupStatusCode, isActorReady, isAuthLoading, navigate]);
 
   const handleSubmitExpense = (expenseData) => {
     setIsSubmitting(true);
@@ -131,8 +148,20 @@ function GroupDetail() {
     setSelectedExpense(null);
   };
 
-  if (isGroupLoading)
+  if (isAuthLoading || (isQueryEnabled && isGroupLoading))
     return <LoadingFallback message="Loading group details..." />;
+
+  if (!isActorReady) {
+    return <LoadingFallback message="Mengalihkan..." />;
+  }
+
+  if (groupStatusCode === 401 || groupStatusCode === 403) {
+    return <LoadingFallback message="Mengalihkan..." />;
+  }
+
+  if (groupStatusCode === 404) {
+    return <NotFoundFallback message="Group tidak ditemukan." />;
+  }
 
   if (groupError)
     return (

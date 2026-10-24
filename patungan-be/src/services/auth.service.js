@@ -1,9 +1,13 @@
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 const User = require("../models/user");
 const LoginToken = require("../models/login-token");
 const LinkToken = require("../models/link-token");
+const Group = require("../models/group");
 const { OAuth2Client } = require("google-auth-library");
+const AppError = require("../errors/AppError");
+const { normalizeGuestId } = require("../utils/guest");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -268,6 +272,43 @@ const verifyLinkTokenService = async (linkToken, userId) => {
   throw { status: 400, message: "Invalid token status" };
 };
 
+const claimGuestDataService = async ({ userId, guestId }) => {
+  const normalizedGuestId = normalizeGuestId(guestId);
+
+  if (!userId) throw new AppError("Unauthorized", 401);
+  if (!normalizedGuestId) {
+    throw new AppError("Valid guest session is required", 400);
+  }
+
+  const session = await mongoose.startSession();
+  let claimedGroups = 0;
+
+  try {
+    await session.withTransaction(async () => {
+      const result = await Group.updateMany(
+        {
+          createdBy: null,
+          guestId: normalizedGuestId,
+        },
+        {
+          $set: { createdBy: userId },
+          $unset: { guestId: 1 },
+        },
+        { session },
+      );
+
+      claimedGroups = result.modifiedCount ?? 0;
+    });
+  } finally {
+    session.endSession();
+  }
+
+  return {
+    claimedGroups,
+    guestId: normalizedGuestId,
+  };
+};
+
 module.exports = {
   requestLoginService,
   verifyLoginTokenService,
@@ -276,4 +317,5 @@ module.exports = {
   linkGoogleService,
   requestLinkTelegramService,
   verifyLinkTokenService,
+  claimGuestDataService,
 };

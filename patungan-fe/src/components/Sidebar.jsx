@@ -10,7 +10,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 const NewGroupModal = lazy(() => import("./NewGroupModal"));
 import { useAddGroup, useDeleteGroup, useGroups } from "../hooks/useGroups";
@@ -38,6 +38,7 @@ function Sidebar() {
   const listRef = useRef(null);
   const menuRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const { data: groupList = [], isLoading } = useGroups();
   const { mutate: addGroup } = useAddGroup();
@@ -94,7 +95,10 @@ function Sidebar() {
     setMenuOpen(false);
 
     logout({
-      onSuccess: () => toast.success("Berhasil logout"),
+      onSuccess: () => {
+        navigate("/dashboard", { replace: true });
+        toast.success("Berhasil logout");
+      },
       onError: () => toast.error("Gagal logout"),
     });
   };
@@ -322,6 +326,24 @@ function Sidebar() {
                 );
               })}
           </div>
+
+          {!isAuthenticated && (
+            <div className="mt-3 pt-3 border-t border-custom">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50 px-3 py-3">
+                <p className="text-sm font-semibold text-blue-700">Mode Guest</p>
+                <p className="text-xs text-blue-600 mt-1 leading-relaxed">
+                  Data akan tersimpan di perangkat ini dan bisa dipindahkan ke akun setelah login.
+                </p>
+                <NavLink
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Login untuk sinkronkan
+                </NavLink>
+              </div>
+            </div>
+          )}
 
           {isAuthenticated && (
             <div

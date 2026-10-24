@@ -2,20 +2,27 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import groupService from "../services/groupService";
 import expenseService from "../services/expenseService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 
 export const useGroups = () => {
+  const { isActorReady } = useAuth();
+
   return useQuery({
     queryKey: ["groups"],
     queryFn: groupService.getAll,
+    enabled: isActorReady,
     staleTime: 30_000,
   });
 };
 
-export const useGroupDetail = (id) => {
+export const useGroupDetail = (id, enabled = true) => {
+  const { isActorReady } = useAuth();
+
   return useQuery({
     queryKey: ["groups", id],
     queryFn: () => expenseService.getSummary(id),
-    enabled: !!id,
+    enabled: !!id && enabled && isActorReady,
+    retry: false,
   });
 };
 

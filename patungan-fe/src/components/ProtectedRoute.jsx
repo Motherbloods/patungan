@@ -1,5 +1,5 @@
 import { useAuth } from "../context/authContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import LayoutSkeleton from "./LayoutSkeleton";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -9,12 +9,12 @@ import groupService from "../services/groupService";
 import dashboardService from "../services/dashboardService";
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { loading, isActorReady } = useAuth();
   const queryClient = useQueryClient();
   const location = useLocation();
 
   useEffect(() => {
-    if (!user) return;
+    if (!isActorReady) return;
 
     queryClient.prefetchQuery({
       queryKey: ["groups"],
@@ -48,11 +48,9 @@ function ProtectedRoute({ children }) {
         staleTime: 30_000,
       });
     }
-  }, [user, location.pathname, queryClient]);
+  }, [isActorReady, location.pathname, queryClient]);
 
   if (loading) return <LayoutSkeleton />;
-  if (!user) return <Navigate to="/login" replace />;
-
   return children;
 }
 

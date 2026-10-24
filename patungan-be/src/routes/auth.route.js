@@ -8,6 +8,7 @@ const {
   linkGoogle,
   requestLinkTelegram,
   verifyLinkToken,
+  claimGuestData,
 } = require("../controllers/auth.controller");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post("/auth/login/google", loginGoogle);
 router.post("/auth//link/google", authMiddleware, linkGoogle);
 router.post("/auth/verify-login", verifyLoginToken);
 router.post("/auth/logout", logout);
+router.post("/auth/claim-guest-data", authMiddleware, claimGuestData);
 
 module.exports = router;

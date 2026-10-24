@@ -6,7 +6,7 @@ const {
 } = require("../services/dashboard.service");
 
 const getDashboardSummary = asyncHandler(async (req, res) => {
-  const result = await getDashboardSummaryService(req.userId);
+  const result = await getDashboardSummaryService(req.actor);
   res.json(result);
 });
 
@@ -16,7 +16,7 @@ const getDashboardGroupsPagination = asyncHandler(async (req, res) => {
   const result = await getDashboardGroupsPaginationService(
     page,
     limit,
-    req.userId,
+    req.actor,
   );
   res.json(result);
 });
@@ -24,7 +24,7 @@ const getDashboardGroupsPagination = asyncHandler(async (req, res) => {
 const getDashboardActivity = asyncHandler(async (req, res) => {
   const page = Number.parseInt(req.query.page) || 1;
   const limit = Number.parseInt(req.query.limit) || 10;
-  const result = await getDashboardActivityService(page, limit, req.userId);
+  const result = await getDashboardActivityService(page, limit, req.actor);
   res.json(result);
 });
 

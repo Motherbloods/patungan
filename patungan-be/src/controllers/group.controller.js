@@ -17,23 +17,23 @@ const {
 } = require("../services/group.service");
 
 const createGroup = asyncHandler(async (req, res) => {
-  const result = await createGroupService(req.body, req.userId);
+  const result = await createGroupService(req.body, req.actor);
   res.json(result);
 });
 
 const createExpense = asyncHandler(async (req, res) => {
-  const result = await createExpenseService(req.body);
+  const result = await createExpenseService(req.body, req.actor);
   res.json(result);
 });
 
 const getAllGroup = asyncHandler(async (req, res) => {
-  const groups = await getAllGroupService(req.userId);
+  const groups = await getAllGroupService(req.actor);
   res.json(groups);
 });
 
 const getSummaryGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const summary = await getGroupDataService(id, { balances: true }, req.userId);
+  const summary = await getGroupDataService(id, { balances: true }, req.actor);
   res.json(summary);
 });
 
@@ -42,7 +42,7 @@ const getGroupTransactions = asyncHandler(async (req, res) => {
   const transaksi = await getGroupDataService(
     id,
     { expenses: true },
-    req.userId,
+    req.actor,
   );
   res.json(transaksi);
 });
@@ -52,68 +52,68 @@ const getGroupSettlements = asyncHandler(async (req, res) => {
   const settlement = await getGroupDataService(
     id,
     { settlements: true },
-    req.userId,
+    req.actor,
   );
   res.json(settlement);
 });
 
 const getGroupHistory = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const history = await getGroupDataService(id, { history: true }, req.userId);
+  const history = await getGroupDataService(id, { history: true }, req.actor);
   res.json(history);
 });
 
 const editGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await editGroupService(id, req.body, req.userId);
+  const result = await editGroupService(id, req.body, req.actor);
   res.json(result);
 });
 
 const editExpense = asyncHandler(async (req, res) => {
   const { group_id, expense_id } = req.params;
-  const result = await editExpenseService(group_id, expense_id, req.body);
+  const result = await editExpenseService(group_id, expense_id, req.body, req.actor);
   res.json(result);
 });
 
 const deleteGroup = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await deleteGroupService(id, req.userId);
+  const result = await deleteGroupService(id, req.actor);
   res.json(result);
 });
 
 const deleteExpense = asyncHandler(async (req, res) => {
   const { group_id, expense_id } = req.params;
-  const result = await deleteExpenseService(group_id, expense_id);
+  const result = await deleteExpenseService(group_id, expense_id, req.actor);
   res.json(result);
 });
 
 const addMember = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await addMemberService(id, req.body, req.userId);
+  const result = await addMemberService(id, req.body, req.actor);
   res.status(201).json(result);
 });
 
 const editMember = asyncHandler(async (req, res) => {
   const { id, member_id } = req.params;
-  const result = await editMemberService(id, member_id, req.body, req.userId);
+  const result = await editMemberService(id, member_id, req.body, req.actor);
   res.json(result);
 });
 
 const deactivateMember = asyncHandler(async (req, res) => {
   const { id, member_id } = req.params;
-  const result = await deactivateMemberService(id, member_id, req.userId);
+  const result = await deactivateMemberService(id, member_id, req.actor);
   res.json(result);
 });
 
 const reactivateMember = asyncHandler(async (req, res) => {
   const { id, member_id } = req.params;
-  const result = await reactivateMemberService(id, member_id, req.userId);
+  const result = await reactivateMemberService(id, member_id, req.actor);
   res.json(result);
 });
 
 const createSettlement = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const result = await createSettlementService(id, req.body);
+  const result = await createSettlementService(id, req.body, req.actor);
   res.status(201).json(result);
 });
 
@@ -123,7 +123,7 @@ const updateOwnerMember = asyncHandler(async (req, res) => {
   const result = await updateOwnerMemberService(
     id,
     memberId ?? null,
-    req.userId,
+    req.actor,
   );
   res.json(result);
 });

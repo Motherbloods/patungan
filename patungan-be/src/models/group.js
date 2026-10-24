@@ -12,7 +12,13 @@ const groupSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User-Patungan",
-      required: true,
+      default: null,
+      index: true,
+    },
+
+    guestId: {
+      type: String,
+      default: null,
       index: true,
     },
 

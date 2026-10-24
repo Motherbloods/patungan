@@ -54,7 +54,7 @@ function Login() {
   const [cardVisible, setCardVisible] = useState(false);
 
   const navigate = useNavigate();
-  const { isAuthenticated, setUser } = useAuth();
+  const { isAuthenticated, completeLogin } = useAuth();
 
   //tanpa {mutate:} ambil seluruh object dari reactquery, bisa onsuccess, onerror
   const requestLogin = useRequestLogin();
@@ -104,11 +104,12 @@ function Login() {
 
   useEffect(() => {
     if (verifyData?.isAuthenticated) {
-      setUser(verifyData.user);
-      toast.success("Login berhasil!");
-      navigate("/dashboard");
+      completeLogin(verifyData.user).finally(() => {
+        toast.success("Login berhasil!");
+        navigate("/dashboard");
+      });
     }
-  }, [verifyData]);
+  }, [completeLogin, navigate, verifyData]);
 
   useEffect(() => {
     if (!loginToken || timeLeft <= 0) return;
@@ -363,7 +364,7 @@ function Login() {
                                 loginGoogle(idToken),
                                 timeout,
                               ]);
-                              setUser(res.user);
+                              await completeLogin(res.user);
                               toast.success("Login berhasil!", { id: toastId });
                               navigate("/dashboard");
                             } catch (err) {

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getGuestId } from "../utils/guestSession";
 
 const apiClient = () => {
   const client = axios.create({
@@ -10,7 +11,15 @@ const apiClient = () => {
   });
 
   client.interceptors.request.use(
-    (config) => config,
+    (config) => {
+      const guestId = getGuestId();
+
+      if (guestId) {
+        config.headers["x-guest-id"] = guestId;
+      }
+
+      return config;
+    },
     (err) => {
       return Promise.reject(err);
     },
