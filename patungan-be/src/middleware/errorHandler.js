@@ -6,7 +6,9 @@ const errorHandler = (err, req, res, next) => {
   const isClientError = statusCode >= 400 && statusCode < 500;
 
   if (!isClientError) {
-    logger.error(`${req.method} ${req.originalUrl} - ${err.stack || err.message}`);
+    logger.error(
+      `${req.method} ${req.path} - ${err.stack || err.message}`.replace(/[\r\n\u2028\u2029]+/g, " | "),
+    );
   }
 
   res.status(statusCode).json({
