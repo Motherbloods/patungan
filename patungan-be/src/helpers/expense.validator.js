@@ -1,6 +1,9 @@
 const AppError = require("../errors/AppError");
+const { isValidObjectId } = require("../utils/objectId");
 
 const ALLOWED_SPLIT_METHODS = ["bagi-rata", "custom"];
+const MAX_AMOUNT = 1e12;
+const MAX_NAME_LENGTH = 100;
 
 const validateExpenseInput = ({
   name,
@@ -16,8 +19,24 @@ const validateExpenseInput = ({
     );
   }
 
-  if (typeof total_amount !== "number" || total_amount <= 0) {
-    throw new AppError("total_amount must be a number greater than 0", 400);
+  if (typeof name !== "string" || name.trim().length > MAX_NAME_LENGTH) {
+    throw new AppError(
+      `name must be a string up to ${MAX_NAME_LENGTH} characters`,
+      400,
+    );
+  }
+
+  if (
+    typeof total_amount !== "number" ||
+    !Number.isFinite(total_amount) ||
+    total_amount <= 0 ||
+    total_amount > MAX_AMOUNT
+  ) {
+    throw new AppError("total_amount must be a valid number greater than 0", 400);
+  }
+
+  if (!isValidObjectId(paid_by)) {
+    throw new AppError("paid_by must be a valid id", 400);
   }
 
   if (!Array.isArray(participants) || participants.length === 0) {
@@ -32,7 +51,18 @@ const validateExpenseInput = ({
       );
     }
 
-    if (typeof p.share_amount !== "number") {
+    if (!isValidObjectId(p.user_id)) {
+      throw new AppError(
+        `Participant at index ${index} must have a valid user_id`,
+        400,
+      );
+    }
+
+    if (
+      typeof p.share_amount !== "number" ||
+      !Number.isFinite(p.share_amount) ||
+      p.share_amount > MAX_AMOUNT
+    ) {
       throw new AppError(
         `Participant at index ${index} must have share_amount as number`,
         400,
@@ -46,6 +76,16 @@ const validateExpenseInput = ({
       );
     }
   });
+
+  const uniqueIds = new Set(participants.map((p) => p.user_id.toString()));
+  if (uniqueIds.size !== participants.length) {
+    throw new AppError("participants must not contain duplicates", 400);
+  }
+
+  const totalShare = participants.reduce((sum, p) => sum + p.share_amount, 0);
+  if (Math.abs(total_amount - totalShare) > participants.length) {
+    throw new AppError("Sum of participant shares must match total_amount", 400);
+  }
 
   if (!ALLOWED_SPLIT_METHODS.includes(split_method)) {
     throw new AppError(

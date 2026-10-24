@@ -40,9 +40,7 @@ const createGroupService = async (data, actor) => {
     !members ||
     members.length === 0
   ) {
-    throw new Error(
-      "All required fields must be provided: groupName, groupIcon, groupColor, groupIconColor, members",
-    );
+    throw new AppError("All required fields must be provided: groupName, groupIcon, groupColor, groupIconColor, members", 400);
   }
 
   const formattedMembers = members.map((member, index) => {
@@ -86,7 +84,7 @@ const createExpenseService = async (data, actor) => {
   const { group_id, name, total_amount, paid_by, participants, split_method } =
     data;
 
-  if (!group_id) throw new Error("group_id is required");
+  if (!group_id) throw new AppError("group_id is required", 400);
   validateObjectIds(group_id);
   validateExpenseInput({
     name,
@@ -102,7 +100,8 @@ const createExpenseService = async (data, actor) => {
     total_amount,
   );
 
-  await getGroupOrThrow(group_id, actor);
+  const group = await getGroupOrThrow(group_id, actor);
+  assertGroupMembers(group, [paid_by, ...participants.map((p) => p.user_id)]);
 
   const session = await mongoose.startSession();
   let expense;
@@ -159,6 +158,15 @@ const getAllGroupService = async (actor) => {
   const groups = await Group.find(getActorOwnershipFilter(actor));
 
   return groups;
+};
+
+const assertGroupMembers = (group, ids) => {
+  const memberIds = new Set(group.members.map((m) => m._id.toString()));
+  for (const id of ids) {
+    if (!memberIds.has(id.toString())) {
+      throw new AppError("paid_by and participants must be group members", 400);
+    }
+  }
 };
 
 const getGroupOrThrow = async (group_id, actor) => {
@@ -235,7 +243,7 @@ const editMemberService = async (group_id, member_id, data, actor) => {
   validateObjectIds(group_id, member_id);
 
   const { name, emoji } = data;
-  if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
+  if (!name?.trim()) throw new AppError("Nama member tidak boleh kosong", 400);
 
   await getGroupOrThrow(group_id, actor);
 
@@ -301,7 +309,7 @@ const reactivateMemberService = async (group_id, member_id, actor) => {
 
   const member = group.members.id(member_id);
   if (!member) throw new AppError("Member tidak ditemukan", 404);
-  if (member.isActive) throw new Error("Member sudah aktif");
+  if (member.isActive) throw new AppError("Member sudah aktif", 409);
 
   const isDuplicate = group.members.some(
     (m) =>
@@ -310,9 +318,7 @@ const reactivateMemberService = async (group_id, member_id, actor) => {
       m.name.toLowerCase() === member.name.toLowerCase(),
   );
   if (isDuplicate) {
-    throw new Error(
-      `Nama "${member.name}" sudah dipakai member aktif lain. Ganti nama member tersebut terlebih dahulu.`,
-    );
+    throw new AppError(`Nama "${member.name}" sudah dipakai member aktif lain. Ganti nama member tersebut terlebih dahulu.`, 400);
   }
 
   member.isActive = true;
@@ -327,7 +333,7 @@ const addMemberService = async (group_id, data, actor) => {
   validateObjectIds(group_id);
 
   const { name, emoji } = data;
-  if (!name?.trim()) throw new Error("Nama member tidak boleh kosong");
+  if (!name?.trim()) throw new AppError("Nama member tidak boleh kosong", 400);
 
   const group = await Group.findOne({
     _id: group_id,
@@ -338,15 +344,13 @@ const addMemberService = async (group_id, data, actor) => {
   const isDuplicate = group.members.some(
     (m) => m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
   );
-  if (isDuplicate) throw new Error("Nama member sudah ada di grup ini");
+  if (isDuplicate) throw new AppError("Nama member sudah ada di grup ini", 409);
 
   const matchInactive = group.members.find(
     (m) => !m.isActive && m.name.toLowerCase() === name.trim().toLowerCase(),
   );
   if (matchInactive) {
-    throw new Error(
-      `Member dengan nama "${name.trim()}" sudah ada tapi nonaktif. Aktifkan kembali daripada membuat baru.`,
-    );
+    throw new AppError(`Member dengan nama "${name.trim()}" sudah ada tapi nonaktif. Aktifkan kembali daripada membuat baru.`, 409);
   }
 
   const activeCount = group.members.filter((m) => m.isActive).length;
@@ -372,7 +376,7 @@ const editExpenseService = async (group_id, expense_id, data, actor) => {
   const { name, total_amount, paid_by, participants, split_method } = data;
 
   if (!group_id || !expense_id)
-    throw new Error("group_id and expense_id are required");
+    throw new AppError("group_id and expense_id are required", 400);
   validateObjectIds(group_id, expense_id);
   validateExpenseInput({
     name,
@@ -382,7 +386,8 @@ const editExpenseService = async (group_id, expense_id, data, actor) => {
     split_method,
   });
 
-  await getGroupOrThrow(group_id, actor);
+  const group = await getGroupOrThrow(group_id, actor);
+  assertGroupMembers(group, [paid_by, ...participants.map((p) => p.user_id)]);
 
   const oldExpense = await Expense.findById(expense_id);
   if (!oldExpense) throw new AppError("Expense Not Found", 404);
@@ -521,9 +526,7 @@ const deleteGroupService = async (group_id, actor) => {
 
 const deleteExpenseService = async (group_id, expense_id, actor) => {
   if (!group_id || !expense_id) {
-    throw new Error(
-      "All required fields must be provided: group_id, expense_id",
-    );
+    throw new AppError("All required fields must be provided: group_id, expense_id", 400);
   }
   validateObjectIds(group_id, expense_id);
   await getGroupOrThrow(group_id, actor);
@@ -605,13 +608,22 @@ const createSettlementService = async (group_id, data, actor) => {
   const { from, to, amount } = data;
 
   if (!from || !to || !amount) {
-    throw new Error("from, to, and amount are required");
+    throw new AppError("from, to, and amount are required", 400);
   }
-  if (typeof amount !== "number" || amount <= 0) {
-    throw new Error("amount must be a number greater than 0");
+  if (
+    typeof amount !== "number" ||
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    amount > 1e12
+  ) {
+    throw new AppError("amount must be a valid number greater than 0", 400);
   }
   validateObjectIds(from, to);
-  await getGroupOrThrow(group_id, actor);
+  if (from.toString() === to.toString()) {
+    throw new AppError("from and to must be different members", 400);
+  }
+  const group = await getGroupOrThrow(group_id, actor);
+  assertGroupMembers(group, [from, to]);
 
   const session = await mongoose.startSession();
   let settlement;
