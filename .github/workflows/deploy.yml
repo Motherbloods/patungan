@@ -31,14 +31,14 @@ jobs:
       - name: Frontend install, lint, build
         working-directory: patungan-fe
         run: |
-          npm ci --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npm run lint
           npm run build
 
       - name: Backend install and syntax check
         working-directory: patungan-be
         run: |
-          npm ci --omit=dev --no-audit --no-fund
+          npm ci --omit=dev --ignore-scripts --no-audit --no-fund
           find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
 
   deploy:

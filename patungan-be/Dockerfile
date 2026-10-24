@@ -11,7 +11,7 @@ RUN addgroup -S patungan-group && adduser -S patungan-be-user -G patungan-group
 
 COPY --chown=patungan-be-user:patungan-group package*.json ./
 
-RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund && npm cache clean --force
 
 COPY --chown=patungan-be-user:patungan-group . .
 
