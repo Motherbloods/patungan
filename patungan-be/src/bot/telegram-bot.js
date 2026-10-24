@@ -10,6 +10,11 @@ if (!token) console.error("❌ TELEGRAM TOKEN NOT FOUND");
 
 const bot = new TelegramBot(token, { polling: false });
 
+const send = (chatId, text) =>
+  bot.sendMessage(chatId, text).catch((err) => {
+    console.error("Telegram send failed:", err.code || err.message);
+  });
+
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -17,14 +22,14 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const param = match[1].trim();
   if (!param) {
-    return bot.sendMessage(chatId, messages.welcome);
+    return send(chatId, messages.welcome);
   }
 
   if (param.startsWith("link_")) {
     const linkToken = param.slice(5);
 
     if (!uuidRegex.test(linkToken)) {
-      return bot.sendMessage(chatId, messages.invalidLink);
+      return send(chatId, messages.invalidLink);
     }
 
     try {
@@ -35,7 +40,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
         firstName: msg.from.first_name || "",
         lastName: msg.from.last_name || "",
       });
-      return bot.sendMessage(chatId, messages.linkSuccess);
+      return send(chatId, messages.linkSuccess);
     } catch (error) {
       console.error("❌ Link telegram error:", error);
       const errorMessages = {
@@ -47,7 +52,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
         "Akun Telegram sudah terhubung ke akun ini.":
           messages.alreadyLinkedSelf,
       };
-      return bot.sendMessage(
+      return send(
         chatId,
         errorMessages[error.message] || messages.generalError,
       );
@@ -55,7 +60,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   }
 
   if (!uuidRegex.test(param)) {
-    return bot.sendMessage(chatId, messages.invalidLink);
+    return send(chatId, messages.invalidLink);
   }
 
   try {
@@ -66,7 +71,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
       lastName: msg.from.last_name || "",
       loginToken: param,
     });
-    return bot.sendMessage(chatId, messages.loginSuccess);
+    return send(chatId, messages.loginSuccess);
   } catch (error) {
     console.error("❌ Bot login error:", error);
     const errorMessages = {
@@ -74,7 +79,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
       "Token already used": messages.tokenUsed,
       "Invalid token": messages.invalidLink,
     };
-    return bot.sendMessage(
+    return send(
       chatId,
       errorMessages[error.message] || messages.generalError,
     );
