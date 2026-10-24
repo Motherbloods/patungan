@@ -11,7 +11,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Frontend install, lint, build
+        working-directory: patungan-fe
+        run: |
+          npm ci --no-audit --no-fund
+          npm run lint
+          npm run build
+
+      - name: Backend install and syntax check
+        working-directory: patungan-be
+        run: |
+          npm ci --omit=dev --no-audit --no-fund
+          find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
+
   deploy:
+    needs: verify
     if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     timeout-minutes: 25
