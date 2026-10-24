@@ -52,18 +52,18 @@ const requestLoginService = async () => {
 
 const verifyLoginTokenService = async (loginToken) => {
   if (!loginToken) {
-    throw { status: 400, message: "Login token required" };
+    throw new AppError("Login token required", 400);
   }
 
   const sanitizedToken = String(loginToken).trim();
   const tokenDoc = await LoginToken.findOne({ token: sanitizedToken }).lean();
 
   if (!tokenDoc) {
-    throw { status: 404, message: "Invalid token" };
+    throw new AppError("Invalid token", 404);
   }
 
   if (tokenDoc.status === "expired" || tokenDoc.expiresAt < new Date()) {
-    throw { status: 401, message: "Token expired" };
+    throw new AppError("Token expired", 401);
   }
 
   if (tokenDoc.status === "pending") {
@@ -80,7 +80,7 @@ const verifyLoginTokenService = async (loginToken) => {
     }).select("-__v");
 
     if (!user) {
-      throw { status: 404, message: "User not found" };
+      throw new AppError("User not found", 404);
     }
 
     const jwtToken = generateToken(user._id);
@@ -96,7 +96,7 @@ const verifyLoginTokenService = async (loginToken) => {
     return result;
   }
 
-  throw { status: 400, message: "Invalid token status" };
+  throw new AppError("Invalid token status", 400);
 };
 
 const verifyAuthService = async (userId) => {
@@ -192,23 +192,20 @@ const linkGoogleService = async (userId, idToken) => {
     audience: process.env.GOOGLE_CLIENT_ID,
   });
   const payload = ticket.getPayload();
-  if (!payload) throw { status: 400, message: "Invalid Google token" };
+  if (!payload) throw new AppError("Invalid Google token", 400);
 
   const { sub: googleId, email, picture } = payload;
 
   const existing = await User.findOne({ "providers.google.id": googleId });
   if (existing && existing._id.toString() !== userId) {
-    throw {
-      status: 409,
-      message: "Akun Google ini sudah terhubung ke akun lain.",
-    };
+    throw new AppError("Akun Google ini sudah terhubung ke akun lain.", 409);
   }
 
   const user = await User.findById(userId);
 
-  if (!user) throw { status: 404, message: "User not found" };
+  if (!user) throw new AppError("User not found", 404);
   if (user.providers?.google?.id)
-    throw { status: 400, message: "Akun Google sudah terhubung ke akun ini." };
+    throw new AppError("Akun Google sudah terhubung ke akun ini.", 400);
 
   user.providers.google = { id: googleId, email };
   if (!user.avatar) user.avatar = picture;
@@ -244,18 +241,15 @@ const verifyLinkTokenService = async (linkToken, userId) => {
     userId: sanitizedUserId,
   });
 
-  if (!tokenDoc) throw { status: 404, message: "Invalid token" };
+  if (!tokenDoc) throw new AppError("Invalid token", 404);
   if (tokenDoc.status === "expired" || tokenDoc.expiresAt < new Date())
-    throw { status: 401, message: "Token expired" };
+    throw new AppError("Token expired", 401);
   if (tokenDoc.status === "pending")
     return { status: "pending", linked: false };
 
   if (tokenDoc.status === "failed") {
     await LinkToken.deleteOne({ _id: tokenDoc._id });
-    throw {
-      status: 409,
-      message: tokenDoc.failReason || "Gagal menautkan akun.",
-    };
+    throw new AppError(tokenDoc.failReason || "Gagal menautkan akun.", 409);
   }
 
   if (tokenDoc.status === "used" || tokenDoc.status === "delivered") {
@@ -269,7 +263,7 @@ const verifyLinkTokenService = async (linkToken, userId) => {
     return { status: "success", linked: true, user: formatUser(user) };
   }
 
-  throw { status: 400, message: "Invalid token status" };
+  throw new AppError("Invalid token status", 400);
 };
 
 const claimGuestDataService = async ({ userId, guestId }) => {
